@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exam Master Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f3;--card:#fff;--ink:#14322e;--mut:#5f7470;--ac:#1f7a5c;--bd:#d5dfda;--rd:#b3261e}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--ink);font-size:16px}
+header{background:var(--ink);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+header b{font-size:18px}
+main{max-width:640px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:14px;color:var(--mut);margin:10px 0 4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--bd);border-radius:8px;font:inherit;background:#fff;color:var(--ink)}
+textarea{min-height:80px}
+button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:10px 16px;background:var(--ac);color:#fff}
+button.g{background:#e3ebe7;color:var(--ink)}
+button.d{background:var(--rd)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.q{border-bottom:1px solid var(--bd);padding:10px 0}
+.q:last-child{border:0}
+.q p{margin:0 0 6px}
+.m{font-size:13px;color:var(--mut)}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs button{flex:1}
+#msg{position:fixed;bottom:16px;left:16px;right:16px;max-width:600px;margin:auto;background:var(--ink);color:#fff;padding:12px;border-radius:8px;display:none;z-index:9}
+.hide{display:none}
+:focus-visible{outline:3px solid #f0b429;outline-offset:2px}
+</style>
+</head>
+<body>
+<header><b>Exam Master Admin</b><button class="g hide" id="out" onclick="auth.signOut()">লগআউট</button></header>
+<main>
+
+<div id="login" class="card hide">
+  <h3>অ্যাডমিন লগইন</h3>
+  <label>ইমেইল</label><input id="em" type="email" autocomplete="username">
+  <label>পাসওয়ার্ড</label><input id="pw" type="password" autocomplete="current-password">
+  <div class="row"><button onclick="doLogin()">লগইন করুন</button></div>
+</div>
+
+<div id="app" class="hide">
+  <div class="tabs">
+    <button id="t1" onclick="tab(1)">প্রশ্নের তালিকা</button>
+    <button id="t2" class="g" onclick="tab(2)">নতুন প্রশ্ন</button>
+    <button id="t3" class="g" onclick="tab(3)">একসাথে যোগ</button>
+  </div>
+
+  <div id="p1">
+    <input id="sr" placeholder="খুঁজুন (প্রশ্ন, বিষয় বা অধ্যায়)" oninput="render()">
+    <div class="card" style="margin-top:12px"><div id="list">লোড হচ্ছে...</div></div>
+  </div>
+
+  <div id="p2" class="card hide">
+    <h3 id="ft">নতুন প্রশ্ন</h3>
+    <label>বিষয়</label><input id="subject" placeholder="যেমন: ICT">
+    <label>পত্র</label><input id="paper" value="১ম পত্র">
+    <label>অধ্যায়</label><input id="chapter">
+    <label>বোর্ড</label><input id="board" placeholder="যেমন: সকল বোর্ড">
+    <label>সাল</label><input id="year" placeholder="২০২৬">
+    <label>প্রশ্ন</label><textarea id="questionText"></textarea>
+    <label>ক)</label><input id="o0">
+    <label>খ)</label><input id="o1">
+    <label>গ)</label><input id="o2">
+    <label>ঘ)</label><input id="o3">
+    <label>সঠিক উত্তর</label>
+    <select id="ans"><option value="0">ক</option><option value="1">খ</option><option value="2">গ</option><option value="3">ঘ</option></select>
+    <label>ব্যাখ্যা</label><textarea id="explanation"></textarea>
+    <label>কাঠিন্য</label>
+    <select id="difficulty"><option>সহজ</option><option selected>মাঝারি</option><option>কঠিন</option></select>
+    <label>ট্যাগ (ঐচ্ছিক)</label><input id="tag">
+    <div class="row"><button onclick="save()">সংরক্ষণ করুন</button><button class="g" onclick="tab(1)">বাতিল</button></div>
+  </div>
+
+  <div id="p3" class="card hide">
+    <h3>একসাথে অনেক প্রশ্ন যোগ</h3>
+    <p class="m">JSON তালিকা পেস্ট করুন। প্রতিটি প্রশ্নে subject, chapter, questionText, options (৪টি), correctAnswerIndex (০ থেকে ৩) থাকতে হবে।</p>
+    <textarea id="bulk" style="min-height:200px"></textarea>
+    <div class="row"><button onclick="bulkAdd()">সব যোগ করুন</button></div>
+  </div>
+</div>
+</main>
+<div id="msg"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-auth-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/10.12.2/firebase-firestore-compat.min.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyBJhO6DtXxQGy8h-TruTIrW6xhV1j7tFxM",
+  authDomain:"exam-master-168fc.firebaseapp.com",
+  projectId:"exam-master-168fc",
+  appId:"1:458331934965:web:15bc96c0d246744c39b5bc"
+});
+const auth=firebase.auth(), db=firebase.firestore(), Q=db.collection('questions');
+const $=id=>document.getElementById(id);
+let items=[], editId=null, unsub=null;
+const F=['subject','paper','chapter','board','year','questionText','explanation','difficulty','tag'];
+
+function toast(t){const m=$('msg');m.textContent=t;m.style.display='block';setTimeout(()=>m.style.display='none',3500)}
+function doLogin(){auth.signInWithEmailAndPassword($('em').value.trim(),$('pw').value).catch(e=>toast('লগইন হয়নি: '+e.code))}
+
+auth.onAuthStateChanged(u=>{
+  $('login').classList.toggle('hide',!!u);
+  $('app').classList.toggle('hide',!u);
+  $('out').classList.toggle('hide',!u);
+  if(unsub){unsub();unsub=null}
+  if(u){unsub=Q.onSnapshot(s=>{items=s.docs.map(d=>({id:d.id,...d.data()}));render()},e=>toast('ডাটা আনা যায়নি: '+e.code))}
+});
+
+function tab(n){
+  [1,2,3].forEach(i=>{$('p'+i).classList.toggle('hide',i!==n);$('t'+i).className=i===n?'':'g'});
+  if(n===2&&editId===null)clearForm();
+  if(n!==2)editId=null;
+}
+function clearForm(){F.forEach(f=>$(f).value='');$('paper').value='১ম পত্র';$('difficulty').value='মাঝারি';[0,1,2,3].forEach(i=>$('o'+i).value='');$('ans').value='0';$('ft').textContent='নতুন প্রশ্ন'}
+
+function esc(s){return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function render(){
+  const k=$('sr').value.trim().toLowerCase();
+  const r=items.filter(x=>!k||(x.questionText+x.subject+x.chapter).toLowerCase().includes(k));
+  $('list').innerHTML=r.length?r.map(x=>`<div class="q"><p>${esc(x.questionText)}</p><div class="m">${esc(x.subject)} · ${esc(x.chapter)} · ${esc(x.board)} ${esc(x.year)} · উত্তর: ${'কখগঘ'[x.correctAnswerIndex]||'?'}</div><div class="row" style="margin-top:8px"><button class="g" onclick="edit('${x.id}')">সম্পাদনা</button><button class="d" onclick="del('${x.id}')">মুছুন</button></div></div>`).join(''):'কোনো প্রশ্ন নেই। "নতুন প্রশ্ন" থেকে যোগ করুন।';
+}
+function edit(id){
+  const x=items.find(i=>i.id===id);if(!x)return;
+  tab(2);editId=id;$('ft').textContent='প্রশ্ন সম্পাদনা';
+  F.forEach(f=>$(f).value=x[f]||'');
+  [0,1,2,3].forEach(i=>$('o'+i).value=(x.options||[])[i]||'');
+  $('ans').value=x.correctAnswerIndex||0;
+}
+async function save(){
+  const opts=[0,1,2,3].map(i=>$('o'+i).value.trim());
+  if(!$('questionText').value.trim()||opts.some(o=>!o)||!$('subject').value.trim())return toast('বিষয়, প্রশ্ন ও চারটি অপশন পূরণ করুন');
+  const d={options:opts,correctAnswerIndex:+$('ans').value,updatedAt:Date.now()};
+  F.forEach(f=>d[f]=$(f).value.trim());
+  try{
+    if(editId)await Q.doc(editId).set(d,{merge:true});else await Q.add(d);
+    toast('সংরক্ষিত হয়েছে');editId=null;tab(1);
+  }catch(e){toast('সংরক্ষণ হয়নি: '+e.code)}
+}
+async function del(id){
+  if(!confirm('প্রশ্নটি মুছে ফেলবেন?'))return;
+  try{await Q.doc(id).delete();toast('মুছে ফেলা হয়েছে')}catch(e){toast('মোছা যায়নি: '+e.code)}
+}
+async function bulkAdd(){
+  let a;try{a=JSON.parse($('bulk').value)}catch(e){return toast('JSON ঠিক নেই')}
+  if(!Array.isArray(a))return toast('তালিকা ([...]) দিতে হবে');
+  const bad=a.findIndex(x=>!x.questionText||!Array.isArray(x.options)||x.options.length!==4||![0,1,2,3].includes(x.correctAnswerIndex));
+  if(bad>=0)return toast('প্রশ্ন নম্বর '+(bad+1)+' এ ভুল আছে');
+  try{
+    for(let i=0;i<a.length;i+=400){
+      const b=db.batch();a.slice(i,i+400).forEach(x=>b.set(Q.doc(),{...x,updatedAt:Date.now()}));await b.commit();
+    }
+    $('bulk').value='';toast(a.length+'টি প্রশ্ন যোগ হয়েছে');tab(1);
+  }catch(e){toast('যোগ হয়নি: '+e.code)}
+}
+</script>
+</body>
+</html>
