@@ -123,16 +123,17 @@ import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase
 import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,onSnapshot,writeBatch,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ====== ধাপ ১: এখানে নিজের Firebase config বসান ====== */
+/* ====== Firebase config (নতুন প্রজেক্ট) ====== */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "exam-master",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAwFUfi1Z90V78dSl5esrnSXJ5F4E6AVeI",
+  authDomain: "exam--master-a3abb.firebaseapp.com",
+  projectId: "exam--master-a3abb",
+  storageBucket: "exam--master-a3abb.firebasestorage.app",
+  messagingSenderId: "208961515835",
+  appId: "1:208961515835:web:863431a7294f723088871e",
+  measurementId: "G-0BRDQ5TFFN"
 };
-const ADMIN_UID = "4rjBB5yWMdcWudnLPihP1ddjVaH2";
+const ADMIN_UID = "5l8DHPx8UVVAHQ522OCvvcOILdJ2";
 /* ================================================== */
 
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
