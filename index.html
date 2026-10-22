@@ -2,128 +2,205 @@
 <html lang="bn">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
 <title>Exam Master অ্যাডমিন</title>
-<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@500;700&family=Hind+Siliguri:wght@400;500;600&display=swap">
 <style>
-:root{--bg:#f6f7f4;--card:#fff;--ink:#14211b;--mute:#6a7770;--line:#dfe4de;--pri:#0e6ba8;--ok:#1f8a4c;--bad:#c0392b;--warn:#e8a317}
+
+/* Layout: phone = top bar + 5 bottom tabs ("আরও" opens the rest); desktop = left sidebar with every page.
+   Default theme is a soft, low-glare green-grey for long reading; bright, dark and auto are switchable in চেহারা. */
+:root{
+  --bg:#e9efeb; --surface:#f6f9f7; --ink:#10201d; --muted:#445a55; --line:#c6d4ce;
+  --accent:#0b6b63; --accent-ink:#ffffff; --accent-soft:#cfe6e0;
+  --good:#146c34; --good-soft:#d3eddb; --warn:#8a4a07; --warn-soft:#f6e3bd; --bad:#a51d1d; --bad-soft:#f5d6d6;
+  --side:#0d2b28; --side-ink:#d3e6e2; --side-on:#17493f;
+  --f-display:'Anek Bangla','Hind Siliguri',system-ui,sans-serif; --f-body:'Hind Siliguri',system-ui,sans-serif;
+  --fs:17px;
+}
+:root[data-theme="light"]{
+  --bg:#f5f8f7; --surface:#ffffff; --ink:#0a1714; --muted:#41564f; --line:#d5e0dc;
+  --accent:#0f766e; --accent-soft:#d9efeb; --warn:#92400e; --bad:#b91c1c;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]):not([data-theme="soft"]){
+  --bg:#0e1917; --surface:#16251f; --ink:#eaf4f1; --muted:#a9c0ba; --line:#274039;
+  --accent:#2dd4bf; --accent-ink:#04201c; --accent-soft:#14352f;
+  --good:#4ade80; --good-soft:#12301d; --warn:#fbbf24; --warn-soft:#3a2c0b; --bad:#f87171; --bad-soft:#3b1717;
+  --side:#08110f; --side-ink:#b4cbc6; --side-on:#13302b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1917; --surface:#16251f; --ink:#eaf4f1; --muted:#a9c0ba; --line:#274039;
+  --accent:#2dd4bf; --accent-ink:#04201c; --accent-soft:#14352f;
+  --good:#4ade80; --good-soft:#12301d; --warn:#fbbf24; --warn-soft:#3a2c0b; --bad:#f87171; --bad-soft:#3b1717;
+  --side:#08110f; --side-ink:#b4cbc6; --side-on:#13302b; color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;font-family:'Hind Siliguri',sans-serif;background:var(--bg);color:var(--ink);padding-bottom:76px}
-header{position:sticky;top:0;background:var(--ink);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;z-index:5}
-header b{font-size:18px}
-main{padding:14px;max-width:760px;margin:auto}
-.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
-h2{margin:0 0 10px;font-size:18px}
-input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit;margin-bottom:8px;background:#fff}
-textarea{min-height:90px}
-button{font:inherit;border:0;border-radius:8px;padding:10px 14px;background:var(--pri);color:#fff;font-weight:600;cursor:pointer}
-button.g{background:#e9ede8;color:var(--ink)}button.r{background:var(--bad)}button.s{padding:6px 10px;font-size:14px}
-.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:5}
-nav button{flex:1;background:none;color:var(--mute);border-radius:0;padding:12px 2px;font-size:13px}
-nav button.on{color:var(--pri);box-shadow:inset 0 3px 0 var(--pri)}
-.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.stat div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;text-align:center}
-.stat b{font-size:26px;display:block}
-.q{border-bottom:1px solid var(--line);padding:10px 0}
-.q:last-child{border:0}.q small{color:var(--mute)}
-.tag{display:inline-block;background:#e9f1f7;color:var(--pri);border-radius:6px;padding:1px 8px;font-size:12px;margin-right:4px}
-.live{background:#fdf1d3;color:#8a5d00}
-#toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:9;max-width:90%}
-.hide{display:none}
-.err{color:var(--bad);font-size:14px}
+body{background:var(--bg);color:var(--ink);font:400 var(--fs)/1.65 var(--f-body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px;letter-spacing:.005em}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.3}
+h1{font-size:1.45em} h2{font-size:1.12em} h3{font-size:1em}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--f-display);font-weight:700;font-size:1.1em}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.iconbtn{background:var(--surface);border:1px solid var(--line);border-radius:10px;width:42px;height:42px;display:grid;place-items:center;color:var(--ink)}
+.iconbtn svg{width:22px;height:22px}
+.wrap{max-width:1100px;margin:0 auto;min-width:0}
+.demo{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:9px 13px;font-size:.88em;margin-bottom:14px}
+.mob{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding:6px max(6px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(6px,env(safe-area-inset-right,0px))}
+.mob button,.side button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 2px;color:var(--muted);font-size:.74em;border-radius:12px;min-width:0}
+.mob svg,.side svg{width:24px;height:24px;flex:none}
+.mob button[aria-current="true"]{color:var(--accent);background:var(--accent-soft);font-weight:600}
+.side{display:none}
+.grid{display:grid;gap:12px}
+.stats{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:15px;min-width:0}
+.stat .n{font-family:var(--f-display);font-size:1.7em;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat .l{color:var(--muted);font-size:.9em}
+.stat .d{font-size:.8em;color:var(--good)}
+.sec{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:6px 0 12px;flex-wrap:wrap}
+.sub{color:var(--muted);font-size:.92em;margin:2px 0 0}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:12px;padding:10px 16px;font-weight:600;min-height:44px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:6px 12px;font-size:.88em;min-height:36px;border-radius:10px}
+.btn.danger{background:var(--bad-soft);color:var(--bad)}
+.btn.good{background:var(--good-soft);color:var(--good)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.pill{display:inline-block;font-size:.78em;padding:2px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:600;white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.gray{background:var(--line);color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row>div{min-width:0}
+.t{font-weight:500;overflow-wrap:anywhere}
+.s{font-size:.88em;color:var(--muted);overflow-wrap:anywhere}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tools>*{flex:1 1 130px;min-width:0}
+input,select,textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:44px}
+textarea{min-height:88px;resize:vertical}
+label{display:block;font-size:.88em;color:var(--muted);margin:12px 0 4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{display:flex;gap:10px;align-items:center;margin-top:8px}
+.opt input[type=radio]{width:22px;height:22px;min-height:0;flex:none;accent-color:var(--accent)}
+.sw{position:relative;width:52px;height:30px;flex:none}
+.sw input{opacity:0;position:absolute;inset:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:1;min-height:0}
+.sw i{position:absolute;inset:0;background:var(--muted);opacity:.45;border-radius:99px;transition:.15s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.15s}
+.sw input:checked+i{background:var(--accent);opacity:1} .sw input:checked+i::after{transform:translateX(22px)}
+.sw input:focus-visible+i{outline:3px solid var(--accent);outline-offset:2px}
+.bar{height:9px;border-radius:99px;background:var(--accent-soft);overflow:hidden;margin-top:6px}
+.bar b{display:block;height:100%;background:var(--accent)}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:11px var(--f-body)}
+.seg{display:flex;gap:4px;background:var(--line);padding:4px;border-radius:14px;margin-bottom:14px;overflow-x:auto}
+.seg button{flex:1 0 auto;background:none;border:0;border-radius:10px;padding:8px 14px;color:var(--muted);font-weight:500;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(92px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;font-size:.92em;z-index:20;max-width:90vw}
+.msg{font-size:.88em;margin-top:8px;color:var(--muted)}
+.empty{color:var(--muted);text-align:center;padding:26px 8px}
+.menu{display:grid;grid-template-columns:1fr;gap:10px}
+.menu button{display:flex;gap:14px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
+.menu .ic{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.menu .ic svg{width:24px;height:24px}
+.menu b{display:block;font-weight:600}
+.menu span.d{font-size:.88em;color:var(--muted)}
+.alert{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--warn);margin-top:8px}
+.alert.bad{background:var(--bad-soft);color:var(--bad)}
+.panel{background:var(--bg);border-radius:12px;padding:12px;margin-top:10px}
+.themes{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.themes button{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;text-align:left}
+.themes button[aria-pressed="true"]{border-color:var(--accent)}
+.sample{display:flex;gap:4px;margin-bottom:8px}.sample i{width:22px;height:22px;border-radius:6px;border:1px solid rgba(0,0,0,.15)}
+.chk{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.chk:first-of-type{border-top:0}
+.chk input{width:22px;height:22px;min-height:0;flex:none;margin-top:3px;accent-color:var(--accent)}
+.podium{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;align-items:end}
+.podium .card{text-align:center;padding:12px 8px}
+.podium .p1{padding-block:22px;background:var(--accent-soft)}
+.podium .n{font-family:var(--f-display);font-size:1.4em;font-weight:700}
+@media (min-width:900px){
+  body{padding-block:0 40px}
+  .stats{grid-template-columns:repeat(4,1fr)}
+  .cols{display:grid;grid-template-columns:3fr 2fr;gap:12px;align-items:start}
+  .cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:start}
+  .menu{grid-template-columns:1fr 1fr}
+  .mob{display:none}
+  .side{display:grid;position:fixed;top:0;bottom:0;left:0;width:230px;align-content:start;gap:3px;background:var(--side);padding:78px 12px 12px;overflow-y:auto;z-index:4}
+  .side button{flex-direction:row;gap:12px;font-size:.95em;padding:10px 12px;color:var(--side-ink);justify-content:flex-start}
+  .side button[aria-current="true"]{background:var(--side-on);color:#fff}
+  .wrap{margin-left:230px;max-width:none;padding-left:24px}
+  .top{position:fixed;top:0;left:0;width:230px;z-index:11;background:var(--side);color:#fff;padding:18px 16px}
+  .top .iconbtn{display:none}
+  body::before{display:none}
+  .toast{bottom:24px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+.login{max-width:400px;margin:10vh auto 0}
+.login h1{margin-bottom:6px}
+.loading{text-align:center;color:var(--muted);margin-top:30vh}
+code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:.9em}
+
+.podium .p1{padding-block:22px;background:linear-gradient(160deg,var(--accent-soft),var(--surface));border:2px solid var(--accent);box-shadow:0 4px 14px rgba(11,107,99,.18)}
+.podium .p1 .n{color:var(--accent)}
+.tools.two-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.tools.two-row>*{flex:none}
+.tools.two-row input{grid-column:1/-1}
+.adv-toggle{display:flex;align-items:center;gap:8px;margin:14px 0 6px;cursor:pointer;user-select:none;color:var(--muted);font-size:.92em}
+.adv-toggle svg{width:18px;height:18px;flex:none;transition:transform .15s}
+.adv-toggle[aria-expanded="true"] svg{transform:rotate(90deg)}
+.adv-box{display:none}.adv-box.open{display:block}
+.example-json{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:ui-monospace,monospace;font-size:.8em;white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0 8px;max-height:140px;overflow:auto}
+@media (min-width:900px){.tools.two-row{grid-template-columns:2fr 1fr 1fr 1fr}.tools.two-row input{grid-column:auto}}
 </style>
 </head>
 <body>
-<div id="toast"></div>
+<div class="loading" id="loading">লোড হচ্ছে...</div>
 
-<div id="loginView" style="max-width:380px;margin:12vh auto;padding:16px">
-  <div class="card">
-    <h2>Exam Master অ্যাডমিন</h2>
-    <input id="em" type="email" placeholder="ইমেইল">
-    <input id="pw" type="password" placeholder="পাসওয়ার্ড">
-    <button style="width:100%" onclick="login()">লগইন করুন</button>
-    <p id="loginErr" class="err"></p>
+<div id="loginView" hidden>
+  <div class="login">
+    <div class="card">
+      <div class="brand" style="margin-bottom:14px"><span class="logo" aria-hidden="true">E</span>Exam Master</div>
+      <h1>অ্যাডমিন লগইন</h1>
+      <label for="em">ইমেইল</label><input id="em" type="email" autocomplete="username">
+      <label for="pw">পাসওয়ার্ড</label><input id="pw" type="password" autocomplete="current-password">
+      <div style="margin-top:14px"><button class="btn" style="width:100%" data-a="login">লগইন করুন</button></div>
+      <p id="loginErr" class="msg" style="color:var(--bad)"></p>
+    </div>
   </div>
 </div>
 
-<div id="appView" class="hide">
-<header><b>Exam Master</b><button class="g s" onclick="logout()">লগআউট</button></header>
-<main>
-
-<section id="p-home">
-  <div class="stat">
-    <div><b id="cQ">0</b>প্রশ্ন</div>
-    <div><b id="cE">0</b>পরীক্ষা</div>
-    <div><b id="cU">0</b>ইউজার</div>
-  </div>
-  <div class="card" style="margin-top:12px"><h2>লাইভ পরীক্ষা</h2><div id="liveBox">কোনো লাইভ পরীক্ষা নেই</div></div>
-</section>
-
-<section id="p-q" class="hide">
-  <div class="card">
-    <h2 id="qTitle">নতুন প্রশ্ন</h2>
-    <input type="hidden" id="qId">
-    <div class="row"><input id="qSub" placeholder="বিষয় (যেমন ICT)"><input id="qCh" placeholder="অধ্যায়"></div>
-    <div class="row"><input id="qBoard" placeholder="বোর্ড"><input id="qYear" placeholder="সাল"></div>
-    <textarea id="qText" placeholder="প্রশ্ন"></textarea>
-    <input id="oA" placeholder="ক"><input id="oB" placeholder="খ"><input id="oC" placeholder="গ"><input id="oD" placeholder="ঘ">
-    <select id="qAns"><option value="">সঠিক উত্তর বাছাই করুন</option><option value="0">ক</option><option value="1">খ</option><option value="2">গ</option><option value="3">ঘ</option></select>
-    <textarea id="qExp" placeholder="ব্যাখ্যা"></textarea>
-    <input id="qImg" placeholder="ছবির লিংক (ঐচ্ছিক)">
-    <div class="row"><button onclick="saveQ()">সেভ করুন</button><button class="g" onclick="clearQ()">খালি করুন</button></div>
-  </div>
-  <div class="card">
-    <h2>সব প্রশ্ন</h2>
-    <input id="qSearch" placeholder="খুঁজুন..." oninput="renderQ()">
-    <select id="qFilter" onchange="renderQ()"><option value="">সব বিষয়</option></select>
-    <div id="qList"></div>
-  </div>
-</section>
-
-<section id="p-imp" class="hide">
-  <div class="card">
-    <h2>একসাথে অনেক প্রশ্ন যোগ</h2>
-    <p style="color:var(--mute);margin-top:0">JSON ফাইল বা লেখা দিন। উত্তর না থাকলে বা ভুল হলে ওই প্রশ্ন নেওয়া হবে না — আন্দাজে উত্তর বসানো হয় না।</p>
-    <input type="file" id="impFile" accept=".json,.txt" onchange="readFile(this)">
-    <textarea id="impText" placeholder='[{"question":"...","options":["ক","খ","গ","ঘ"],"answer":"খ","subject":"ICT"}]' style="min-height:140px"></textarea>
-    <button onclick="checkImp()">আগে যাচাই করুন</button>
-    <div id="impRes" style="margin:10px 0"></div>
-    <button id="impGo" class="hide" onclick="doImp()">Firebase-এ যোগ করুন</button>
-  </div>
-</section>
-
-<section id="p-ex" class="hide">
-  <div class="card">
-    <h2>নতুন পরীক্ষা</h2>
-    <input id="eName" placeholder="পরীক্ষার নাম">
-    <div class="row"><input id="eSub" placeholder="বিষয়"><input id="eDur" type="number" placeholder="সময় (মিনিট)"></div>
-    <div class="row"><input id="eCnt" type="number" placeholder="প্রশ্নের সংখ্যা"><input id="eNeg" type="number" step="0.05" placeholder="নেগেটিভ মার্ক (০.২৫)"></div>
-    <button onclick="saveE()">পরীক্ষা তৈরি করুন</button>
-  </div>
-  <div class="card"><h2>সব পরীক্ষা</h2><div id="eList"></div></div>
-</section>
-
-<section id="p-us" class="hide">
-  <div class="card"><h2>ইউজার</h2><input id="uSearch" placeholder="খুঁজুন..." oninput="renderU()"><div id="uList"></div></div>
-</section>
-
-</main>
-<nav>
-  <button class="on" data-p="home" onclick="go('home')">হোম</button>
-  <button data-p="q" onclick="go('q')">প্রশ্ন</button>
-  <button data-p="imp" onclick="go('imp')">ইমপোর্ট</button>
-  <button data-p="ex" onclick="go('ex')">পরীক্ষা</button>
-  <button data-p="us" onclick="go('us')">ইউজার</button>
-</nav>
+<div id="appView" hidden>
+  <header class="top">
+    <div class="brand"><span class="logo" id="logo"></span>Exam Master</div>
+    <div style="display:flex;gap:8px"><button class="iconbtn" id="lookbtn" aria-label="চেহারা ও লেখার সাইজ"></button><button class="iconbtn" id="outbtn" aria-label="লগআউট"></button></div>
+  </header>
+  <main class="wrap" id="main"></main>
+  <nav class="mob" id="mob" aria-label="মেনু"></nav>
+  <aside class="side" id="side" aria-label="সব পেজ"></aside>
 </div>
+<div class="toast" id="toast" hidden></div>
 
+<script>
+(function(){
+  function show(extra){
+    var l=document.getElementById('loading'); if(!l||l.hidden) return;
+    l.style.marginTop='12vh';
+    l.innerHTML='<div class="card" style="max-width:440px;margin:0 auto;text-align:left;color:var(--ink)"><h2>প্যানেল চালু হচ্ছে না</h2><p>এই কয়েকটা দেখে নিন:</p><ol style="padding-left:20px"><li>ফাইলটা চ্যাট প্রিভিউতে না খুলে <b>GitHub Pages লিংকে</b> (https://...github.io/...) Chrome-এ খুলুন।</li><li>ইন্টারনেট চালু আছে কিনা দেখুন। বিজ্ঞাপন ব্লকার বা VPN বন্ধ করে আবার চেষ্টা করুন।</li><li>পেজ রিফ্রেশ করুন (cache মুছে)।</li></ol>'+(extra?'<p style="font-size:.85em;color:var(--muted)">টেকনিক্যাল লেখা: '+extra+'</p>':'')+'</div>';
+  }
+  var last='';
+  window.addEventListener('error',function(e){last=(e&&e.message)||'error';});
+  window.addEventListener('unhandledrejection',function(e){last=(e&&e.reason&&(e.reason.code||e.reason.message))||'rejection';});
+  setTimeout(function(){show(last);},9000);
+})();
+</script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,onSnapshot,writeBatch,serverTimestamp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,onSnapshot,writeBatch,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ====== Firebase config (নতুন প্রজেক্ট) ====== */
+/* ====== Firebase config ====== */
 const firebaseConfig = {
   apiKey: "AIzaSyAwFUfi1Z90V78dSl5esrnSXJ5F4E6AVeI",
   authDomain: "exam--master-a3abb.firebaseapp.com",
@@ -134,144 +211,543 @@ const firebaseConfig = {
   measurementId: "G-0BRDQ5TFFN"
 };
 const ADMIN_UID = "5l8DHPx8UVVAHQ522OCvvcOILdJ2";
-/* ================================================== */
+/* ============================= */
 
 const app = initializeApp(firebaseConfig), auth = getAuth(app), db = getFirestore(app);
 const $ = id => document.getElementById(id);
-let Q = [], E = [], U = [], pending = [], unsubs = [];
+const L = ['ক','খ','গ','ঘ'];
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const bn = n => String(n).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯'[d]);
 
-window.toast = m => { const t=$('toast'); t.textContent=m; t.style.display='block'; setTimeout(()=>t.style.display='none',2800); };
-window.go = p => {
-  ['home','q','imp','ex','us'].forEach(x => $('p-'+x).classList.toggle('hide', x!==p));
-  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.p===p));
-  scrollTo(0,0);
+/* ---------- ডিফল্ট তালিকা (ফাইরবেসে সেভ না থাকলে এটাই দেখাবে) ---------- */
+const DEFAULT_STRUCT = {
+  'বাংলা ১ম পত্র':['গদ্য','কবিতা','উপন্যাস','নাটক','ছোটগল্প'],
+  'বাংলা ২য় পত্র':['ব্যাকরণ','নির্মিতি'],
+  'ইংরেজি ১ম পত্র':[],
+  'ইংরেজি ২য় পত্র':[],
+  'ICT':['১ম: তথ্য ও যোগাযোগ প্রযুক্তি','২য়: কমিউনিকেশন সিস্টেমস ও নেটওয়ার্কিং','৩য়: সংখ্যা পদ্ধতি ও ডিজিটাল ডিভাইস','৪র্থ: ওয়েব ডিজাইন ও HTML','৫ম: প্রোগ্রামিং ভাষা','৬ষ্ঠ: ডেটাবেজ ম্যানেজমেন্ট সিস্টেম'],
+  'পদার্থবিজ্ঞান ১ম পত্র':['১ম: ভৌতজগৎ ও পরিমাপ','২য়: ভেক্টর','৩য়: গতিবিদ্যা','৪র্থ: নিউটনিয়ান বলবিদ্যা','৫ম: কাজ, শক্তি ও ক্ষমতা','৬ষ্ঠ: মহাকর্ষ ও অভিকর্ষ','৭ম: পদার্থের গাঠনিক ধর্ম','৮ম: পর্যাবৃত্ত গতি','৯ম: তরঙ্গ','১০ম: আদর্শ গ্যাস ও গ্যাসের গতিতত্ত্ব'],
+  'পদার্থবিজ্ঞান ২য় পত্র':['১ম: তাপগতিবিদ্যা','২য়: স্থির তড়িৎ','৩য়: চল তড়িৎ','৪র্থ: তড়িৎ প্রবাহের চৌম্বক ক্রিয়া ও চুম্বকত্ব','৫ম: তড়িৎচুম্বকীয় আবেশ ও পরিবর্তী প্রবাহ','৬ষ্ঠ: জ্যামিতিক আলোকবিজ্ঞান','৭ম: ভৌত আলোকবিজ্ঞান','৮ম: আধুনিক পদার্থবিজ্ঞানের সূচনা','৯ম: পরমাণুর মডেল ও নিউক্লিয়ার পদার্থবিজ্ঞান','১০ম: সেমিকন্ডাক্টর ও ইলেকট্রনিক্স','১১শ: জ্যোতির্বিজ্ঞান'],
+  'রসায়ন ১ম পত্র':['১ম: ল্যাবরেটরির নিরাপদ ব্যবহার','২য়: গুণগত রসায়ন','৩য়: মৌলের পর্যায়বৃত্ত ধর্ম ও রাসায়নিক বন্ধন','৪র্থ: রাসায়নিক পরিবর্তন','৫ম: কর্মমুখী রসায়ন'],
+  'রসায়ন ২য় পত্র':['১ম: পরিবেশ রসায়ন','২য়: জৈব রসায়ন','৩য়: পরিমাণগত রসায়ন','৪র্থ: তড়িৎ রসায়ন','৫ম: অর্থনৈতিক রসায়ন'],
+  'জীববিজ্ঞান ১ম পত্র':['১ম: কোষ ও এর গঠন','২য়: কোষ বিভাজন','৩য়: কোষ রসায়ন','৪র্থ: অণুজীব','৫ম: শৈবাল ও ছত্রাক','৬ষ্ঠ: ব্রায়োফাইটা ও টেরিডোফাইটা','৭ম: নগ্নবীজী ও আবৃতবীজী উদ্ভিদ','৮ম: টিস্যু ও টিস্যুতন্ত্র','৯ম: উদ্ভিদ শারীরতত্ত্ব','১০ম: উদ্ভিদ প্রজনন','১১শ: জীবপ্রযুক্তি','১২শ: জীবের পরিবেশ, বিস্তার ও সংরক্ষণ'],
+  'জীববিজ্ঞান ২য় পত্র':['১ম: প্রাণীর বিভিন্নতা ও শ্রেণিবিন্যাস','২য়: প্রাণীর পরিচিতি','৩য়: পরিপাক ও শোষণ','৪র্থ: রক্ত ও সঞ্চালন','৫ম: শ্বসন ও শ্বাসক্রিয়া','৬ষ্ঠ: বর্জ্য ও নিষ্কাশন','৭ম: চলন ও অঙ্গচালনা','৮ম: সমন্বয় ও নিয়ন্ত্রণ','৯ম: মানব জীবনের ধারাবাহিকতা','১০ম: মানবদেহের প্রতিরক্ষা','১১শ: জিনতত্ত্ব ও বিবর্তন','১২শ: প্রাণীর আচরণ'],
+  'উচ্চতর গণিত ১ম পত্র':['১ম: ম্যাট্রিক্স ও নির্ণায়ক','২য়: ভেক্টর','৩য়: সরলরেখা','৪র্থ: বৃত্ত','৫ম: বিন্যাস ও সমাবেশ','৬ষ্ঠ: ত্রিকোণমিতিক অনুপাত','৭ম: সংযুক্ত কোণের ত্রিকোণমিতিক অনুপাত','৮ম: ফাংশন ও ফাংশনের লেখচিত্র','৯ম: অন্তরীকরণ','১০ম: যোগজীকরণ'],
+  'উচ্চতর গণিত ২য় পত্র':['১ম: বাস্তব সংখ্যা ও অসমতা','২য়: যোগাশ্রয়ী প্রোগ্রাম','৩য়: জটিল সংখ্যা','৪র্থ: বহুপদী ও বহুপদী সমীকরণ','৫ম: দ্বিপদী বিস্তৃতি','৬ষ্ঠ: কণিক','৭ম: বিপরীত ত্রিকোণমিতিক ফাংশন ও সমীকরণ','৮ম: স্থিতিবিদ্যা','৯ম: সমতলে বস্তুকণার গতি','১০ম: বিস্তার পরিমাপ ও সম্ভাবনা']
 };
-window.login = async () => {
-  $('loginErr').textContent='';
-  try { await signInWithEmailAndPassword(auth,$('em').value.trim(),$('pw').value); }
-  catch(e){ $('loginErr').textContent='লগইন হয়নি। ইমেইল ও পাসওয়ার্ড ঠিক আছে কিনা দেখুন।'; }
-};
-window.logout = () => signOut(auth);
+const DEFAULT_MISSIONS = [{t:'দৈনিক ১০টি MCQ সমাধান',xp:50,on:true},{t:'একটি পূর্ণাঙ্গ মডেল টেস্ট',xp:100,on:true},{t:'১টি সৃজনশীল (CQ) অনুশীলন',xp:60,on:true},{t:'ভুল উত্তর রিভিশন টেস্ট',xp:40,on:true}];
+const DEFAULT_APP = {maint:false,force:false,reg:true,board:true,ver:'',support:''};
+const SEC_ITEMS = ['Firestore রুল: শুধু অ্যাডমিন লিখতে পারবে','Firebase Auth-এ শুধু Email/Password চালু','রুলে অ্যাডমিন UID বসানো','App Check চালু করা','নিয়মিত ব্যাকআপ এক্সপোর্ট'];
+const BOARDS = ['সকল বোর্ড','ঢাকা','চট্টগ্রাম','রাজশাহী','কুমিল্লা','যশোর','বরিশাল','সিলেট','দিনাজপুর','ময়মনসিংহ','মাদ্রাসা'];
+const INST = ['DU','BUET','মেডিকেল','CKRUET','JU','RU','CU','GST','কৃষি'];
+const BANKS = ['HSC বোর্ড','বিশ্ববিদ্যালয়','স্মার্ট প্র্যাকটিস','মেগা'];
+const QSTATUS = ['প্রকাশিত','খসড়া','রিভিউ দরকার'];
+const EXAMPLE_JSON = '[\n  {"question":"SI পদ্ধতিতে বলের একক কোনটি?","options":["জুল","নিউটন","ওয়াট","প্যাসকেল"],"answer":"খ","explanation":"বলের SI একক নিউটন (N)।"},\n  {"question":"পানির আণবিক ভর কত? (H=১, O=১৬)","options":["১৬","১৮","২০","১০"],"answer":1}\n]';
 
+const RULES_SNIPPET = `// আগের রুল মুছবেন না। শুধু নিচের অংশটুকু "match /databases/{database}/documents { ... }" এর ভেতরে যোগ করুন।
+match /reports/{id} {
+  allow create: if request.auth != null;
+  allow read, update, delete: if request.auth != null && request.auth.uid == "${ADMIN_UID}";
+}
+match /notices/{id} {
+  allow read: if request.auth != null;
+  allow write: if request.auth != null && request.auth.uid == "${ADMIN_UID}";
+}
+match /config/{id} {
+  allow read: if request.auth != null;
+  allow write: if request.auth != null && request.auth.uid == "${ADMIN_UID}";
+}
+match /audit/{id} {
+  allow read, write: if request.auth != null && request.auth.uid == "${ADMIN_UID}";
+}`;
+
+/* ---------- state ---------- */
+const S = {tab:'home',qseg:'list',eseg:'list',iseg:'list',qf:'',qsub:'সব',qst:'সব',qbank:'সব',qlimit:50,eq:null,exq:null,cf:null,us:null,uq:'',ufil:'সব',sSub:'ICT',xasub:null,xainst:null,rx:null,imp:null,ximp:null,look:{theme:'soft',size:'17'}};
+let Q = [], E = [], U = [], R = [], N = [], AUD = [], unsubs = [];
+let CFG = {app:{...DEFAULT_APP}, struct:DEFAULT_STRUCT, missions:DEFAULT_MISSIONS, sec:{}};
+const perm = {};
+let ME = null;
+
+/* ---------- দেখতে/থিম ---------- */
+function applyLook(){
+  const r = document.documentElement;
+  if (S.look.theme === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', S.look.theme);
+  r.style.setProperty('--fs', S.look.size + 'px');
+  try { localStorage.setItem('em-look', JSON.stringify(S.look)); } catch(e) {}
+}
+try { const sv = JSON.parse(localStorage.getItem('em-look') || 'null'); if (sv && sv.theme) S.look = sv; } catch(e) {}
+
+/* ---------- ছোট সাহায্যকারী ---------- */
+let TT;
+function toast(t){ const e = $('toast'); e.textContent = t; e.hidden = false; clearTimeout(TT); TT = setTimeout(() => e.hidden = true, 2800); }
+function errMsg(e){ return e && e.code === 'permission-denied' ? 'অনুমতি নেই। Firestore রুলে এই অংশ যোগ করতে হবে (আরও → অ্যাডমিন ও সিকিউরিটি)।' : 'সমস্যা: ' + ((e && (e.code || e.message)) || 'অজানা'); }
+async function run(p, okMsg){ try { await p; if (okMsg) toast(okMsg); return true; } catch(e) { toast(errMsg(e)); return false; } }
+function log(m){ addDoc(collection(db,'audit'), {msg:m, by:(ME&&ME.email)||'', at:serverTimestamp()}).catch(() => {}); }
+function opts(list, cur){ return list.map(s => `<option${s === cur ? ' selected' : ''}>${esc(s)}</option>`).join(''); }
+function seg(name, list, cur){ return `<div class="seg" role="group">${list.map(x => `<button type="button" data-a="seg" data-n="${name}" data-v="${x[0]}" aria-pressed="${cur === x[0]}">${x[1]}</button>`).join('')}</div>`; }
+function ask(k){ if (S.cf === k) { S.cf = null; return true; } S.cf = k; render(); return false; }
+function delBtn(k, a, v, label){ return `<button class="btn sm danger" data-a="${a}" data-v="${v}">${S.cf === k ? 'নিশ্চিত করুন' : (label || 'মুছুন')}</button>`; }
+function sw(attrs, on, label){ return `<label class="sw" aria-label="${esc(label)}"><input type="checkbox" ${attrs}${on ? ' checked' : ''}><i></i></label>`; }
+function stBadge(s){ return `<span class="pill ${s === 'প্রকাশিত' || s === 'চালু' ? 'good' : s === 'খসড়া' ? 'gray' : s === 'শেষ' ? '' : 'warn'}">${s}</span>`; }
+function fmtDate(t){ try { const d = t && t.toDate ? t.toDate() : new Date(t); if (isNaN(d)) return ''; return d.toLocaleDateString('bn-BD', {day:'numeric', month:'long'}); } catch(e) { return ''; } }
+function subjects(){ const s = Object.keys(CFG.struct); Q.forEach(q => { if (q.subject && s.indexOf(q.subject) < 0) s.push(q.subject); }); return s; }
+function qn(q){ return {...q, bank:q.bank || 'HSC বোর্ড', status:q.status || 'প্রকাশিত', type:q.type || 'MCQ', options:Array.isArray(q.options) ? q.options : ['','','',''], answer:typeof q.answer === 'number' ? q.answer : 0}; }
+function en(e){ return {...e, type:e.type || 'Academic', status:e.status || (e.live ? 'চালু' : 'খসড়া'), count:+e.count || 0, duration:+e.duration || 0, negative:+e.negative || 0}; }
+function ownMode(e){ return e.type === 'Live' || e.type === 'Weekly'; }
+function inGroup(e, q){ return e.type === 'Mega' ? q.bank === 'মেগা' : (e.type === 'Academic' ? (q.bank === 'HSC বোর্ড' || q.bank === 'স্মার্ট প্র্যাকটিস') : true); }
+function qcount(e){ return Array.isArray(e.items) ? `প্রশ্ন ${bn(e.items.length)}/${bn(e.count)} যোগ হয়েছে` : `${bn(e.count)}টি প্রশ্ন`; }
+
+/* ---------- লগইন ---------- */
+async function login(){
+  $('loginErr').textContent = '';
+  try { await signInWithEmailAndPassword(auth, $('em').value.trim(), $('pw').value); }
+  catch(e){ $('loginErr').textContent = 'লগইন হয়নি। ইমেইল ও পাসওয়ার্ড ঠিক আছে কিনা দেখুন।'; }
+}
 onAuthStateChanged(auth, u => {
-  unsubs.forEach(f=>f()); unsubs=[];
+  unsubs.forEach(f => f()); unsubs = []; $('loading').hidden = true;
   if (u && u.uid === ADMIN_UID) {
-    $('loginView').classList.add('hide'); $('appView').classList.remove('hide'); listen();
+    ME = u; $('loginView').hidden = true; $('appView').hidden = false; listen(); applyLook(); render();
   } else {
-    if (u) { signOut(auth); $('loginErr').textContent='এই অ্যাকাউন্টের অ্যাডমিন অনুমতি নেই।'; }
-    $('loginView').classList.remove('hide'); $('appView').classList.add('hide');
+    if (u) { signOut(auth); $('loginErr').textContent = 'এই অ্যাকাউন্টের অ্যাডমিন অনুমতি নেই।'; }
+    ME = null; $('loginView').hidden = false; $('appView').hidden = true;
   }
 });
 
+/* ---------- ডেটা শোনা ---------- */
+function softRender(){
+  const a = document.activeElement;
+  if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && $('main').contains(a)) return;
+  render();
+}
 function listen(){
-  const on=(name,fn)=>unsubs.push(onSnapshot(collection(db,name),s=>fn(s.docs.map(d=>({id:d.id,...d.data()}))),e=>toast('ডেটা আনতে সমস্যা: '+e.code)));
-  on('questions',d=>{Q=d;renderQ();stats();filters();});
-  on('exams',d=>{E=d;renderE();stats();});
-  on('users',d=>{U=d;renderU();stats();});
+  const onCol = (name, fn) => unsubs.push(onSnapshot(collection(db, name),
+    s => { delete perm[name]; fn(s.docs.map(d => ({id:d.id, ...d.data()}))); softRender(); },
+    e => { perm[name] = e.code || 'error'; softRender(); }));
+  const onDoc = (name, fn) => unsubs.push(onSnapshot(doc(db, 'config', name),
+    s => { delete perm['config']; fn(s.exists() ? s.data() : null); softRender(); },
+    e => { perm['config'] = e.code || 'error'; softRender(); }));
+  onCol('questions', d => { Q = d.map(qn); });
+  onCol('exams', d => { E = d.map(en).sort((a,b) => (b.createdAt && b.createdAt.seconds || 0) - (a.createdAt && a.createdAt.seconds || 0)); });
+  onCol('users', d => { U = d; });
+  onCol('reports', d => { R = d; });
+  onCol('notices', d => { N = d; });
+  onCol('audit', d => { AUD = d.sort((a,b) => (b.at && b.at.seconds || 0) - (a.at && a.at.seconds || 0)).slice(0, 40); });
+  onDoc('app', d => { CFG.app = {...DEFAULT_APP, ...(d || {})}; });
+  onDoc('struct', d => { CFG.struct = d && d.data ? d.data : DEFAULT_STRUCT; });
+  onDoc('missions', d => { CFG.missions = d && d.list ? d.list : DEFAULT_MISSIONS; });
+  onDoc('security', d => { CFG.sec = d || {}; });
 }
-function stats(){
-  $('cQ').textContent=Q.length; $('cE').textContent=E.length; $('cU').textContent=U.length;
-  const l=E.filter(e=>e.live);
-  $('liveBox').innerHTML = l.length ? l.map(e=>`<span class="tag live">লাইভ</span> ${esc(e.name)}`).join('<br>') : 'কোনো লাইভ পরীক্ষা নেই';
-}
-function filters(){
-  const cur=$('qFilter').value, subs=[...new Set(Q.map(q=>q.subject).filter(Boolean))];
-  $('qFilter').innerHTML='<option value="">সব বিষয়</option>'+subs.map(s=>`<option ${s===cur?'selected':''}>${esc(s)}</option>`).join('');
-}
-const esc = s => String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const L=['ক','খ','গ','ঘ'];
 
-/* ---- প্রশ্ন ---- */
-window.renderQ = () => {
-  const t=$('qSearch').value.toLowerCase(), f=$('qFilter').value;
-  const list=Q.filter(q=>(!f||q.subject===f)&&(!t||(q.question||'').toLowerCase().includes(t))).slice(0,60);
-  $('qList').innerHTML = list.length ? list.map(q=>`<div class="q">
-    <div>${q.subject?`<span class="tag">${esc(q.subject)}</span>`:''}${q.board?`<span class="tag">${esc(q.board)} ${esc(q.year||'')}</span>`:''}</div>
-    <div style="margin:6px 0">${esc(q.question)}</div>
-    <small>উত্তর: ${L[q.answer]??'?'}</small>
-    <div class="row" style="margin-top:6px"><button class="g s" onclick="editQ('${q.id}')">এডিট</button><button class="r s" onclick="delQ('${q.id}')">মুছুন</button></div></div>`).join('')
-    : '<p style="color:var(--mute)">কোনো প্রশ্ন নেই। উপরে থেকে যোগ করুন।</p>';
-};
-window.clearQ = () => { ['qId','qSub','qCh','qBoard','qYear','qText','oA','oB','oC','oD','qAns','qExp','qImg'].forEach(i=>$(i).value=''); $('qTitle').textContent='নতুন প্রশ্ন'; };
-window.editQ = id => {
-  const q=Q.find(x=>x.id===id); if(!q) return;
-  $('qId').value=id; $('qSub').value=q.subject||''; $('qCh').value=q.chapter||''; $('qBoard').value=q.board||''; $('qYear').value=q.year||'';
-  $('qText').value=q.question||''; ['oA','oB','oC','oD'].forEach((k,i)=>$(k).value=(q.options||[])[i]||'');
-  $('qAns').value=q.answer; $('qExp').value=q.explanation||''; $('qImg').value=q.imageUrl||'';
-  $('qTitle').textContent='প্রশ্ন এডিট'; scrollTo(0,0);
-};
-window.saveQ = async () => {
-  const opts=['oA','oB','oC','oD'].map(k=>$(k).value.trim());
-  if(!$('qText').value.trim()) return toast('প্রশ্ন লিখুন');
-  if(opts.some(o=>!o)) return toast('চারটি অপশনই লিখুন');
-  if($('qAns').value==='') return toast('সঠিক উত্তর বাছাই করুন');
-  const data={subject:$('qSub').value.trim(),chapter:$('qCh').value.trim(),board:$('qBoard').value.trim(),year:$('qYear').value.trim(),
-    question:$('qText').value.trim(),options:opts,answer:+$('qAns').value,explanation:$('qExp').value.trim(),imageUrl:$('qImg').value.trim(),updatedAt:serverTimestamp()};
-  try{
-    const id=$('qId').value;
-    if(id) await updateDoc(doc(db,'questions',id),data); else await addDoc(collection(db,'questions'),{...data,createdAt:serverTimestamp()});
-    toast('সেভ হয়েছে'); clearQ();
-  }catch(e){toast('সেভ হয়নি: '+e.code);}
-};
-window.delQ = async id => { if(confirm('এই প্রশ্ন মুছবেন?')) try{await deleteDoc(doc(db,'questions',id));toast('মোছা হয়েছে');}catch(e){toast('সমস্যা: '+e.code);} };
+/* ---------- নেভিগেশন ---------- */
+const IC = {
+ home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ q:'<path d="M9 9a3 3 0 1 1 4.5 2.6c-1 .6-1.5 1.1-1.5 2.4M12 18h.01"/><circle cx="12" cy="12" r="10"/>',
+ exam:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+ rank:'<path d="M7 4h10v5a5 5 0 0 1-10 0zM7 6H4v2a3 3 0 0 0 3 3M17 6h3v2a3 3 0 0 1-3 3M12 14v4M8 21h8"/>',
+ set:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',
+ more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+ bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+ book:'<path d="M4 4h6a3 3 0 0 1 3 3v14a2 2 0 0 0-2-2H4zM20 4h-6a3 3 0 0 0-3 3v14a2 2 0 0 1 2-2h7z"/>',
+ flag:'<path d="M5 21V4M5 4h12l-2 4 2 4H5"/>',
+ bell:'<path d="M6 9a6 6 0 0 1 12 0c0 6 2 7 2 7H4s2-1 2-7M10 20a2 2 0 0 0 4 0"/>',
+ shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+ log:'<path d="M6 3h9l4 4v14H6zM9 12h7M9 16h7M9 8h3"/>',
+ brush:'<circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 3a9 9 0 0 1 0 18" fill="currentColor"/>',
+ out:'<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/>'};
+const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
+const MAIN = [['home','ড্যাশবোর্ড','home'],['q','প্রশ্ন','q'],['exam','পরীক্ষা','exam'],['user','ইউজার','user']];
+const MORE = [
+ ['rank','মেধা তালিকা','rank','XP অনুযায়ী র‍্যাঙ্ক, লুকানো'],
+ ['mission','মিশন ও XP','bolt','দৈনিক মিশন ও পুরস্কার ঠিক করা'],
+ ['struct','বিষয় ও অধ্যায়','book','বিষয়, অধ্যায় যোগ বা মোছা'],
+ ['report','ভুল রিপোর্ট','flag','ইউজারদের জানানো প্রশ্নের ভুল'],
+ ['notice','নোটিশ','bell','সবাইকে বার্তা'],
+ ['admins','অ্যাডমিন ও সিকিউরিটি','shield','Firestore রুল ও নিরাপত্তা তালিকা'],
+ ['audit','কাজের ইতিহাস','log','কে কখন কী বদলেছে'],
+ ['ctl','অ্যাপ কন্ট্রোল','set','মেইনটেন্যান্স, আপডেট, রেজিস্ট্রেশন'],
+ ['look','চেহারা ও লেখা','brush','থিম এবং লেখার সাইজ'],
+ ['logout','লগআউট','out','এই ডিভাইস থেকে বের হন']];
+const MOREKEYS = MORE.map(m => m[0]);
 
-/* ---- ইমপোর্ট (আন্দাজ নেই) ---- */
-window.readFile = inp => { const f=inp.files[0]; if(!f) return; const r=new FileReader(); r.onload=()=>$('impText').value=r.result; r.readAsText(f); };
-function parseAns(a){
-  if(a===undefined||a===null) return -1;
-  const s=String(a).trim().toLowerCase();
-  const m={'ক':0,'খ':1,'গ':2,'ঘ':3,'a':0,'b':1,'c':2,'d':3,'1':0,'2':1,'3':2,'4':3};
+/* ---------- পেজ ---------- */
+const stat = (l, n, d) => `<div class="card stat"><div class="l">${l}</div><div class="n">${n}</div><div class="d">${d}</div></div>`;
+
+function vHome(){
+  const live = E.filter(e => e.status === 'চালু').length, openR = R.filter(r => (r.status || 'খোলা') === 'খোলা').length,
+        rev = Q.filter(q => q.status === 'রিভিউ দরকার').length, dr = E.filter(e => e.status === 'খসড়া').length;
+  const cnt = {}; Q.forEach(q => { const k = q.subject || 'বিষয় নেই'; cnt[k] = (cnt[k] || 0) + 1; });
+  const top = Object.keys(cnt).map(k => [k, cnt[k]]).sort((a,b) => b[1] - a[1]).slice(0, 6), mx = top.length ? top[0][1] : 1;
+  const bc = BANKS.map(b => [b, Q.filter(q => q.bank === b).length]);
+  let al = '';
+  if (openR) al += `<div class="alert bad"><span>${bn(openR)}টি ভুল রিপোর্ট দেখা বাকি</span><button class="btn sm" data-a="go" data-v="report">দেখুন</button></div>`;
+  if (rev) al += `<div class="alert"><span>${bn(rev)}টি প্রশ্নের রিভিউ দরকার</span><button class="btn sm" data-a="qfilter" data-v="রিভিউ দরকার">দেখুন</button></div>`;
+  if (dr) al += `<div class="alert"><span>${bn(dr)}টি পরীক্ষা খসড়া অবস্থায়</span><button class="btn sm" data-a="go" data-v="exam">দেখুন</button></div>`;
+  return `<div class="sec"><div><h1>ড্যাশবোর্ড</h1><p class="sub">আজকের অবস্থা এক নজরে</p></div></div>
+  <div class="card"><h2>করণীয়</h2>${al || '<div class="empty">এখন কোনো করণীয় নেই</div>'}</div>
+  <div class="grid stats" style="margin-top:12px">${stat('মোট ইউজার', bn(U.length), 'নিবন্ধিত')}${stat('মোট প্রশ্ন', bn(Q.length), 'সব ব্যাংক মিলিয়ে')}${stat('চালু পরীক্ষা', bn(live), bn(E.length) + 'টির মধ্যে')}${stat('ভুল রিপোর্ট', bn(openR), 'খোলা')}</div>
+  <div class="cols2" style="margin-top:12px"><div class="card"><h2>বিষয় অনুযায়ী প্রশ্ন</h2>${top.length ? top.map(x => `<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(x[0])}</span><span class="s">${bn(x[1])}টি</span></div><div class="bar"><b style="width:${Math.round(x[1] / mx * 100)}%"></b></div></div>`).join('') : '<div class="empty">এখনো কোনো প্রশ্ন নেই</div>'}</div>
+  <div class="card"><h2>ব্যাংক অনুযায়ী প্রশ্ন</h2>${bc.map(b => `<div class="row"><div class="t">${b[0]}</div><div class="s">${bn(b[1])}টি</div></div>`).join('')}</div></div>
+  <div class="card" style="margin-top:12px"><h2>দ্রুত কাজ</h2><div class="btns" style="margin-top:10px"><button class="btn" data-a="newq">নতুন প্রশ্ন</button><button class="btn ghost" data-a="newe">নতুন পরীক্ষা</button><button class="btn ghost" data-a="go" data-v="notice">নোটিশ পাঠান</button></div></div>
+  <div class="card" style="margin-top:12px"><h2>সাম্প্রতিক কাজ</h2>${AUD.length ? AUD.slice(0, 5).map(r => `<div class="row"><div class="t">${esc(r.msg)}</div><div class="s" style="white-space:nowrap">${fmtDate(r.at)}</div></div>`).join('') : '<div class="empty">এখনো কোনো কাজের ইতিহাস নেই</div>'}</div>`;
+}
+
+function qForm(){
+  const q = S.eq ? Q.filter(x => x.id === S.eq)[0] : null, v = (k, d) => q && q[k] !== undefined ? q[k] : d, subs = subjects();
+  return `<form class="card" id="fq"><h2>${q ? 'প্রশ্ন এডিট করুন' : 'নতুন প্রশ্ন'}</h2>
+  <div class="two"><div><label for="fbk">কোথায় যাবে</label><select id="fbk">${opts(BANKS, v('bank','HSC বোর্ড'))}</select></div><div><label for="fst">অবস্থা</label><select id="fst">${opts(QSTATUS, v('status','প্রকাশিত'))}</select></div></div>
+  <div class="two"><div><label for="fs">বিষয়</label><select id="fs">${opts(subs, v('subject', subs[0]))}</select></div><div><label for="fb">বোর্ড / প্রতিষ্ঠান</label><select id="fb">${opts(BOARDS.concat(INST), v('board','সকল বোর্ড'))}</select></div></div>
+  <div class="two"><div><label for="fy">সাল</label><input id="fy" type="number" value="${esc(v('year', 2026))}"></div><div><label for="fd">কঠিনতা</label><select id="fd">${opts(['সহজ','মাঝারি','কঠিন'], v('difficulty','সহজ'))}</select></div></div>
+  <label for="fc">অধ্যায়</label><input id="fc" placeholder="যেমন ৩য় অধ্যায়" value="${esc(v('chapter',''))}">
+  <div class="adv-toggle" data-a="adv" role="button" tabindex="0" aria-expanded="${!!(q && (q.session || q.unit))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M9 18l6-6-6-6"/></svg><span>অ্যাডভান্সড: সেশন ও ইউনিট (বিশ্ববিদ্যালয়/মেগা প্রশ্নের জন্য)</span></div>
+  <div class="adv-box${q && (q.session || q.unit) ? ' open' : ''}" id="advbox"><div class="two"><div><label for="fss">সেশন</label><input id="fss" placeholder="যেমন ২০২২-২৩" value="${esc(v('session',''))}"></div><div><label for="fun">ইউনিট</label><input id="fun" placeholder="যেমন ক ইউনিট" value="${esc(v('unit',''))}"></div></div></div>
+  <label for="fq1">প্রশ্ন</label><textarea id="fq1" required>${esc(v('question',''))}</textarea>
+  <label>অপশন (সঠিকটির পাশে গোল চিহ্নে ট্যাপ করুন)</label>${[0,1,2,3].map(i => `<div class="opt"><input type="radio" name="ans" value="${i}" id="r${i}" aria-label="সঠিক উত্তর ${i + 1}"${q && q.answer === i ? ' checked' : ''}><input type="text" id="o${i}" placeholder="${L[i]}) অপশন" value="${esc(q ? q.options[i] : '')}"></div>`).join('')}
+  <label for="fe">ব্যাখ্যা</label><textarea id="fe" style="min-height:64px">${esc(v('explanation',''))}</textarea>
+  <label for="fi">ছবির লিংক (ঐচ্ছিক)</label><input id="fi" value="${esc(v('imageUrl',''))}">
+  <div class="btns" style="margin-top:14px"><button class="btn" type="submit">${q ? 'পরিবর্তন সেভ করুন' : 'সেভ করুন'}</button>${q ? '<button class="btn ghost" type="button" data-a="qcancel">বাতিল</button>' : ''}</div><div class="msg" id="fmsg">সঠিক উত্তর না বেছে সেভ করা যাবে না। উত্তর কখনো আন্দাজ করা হবে না।</div></form>`;
+}
+function impBox(prefix, target){
+  const p = S[prefix], f = S[prefix + 'Form'] || {};
+  return `<div class="card"><h2>একসাথে অনেক প্রশ্ন (বাল্ক ইমপোর্ট)</h2><p class="sub">JSON ফাইল বা লেখা দিন। উত্তর না থাকলে বা ভুল হলে ওই প্রশ্ন নেওয়া হবে না, আন্দাজে উত্তর বসানো হয় না।</p>
+  ${target === 'q' ? `<div class="two"><div><label for="ibk">কোন ব্যাংকে যাবে</label><select id="ibk">${opts(BANKS, f.bank || 'HSC বোর্ড')}</select></div><div><label for="ist">অবস্থা</label><select id="ist">${opts(QSTATUS, f.status || 'প্রকাশিত')}</select></div></div>
+  <p class="sub" style="margin-top:12px">নিচের ঘরগুলো ফাঁকা থাকলে প্রতিটি প্রশ্নে এই মান বসবে (প্রশ্নে নিজের মান থাকলে সেটাই থাকবে):</p>
+  <div class="two"><div><label for="isub">বিষয়</label><select id="isub">${opts([''].concat(subjects()), f.subject || '')}</select></div><div><label for="ibd">বোর্ড / প্রতিষ্ঠান</label><select id="ibd">${opts([''].concat(BOARDS.concat(INST)), f.board || '')}</select></div></div>
+  <div class="two"><div><label for="iyr">সাল</label><input id="iyr" type="number" placeholder="যেমন ২০২৪" value="${esc(f.year || '')}"></div><div><label for="ich">অধ্যায়</label><input id="ich" placeholder="যেমন ৩য় অধ্যায়" value="${esc(f.chapter || '')}"></div></div>` : ''}
+  <label for="ifile">ফাইল (.json বা .txt)</label><input type="file" id="ifile" accept=".json,.txt" data-a="${prefix}file">
+  <div class="example-json" id="${prefix}ex">${esc(EXAMPLE_JSON)}</div><button class="btn sm ghost" type="button" data-a="${prefix}exfill">উদাহরণ বসান</button>
+  <label for="itext">অথবা এখানে পেস্ট করুন</label><textarea id="itext" placeholder='[{"question":"...","options":["ক","খ","গ","ঘ"],"answer":"খ","explanation":"..."}]' style="min-height:140px;font-family:monospace;font-size:.85em">${esc(f.text || '')}</textarea>
+  <div class="msg">উত্তর অক্ষরে ("ক", "খ", "গ", "ঘ") অথবা ০ থেকে ৩ সংখ্যায় দিন: ০=ক, ১=খ, ২=গ, ৩=ঘ। যাচাইয়ের পর প্রথম ৫টির সঠিক উত্তর দেখে নিন।</div>
+  <div class="btns" style="margin-top:12px"><button class="btn ghost" data-a="${prefix}check">আগে যাচাই করুন</button></div>
+  <div id="${prefix}res" style="margin:10px 0">${p ? impResult(p) : ''}</div>
+  ${p && p.ok.length ? `<button class="btn" data-a="${prefix}go">${target === 'q' ? 'Firebase-এ যোগ করুন' : 'এই পরীক্ষায় যোগ করুন'} (${bn(p.ok.length)}টি)</button>` : ''}</div>`;
+}
+function impResult(p){
+  return `<b style="color:var(--good)">ঠিক: ${bn(p.ok.length)}টি</b>` + (p.bad.length ? `<br><span style="color:var(--bad)">বাদ: ${bn(p.bad.length)}টি (উত্তর বা অপশন নেই/ভুল) — নম্বর: ${p.bad.slice(0, 30).map(bn).join(', ')}</span>` : '') +
+  (p.ok.length ? `<div class="panel"><div class="s" style="margin-bottom:6px">প্রথম ${bn(Math.min(5, p.ok.length))}টি দেখে নিন, সঠিক উত্তর ঠিক আছে কিনা:</div>${p.ok.slice(0, 5).map(q => `<div class="row" style="display:block"><div class="t">${esc(q.question)}</div><div class="s">সঠিক: ${L[q.answer]}) ${esc(q.options[q.answer])}</div><div class="s">${esc([q.subject, q.chapter, q.board, q.year].filter(Boolean).join(' · ') || 'বিষয় বা সাল দেওয়া নেই')}</div></div>`).join('')}</div>` : '');
+}
+function parseAns(r){
+  const v = r.answer !== undefined && r.answer !== null ? r.answer : r.a;
+  if (v === undefined || v === null) return -1;
+  if (typeof v === 'number') return Number.isInteger(v) && v >= 0 && v < 4 ? v : -1;
+  const s = String(v).trim().toLowerCase(), m = {'ক':0,'খ':1,'গ':2,'ঘ':3,'a':0,'b':1,'c':2,'d':3};
   return s in m ? m[s] : -1;
 }
-window.checkImp = () => {
-  pending=[]; let bad=0, why=[];
-  let arr; try{ arr=JSON.parse($('impText').value); if(!Array.isArray(arr)) throw 0; }catch(e){ $('impRes').innerHTML='<span class="err">JSON ঠিক নেই। [ ] এর ভেতরে প্রশ্নের তালিকা দিন।</span>'; $('impGo').classList.add('hide'); return; }
-  arr.forEach((r,i)=>{
-    let o=r.options; if(!Array.isArray(o)) o=['ক','খ','গ','ঘ'].map(k=>r[k]);
-    const a=parseAns(r.answer);
-    if(!r.question||!o||o.length!==4||o.some(x=>!String(x||'').trim())){bad++;why.push(i+1);return;}
-    if(a<0){bad++;why.push(i+1);return;}
-    pending.push({subject:r.subject||'',chapter:r.chapter||'',board:r.board||'',year:String(r.year||''),question:String(r.question).trim(),
-      options:o.map(x=>String(x).trim()),answer:a,explanation:r.explanation||'',imageUrl:r.imageUrl||''});
-  });
-  $('impRes').innerHTML=`<b style="color:var(--ok)">ঠিক: ${pending.length}টি</b><br>`+(bad?`<span class="err">বাদ: ${bad}টি (উত্তর বা অপশন নেই/ভুল) — নম্বর: ${why.slice(0,30).join(', ')}</span>`:'');
-  $('impGo').classList.toggle('hide',!pending.length);
-};
-window.doImp = async () => {
-  try{
-    for(let i=0;i<pending.length;i+=400){
-      const b=writeBatch(db);
-      pending.slice(i,i+400).forEach(q=>b.set(doc(collection(db,'questions')),{...q,createdAt:serverTimestamp()}));
-      await b.commit();
-    }
-    toast(pending.length+'টি প্রশ্ন যোগ হয়েছে'); pending=[]; $('impText').value=''; $('impRes').innerHTML=''; $('impGo').classList.add('hide');
-  }catch(e){toast('ইমপোর্ট হয়নি: '+e.code);}
-};
-
-/* ---- পরীক্ষা ---- */
-window.saveE = async () => {
-  if(!$('eName').value.trim()) return toast('পরীক্ষার নাম লিখুন');
-  try{
-    await addDoc(collection(db,'exams'),{name:$('eName').value.trim(),subject:$('eSub').value.trim(),duration:+$('eDur').value||20,
-      count:+$('eCnt').value||20,negative:+$('eNeg').value||0,live:false,createdAt:serverTimestamp()});
-    toast('পরীক্ষা তৈরি হয়েছে'); ['eName','eSub','eDur','eCnt','eNeg'].forEach(i=>$(i).value='');
-  }catch(e){toast('সমস্যা: '+e.code);}
-};
-function renderE(){
-  $('eList').innerHTML = E.length ? E.map(e=>`<div class="q"><div>${e.live?'<span class="tag live">লাইভ</span>':''}<b>${esc(e.name)}</b></div>
-    <small>${esc(e.subject)} · ${e.count} প্রশ্ন · ${e.duration} মিনিট · নেগেটিভ ${e.negative}</small>
-    <div class="row" style="margin-top:6px"><button class="s ${e.live?'g':''}" onclick="togLive('${e.id}',${!e.live})">${e.live?'লাইভ বন্ধ করুন':'লাইভ করুন'}</button>
-    <button class="r s" onclick="delE('${e.id}')">মুছুন</button></div></div>`).join('') : '<p style="color:var(--mute)">এখনো কোনো পরীক্ষা নেই।</p>';
+function normSubject(sub, paper){
+  sub = String(sub || '').trim(); paper = String(paper || '').trim();
+  if (!sub) return '';
+  const alias = {'তথ্য ও যোগাযোগ প্রযুক্তি':'ICT','আইসিটি':'ICT'}; sub = alias[sub] || sub;
+  if (paper && paper !== 'একক পত্র' && subjects().indexOf(sub + ' ' + paper) > -1) return sub + ' ' + paper;
+  return sub;
 }
-window.togLive = async (id,v) => { try{await updateDoc(doc(db,'exams',id),{live:v});}catch(e){toast('সমস্যা: '+e.code);} };
-window.delE = async id => { if(confirm('এই পরীক্ষা মুছবেন?')) try{await deleteDoc(doc(db,'exams',id));}catch(e){toast('সমস্যা: '+e.code);} };
+function chMatch(qc, c){
+  if (c === 'সব অধ্যায়') return true; qc = (qc || '').trim(); if (!qc) return false;
+  const i = c.indexOf(':'), key = i > -1 ? c.slice(0, i).trim() : c, name = i > -1 ? c.slice(i + 1).trim() : c;
+  return qc.indexOf(key) === 0 || (name && (qc.indexOf(name) > -1 || name.indexOf(qc) > -1));
+}
+function parseRows(text, def){
+  let arr; try { arr = JSON.parse(text); if (!Array.isArray(arr)) throw 0; } catch(e) { return {err:'JSON ঠিক নেই। [ ] এর ভেতরে প্রশ্নের তালিকা দিন।'}; }
+  const ok = [], bad = [];
+  arr.forEach((r, i) => {
+    r = r || {};
+    let o = r.options || r.o; if (!Array.isArray(o)) o = L.map(k => r[k]);
+    const qt = r.question || r.q, a = parseAns(r);
+    if (!qt || !o || o.length !== 4 || o.some(x => !String(x || '').trim()) || a < 0) { bad.push(i + 1); return; }
+    ok.push({subject:normSubject(r.subject || r.sub, r.paper) || def.subject || '', chapter:r.chapter || r.ch || def.chapter || '', board:String(r.board || def.board || '').replace(/\s*বোর্ড$/, ''), year:String(r.year || def.year || ''),
+      question:String(qt).trim(), options:o.map(x => String(x).trim()), answer:a, explanation:r.explanation || r.ex || '', imageUrl:r.imageUrl || '',
+      session:r.session || '', unit:r.unit || '', difficulty:['সহজ','মাঝারি','কঠিন'].indexOf(r.difficulty) > -1 ? r.difficulty : 'মাঝারি'});
+  });
+  return {ok, bad};
+}
 
-/* ---- ইউজার ---- */
-window.renderU = () => {
-  const t=$('uSearch').value.toLowerCase();
-  const l=U.filter(u=>!t||JSON.stringify(u).toLowerCase().includes(t)).slice(0,60);
-  $('uList').innerHTML = l.length ? l.map(u=>`<div class="q"><b>${esc(u.name||u.displayName||'নাম নেই')}</b><br><small>${esc(u.email||u.phone||u.id)}</small></div>`).join('') : '<p style="color:var(--mute)">কোনো ইউজার নেই।</p>';
-};
+function vQ(){
+  const head = `<div class="sec"><div><h1>প্রশ্ন ম্যানেজার</h1><p class="sub">মোট ${bn(Q.length)}টি প্রশ্ন</p></div></div>` + seg('qseg', [['list','তালিকা'],['form', S.eq ? 'এডিট' : 'নতুন প্রশ্ন'],['bulk','বাল্ক ইমপোর্ট']], S.qseg);
+  if (S.qseg === 'form') return head + qForm();
+  if (S.qseg === 'bulk') return head + impBox('imp', 'q');
+  const l = Q.filter(q => (S.qsub === 'সব' || q.subject === S.qsub) && (S.qst === 'সব' || q.status === S.qst) && (S.qbank === 'সব' || q.bank === S.qbank) && (!S.qf || (q.question || '').toLowerCase().includes(S.qf.toLowerCase())));
+  return head + `<div class="tools two-row"><input id="qs" placeholder="প্রশ্ন খুঁজুন" value="${esc(S.qf)}" aria-label="খুঁজুন"><select id="qsub" aria-label="বিষয়">${opts(['সব'].concat(subjects()), S.qsub)}</select><select id="qbank" aria-label="ব্যাংক">${opts(['সব'].concat(BANKS), S.qbank)}</select><select id="qst" aria-label="অবস্থা">${opts(['সব'].concat(QSTATUS), S.qst)}</select></div>
+  <div class="card">${l.length ? l.slice(0, S.qlimit).map(q => `<div class="row" style="align-items:flex-start"><div><div class="t">${esc(q.question)}</div><div class="s">${stBadge(q.status)} <span class="pill gray">${esc(q.bank)}</span> ${esc(q.subject || '')} · ${esc(q.board || '')} ${esc(q.year || '')}${q.session ? ' · ' + esc(q.session) : ''}${q.unit ? ' · ' + esc(q.unit) : ''}</div><div class="s">সঠিক: ${L[q.answer] || '?'}) ${esc(q.options[q.answer])}</div></div><div class="btns" style="flex-direction:column;align-items:stretch"><button class="btn sm ghost" data-a="editq" data-v="${q.id}">এডিট</button>${delBtn('q' + q.id, 'delq', q.id)}</div></div>`).join('') + (l.length > S.qlimit ? `<div style="text-align:center;margin-top:10px"><button class="btn ghost" data-a="qmore">আরও দেখুন (${bn(l.length - S.qlimit)}টি বাকি)</button></div>` : '') : '<div class="empty">কোনো প্রশ্ন নেই। "নতুন প্রশ্ন" বা "বাল্ক ইমপোর্ট" থেকে যোগ করুন।</div>'}</div>`;
+}
+
+function eForm(){
+  return `<form class="card" id="fe2"><h2>নতুন পরীক্ষা</h2><label for="en">পরীক্ষার নাম</label><input id="en" required>
+  <div class="two"><div><label for="et">ধরন</label><select id="et">${opts(['Academic','Mega','Live','Weekly'], 'Academic')}</select></div><div><label for="esub">বিষয়</label><select id="esub">${opts(['সব বিষয়'].concat(subjects()), 'সব বিষয়')}</select></div></div>
+  <div class="two"><div><label for="eq">প্রশ্ন সংখ্যা</label><input id="eq" type="number" value="25" min="1"></div><div><label for="em">সময় (মিনিট)</label><input id="em" type="number" value="25" min="1"></div></div>
+  <div class="two"><div><label for="eng">নেগেটিভ মার্কিং</label><select id="eng">${opts(['নেই','০.২৫','০.৫'], '০.২৫')}</select></div><div><label for="epm">পাস মার্ক (%)</label><input id="epm" type="number" value="40" min="0" max="100"></div></div>
+  <label for="einst">প্রতিষ্ঠান (শুধু Mega পরীক্ষার জন্য)</label><select id="einst">${opts(['সব প্রতিষ্ঠান'].concat(INST), 'সব প্রতিষ্ঠান')}</select>
+  <label for="ew">শুরুর সময়</label><input id="ew" type="datetime-local">
+  <div class="row" style="margin-top:6px"><div><div class="t">পরীক্ষার পর উত্তর দেখানো</div><div class="s">শেষ হলে ব্যাখ্যাসহ উত্তর দেখা যাবে</div></div><label class="sw" aria-label="উত্তর দেখানো"><input type="checkbox" id="eshow" checked><i></i></label></div>
+  <div class="msg">Academic পরীক্ষার প্রশ্ন আসবে প্রশ্নব্যাংক থেকে, আর Mega পরীক্ষার প্রশ্ন আসবে আলাদা Mega প্রশ্নব্যাংক থেকে (অটো বা হাতে বাছা)। Live ও Weekly পরীক্ষায় নিজের প্রশ্ন লিখে যোগ করবেন। শুরুতে পরীক্ষা খসড়া থাকবে।</div>
+  <div style="margin-top:12px"><button class="btn" type="submit">তৈরি করে প্রশ্ন যোগ করুন</button></div></form>`;
+}
+function vItems(){
+  const e = E.filter(x => x.id === S.exq)[0];
+  if (!e) { S.eseg = 'list'; return vExam(); }
+  const items = Array.isArray(e.items) ? e.items : [];
+  if (!ownMode(e) && (S.iseg === 'add' || S.iseg === 'bulk')) S.iseg = 'list';
+  if (ownMode(e) && S.iseg === 'auto') S.iseg = 'list';
+  const n = items.length, pc = e.count ? Math.min(100, Math.round(n / e.count * 100)) : 0;
+  const head = `<div class="sec"><div><button class="btn sm ghost" data-a="exback">← পরীক্ষার তালিকা</button><h1 style="margin-top:10px">${esc(e.name)}</h1><p class="sub">${ownMode(e) ? 'এই পরীক্ষার নিজস্ব প্রশ্ন। শুধু এই পরীক্ষায় দেখাবে।' : (e.type === 'Mega' ? 'Mega পরীক্ষার প্রশ্ন Mega প্রশ্নব্যাংক থেকে আসে। আলাদা করে লিখতে হবে না।' : 'Academic পরীক্ষার প্রশ্ন প্রশ্নব্যাংক থেকে আসে। আলাদা করে লিখতে হবে না।')}</p></div></div>
+  <div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between"><b>${bn(n)} / ${bn(e.count)} টি প্রশ্ন যোগ হয়েছে</b><span class="s">${bn(pc)}%</span></div><div class="bar"><b style="width:${pc}%"></b></div>${n < e.count ? `<div class="msg">আরও ${bn(e.count - n)}টি প্রশ্ন লাগবে। সব না হলে পরীক্ষা চালু করা যাবে না।</div>` : '<div class="msg" style="color:var(--good)">সব প্রশ্ন যোগ হয়েছে। এখন পরীক্ষা চালু করতে পারবেন।</div>'}</div>` +
+  seg('iseg', ownMode(e) ? [['list','প্রশ্নের তালিকা'],['add','নতুন প্রশ্ন'],['bulk','বাল্ক ইমপোর্ট'],['bank','ব্যাংক থেকে']] : [['list','প্রশ্নের তালিকা'],['auto','অটো বাছাই'],['bank','হাতে বাছুন']], S.iseg);
+  const used = items.map(x => x.src);
+  if (S.iseg === 'auto') {
+    const mega = e.type === 'Mega', subs = subjects(), asub = S.xasub || (mega ? 'সব বিষয়' : (e.subject && subs.indexOf(e.subject) > -1 ? e.subject : subs[0])), ainst = S.xainst || e.inst || 'সব প্রতিষ্ঠান';
+    const pool0 = Q.filter(q => q.status === 'প্রকাশিত' && inGroup(e, q) && used.indexOf(q.id) < 0 && (!mega || ainst === 'সব প্রতিষ্ঠান' || q.board === ainst) && (asub === 'সব বিষয়' || q.subject === asub));
+    const chs = ['সব অধ্যায়'].concat(CFG.struct[asub] || []);
+    return head + `<div class="card"><h2>অটো বাছাই</h2><p class="sub">${mega ? 'প্রতিষ্ঠান ও বিষয় দিন, অ্যাপ Mega প্রশ্নব্যাংক থেকে এলোমেলো প্রশ্ন বেছে দেবে।' : 'বিষয় ও অধ্যায় দিন, অ্যাপ প্রশ্নব্যাংক থেকে এলোমেলো প্রশ্ন বেছে দেবে।'}</p>
+    ${mega ? `<label for="xainst">প্রতিষ্ঠান</label><select id="xainst">${opts(['সব প্রতিষ্ঠান'].concat(INST), ainst)}</select>` : ''}
+    <label for="xasub">বিষয়</label><select id="xasub">${opts((mega ? ['সব বিষয়'] : []).concat(subs), asub)}</select>
+    ${mega ? '' : `<label for="xach">অধ্যায়</label><select id="xach">${opts(chs, 'সব অধ্যায়')}</select>`}
+    <label for="xcnt">কয়টি প্রশ্ন</label><input id="xcnt" type="number" min="1" value="${Math.max(1, e.count - n)}">
+    <div class="msg">এই বাছাইয়ে ব্যাংকে প্রকাশিত ${bn(pool0.length)}টি প্রশ্ন বাকি আছে।</div><div style="margin-top:12px"><button class="btn" data-a="xauto">বাছাই করুন</button></div></div>`;
+  }
+  if (S.iseg === 'add') return head + `<form class="card" id="fxq"><h2>এই পরীক্ষার নতুন প্রশ্ন</h2><label for="xq">প্রশ্ন</label><textarea id="xq" required></textarea><label>অপশন (সঠিকটির পাশে গোল চিহ্নে ট্যাপ করুন)</label>${[0,1,2,3].map(i => `<div class="opt"><input type="radio" name="xa" value="${i}" aria-label="সঠিক উত্তর ${i + 1}"><input type="text" id="xo${i}" placeholder="${L[i]}) অপশন"></div>`).join('')}<label for="xe">ব্যাখ্যা</label><textarea id="xe" style="min-height:64px"></textarea><div style="margin-top:14px"><button class="btn" type="submit">প্রশ্ন যোগ করুন</button></div><div class="msg" id="xmsg">সঠিক উত্তর না বেছে যোগ করা যাবে না।</div></form>`;
+  if (S.iseg === 'bulk') return head + impBox('ximp', 'x');
+  if (S.iseg === 'bank') {
+    const av = Q.filter(q => q.status === 'প্রকাশিত' && inGroup(e, q));
+    return head + `<div class="card"><h2>${ownMode(e) ? 'প্রশ্নব্যাংক থেকে নিন (ঐচ্ছিক)' : 'হাতে বেছে নিন'}</h2><p class="sub">${e.type === 'Mega' ? 'শুধু Mega প্রশ্নব্যাংকের প্রশ্ন দেখাচ্ছে। ' : ''}ব্যাংকের প্রশ্নের কপি এই পরীক্ষায় যাবে। মূল প্রশ্ন বদলাবে না।</p>${av.length ? av.slice(0, 100).map(q => `<div class="row"><div><div class="t">${esc(q.question)}</div><div class="s">${esc(q.subject || '')}${e.type === 'Mega' ? ' · ' + esc(q.board || '') : ''}</div></div>${used.indexOf(q.id) > -1 ? '<span class="pill good">যোগ আছে</span>' : `<button class="btn sm" data-a="xbank" data-v="${q.id}">যোগ করুন</button>`}</div>`).join('') : '<div class="empty">ব্যাংকে প্রকাশিত প্রশ্ন নেই</div>'}</div>`;
+  }
+  return head + `<div class="card">${n ? items.map((x, i) => `<div class="row" style="align-items:flex-start"><div><div class="t">${bn(i + 1)}. ${esc(x.question)}</div><div class="s">সঠিক: ${L[x.answer]}) ${esc(x.options[x.answer])}</div></div>${delBtn('x' + i, 'xdel', i)}</div>`).join('') : `<div class="empty">এই পরীক্ষায় এখনো প্রশ্ন নেই। ${ownMode(e) ? '"নতুন প্রশ্ন" ট্যাবে গিয়ে যোগ করুন।' : '"অটো বাছাই" ট্যাবে গিয়ে বাছুন।'}</div>`}</div>`;
+}
+function vExam(){
+  if (S.eseg === 'items') return vItems();
+  const head = `<div class="sec"><div><h1>পরীক্ষা ম্যানেজার</h1><p class="sub">চালু করলেই সবার অ্যাপে দেখা যাবে</p></div></div>` + seg('eseg', [['list','তালিকা'],['form','নতুন পরীক্ষা'],['res','ফলাফল']], S.eseg);
+  if (S.eseg === 'form') return head + eForm();
+  if (S.eseg === 'res') {
+    const e = E.filter(x => x.id === S.rx)[0] || E[0];
+    if (!e) return head + '<div class="card"><div class="empty">এখনো কোনো পরীক্ষা নেই</div></div>';
+    return head + `<div class="card"><label for="rxs" style="margin-top:0">পরীক্ষা বেছে নিন</label><select id="rxs">${E.map(x => `<option value="${x.id}"${x.id === e.id ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select>
+    <div class="row"><div><div class="t">ফলাফল</div><div class="s">${e.resultPublished ? 'প্রকাশিত' : 'এখনো প্রকাশ হয়নি'}</div></div><button class="btn sm ${e.resultPublished ? 'ghost' : ''}" data-a="pubres" data-v="${e.id}">${e.resultPublished ? 'লুকান' : 'প্রকাশ করুন'}</button></div>
+    <div class="msg">কে কত পেল তার তালিকা এখানে দেখাতে হলে অ্যাপকে প্রতিটি পরীক্ষার ফলাফল Firebase-এ সেভ করতে হবে। সেটা অ্যাপে যোগ হলে আমি এই পেজে দেখানোর ব্যবস্থা করে দেব।</div></div>`;
+  }
+  return head + (E.length ? `<div class="grid">${E.map(e => `<div class="card"><div class="row" style="border:0;padding:0;align-items:flex-start"><div><div class="t">${esc(e.name)}</div><div class="s"><span class="pill${e.type === 'Live' ? ' bad' : e.type === 'Weekly' ? ' warn' : ''}">${e.type}</span> ${stBadge(e.status)}</div><div class="s">${qcount(e)} · ${bn(e.duration)} মিনিট · নেগেটিভ ${e.negative ? bn(e.negative) : 'নেই'}</div><div class="s">${esc(e.subject || '')}${e.startAt ? ' · ' + esc(String(e.startAt).replace('T', ' ')) : ''}</div></div>${e.status !== 'শেষ' ? sw(`data-a="toge" data-v="${e.id}"`, e.status === 'চালু', 'চালু বা বন্ধ') : ''}</div>
+  <div class="btns" style="margin-top:10px"><button class="btn sm" data-a="exitems" data-v="${e.id}">প্রশ্ন দেখুন/যোগ করুন</button><button class="btn sm ghost" data-a="exres" data-v="${e.id}">ফলাফল</button>${delBtn('e' + e.id, 'dele', e.id)}</div></div>`).join('')}</div>` : '<div class="card"><div class="empty">এখনো কোনো পরীক্ষা নেই। "নতুন পরীক্ষা" ট্যাব থেকে বানান।</div></div>');
+}
+
+function userName(u){ return u.name || u.displayName || 'নাম নেই'; }
+function vUser(){
+  const t = S.uq.toLowerCase(), l = U.filter(u => (!t || JSON.stringify(u).toLowerCase().includes(t)) && (S.ufil === 'সব' || (S.ufil === 'ব্লক' ? u.blocked : !u.blocked)));
+  return `<div class="sec"><div><h1>ইউজার ম্যানেজার</h1><p class="sub">মোট ${bn(U.length)} জন নিবন্ধিত</p></div></div>
+  <div class="tools"><input id="us" placeholder="নাম বা ইমেইল দিয়ে খুঁজুন" value="${esc(S.uq)}" aria-label="খুঁজুন"><select id="ufil" aria-label="ফিল্টার">${opts(['সব','সক্রিয়','ব্লক'], S.ufil)}</select></div><div class="card">
+  ${l.length ? l.slice(0, 80).map(u => { const open = S.us === u.id; return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div style="min-width:0"><div class="t">${esc(userName(u))} ${u.blocked ? '<span class="pill bad">ব্লক</span>' : ''}</div><div class="s">${esc(u.email || u.phone || u.id)} · XP ${bn(u.xp || 0)}</div></div><button class="btn sm ghost" data-a="uopen" data-v="${u.id}">${open ? 'বন্ধ' : 'খুলুন'}</button></div>
+  ${open ? `<div class="panel"><div class="s">যোগ দিয়েছে: ${esc(fmtDate(u.createdAt) || '—')}</div><div class="s">ID: ${esc(u.id)}</div><div class="btns" style="margin-top:10px"><button class="btn sm ${u.blocked ? 'good' : 'danger'}" data-a="blk" data-v="${u.id}">${u.blocked ? 'আনব্লক' : 'ব্লক করুন'}</button><button class="btn sm ghost" data-a="xp" data-v="${u.id}:50">+৫০ XP</button><button class="btn sm ghost" data-a="xp" data-v="${u.id}:-50">−৫০ XP</button><button class="btn sm ghost" data-a="rkhide" data-v="${u.id}">${u.hidden ? 'তালিকায় দেখান' : 'মেধা তালিকা থেকে লুকান'}</button>${delBtn('rp' + u.id, 'reset', u.id, 'XP রিসেট')}</div></div>` : ''}</div>`; }).join('') : '<div class="empty">কেউ পাওয়া যায়নি</div>'}</div>
+  <div class="msg">ব্লক করলে ইউজারকে আটকানোর কাজ অ্যাপকে করতে হবে (blocked ফিল্ড দেখে)। সেটা অ্যাপে যোগ করার প্রম্পট চাইলে বলুন।</div>`;
+}
+function vRank(){
+  const l = U.filter(u => !u.hidden).sort((a, b) => (b.xp || 0) - (a.xp || 0)), m = l[0] && l[0].xp ? l[0].xp : 1;
+  const top = l.slice(0, 3), ord = [top[1], top[0], top[2]], cls = ['', 'p1', ''], rk = [2, 1, 3];
+  return `<div class="sec"><div><h1>মেধা তালিকা</h1><p class="sub">XP অনুযায়ী, অ্যাপের Leaderboard যেভাবে দেখায়</p></div></div>
+  ${l.length ? `<div class="podium">${ord.map((u, i) => u ? `<div class="card ${cls[i]}"><div class="s">${['🥈 ২য়','🥇 ১ম','🥉 ৩য়'][i]}</div><div class="t">${esc(userName(u))}</div><div class="n">${bn(u.xp || 0)}</div><div class="s">XP</div></div>` : '<div></div>').join('')}</div>
+  <div class="card">${l.slice(0, 50).map((u, i) => `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><span class="t">${bn(i + 1)}. ${esc(userName(u))}</span><span class="s" style="white-space:nowrap">${bn(u.xp || 0)} XP</span></div><div class="bar"><b style="width:${Math.round((u.xp || 0) / m * 100)}%"></b></div></div>`).join('')}</div>` : '<div class="card"><div class="empty">এখনো কোনো ইউজার বা XP নেই</div></div>'}`;
+}
+function vMission(){
+  return `<div class="sec"><div><h1>মিশন ও XP</h1><p class="sub">অ্যাপের "আজকের মিশন"</p></div></div><div class="card">${CFG.missions.map((m, i) => `<div class="row"><div><div class="t">${esc(m.t)}</div><div style="margin-top:6px;display:flex;align-items:center;gap:8px"><input type="number" id="mxp${i}" value="${m.xp}" min="0" style="width:96px" aria-label="XP"><span class="s">XP</span></div></div><div style="display:flex;gap:8px;align-items:center">${sw(`id="mon${i}"`, m.on, 'মিশন চালু')}${delBtn('m' + i, 'delm', i)}</div></div>`).join('') || '<div class="empty">কোনো মিশন নেই</div>'}<div style="margin-top:12px"><button class="btn" data-a="savem">পরিবর্তন সেভ করুন</button></div></div>
+  <div class="card" style="margin-top:12px"><h2>নতুন মিশন</h2><label for="mt">মিশনের নাম</label><input id="mt"><div class="btns" style="margin-top:12px"><button class="btn" data-a="addm">যোগ করুন</button></div></div>`;
+}
+function vStruct(){
+  const subs = Object.keys(CFG.struct); if (subs.indexOf(S.sSub) < 0) S.sSub = subs[0];
+  const ch = CFG.struct[S.sSub] || [];
+  return `<div class="sec"><div><h1>বিষয় ও অধ্যায়</h1><p class="sub">এখানে যোগ করলে প্রশ্ন ও পরীক্ষার তালিকায় আসবে</p></div></div><div class="cols2"><div class="card"><label for="ssub" style="margin-top:0">বিষয়</label><select id="ssub">${opts(subs, S.sSub)}</select>
+  ${ch.length ? ch.map((c, i) => `<div class="row"><div class="t">${esc(c)}</div>${delBtn('c' + i, 'delc', i)}</div>`).join('') : '<div class="empty">এই বিষয়ে এখনো অধ্যায় নেই। নিচে যোগ করুন।</div>'}
+  <label for="nch">নতুন অধ্যায়</label><input id="nch" placeholder="যেমন ৭ম: নতুন অধ্যায়"><div style="margin-top:10px"><button class="btn" data-a="addc">অধ্যায় যোগ করুন</button></div></div>
+  <div class="card"><h2>নতুন বিষয়</h2><label for="nsub">বিষয়ের নাম</label><input id="nsub"><div style="margin-top:10px"><button class="btn" data-a="adds">বিষয় যোগ করুন</button></div><h3 style="margin-top:18px">বোর্ড</h3><div class="btns" style="margin-top:8px">${BOARDS.map(b => `<span class="pill">${b}</span>`).join('')}</div></div></div>`;
+}
+function vReport(){
+  return `<div class="sec"><div><h1>ভুল রিপোর্ট</h1><p class="sub">ইউজাররা প্রশ্নে ভুল পেলে এখানে আসে</p></div></div>${R.length ? `<div class="grid">${R.map(r => { const st = r.status || 'খোলা'; return `<div class="card"><div class="t">${esc(r.question || r.q || '')}</div><div class="s">কারণ: ${esc(r.reason || r.why || '—')}</div><div class="s">জানিয়েছে: ${esc(r.by || r.userName || '—')} · ${st === 'খোলা' ? '<span class="pill bad">খোলা</span>' : `<span class="pill good">${esc(st)}</span>`}</div>${st === 'খোলা' ? `<div class="btns" style="margin-top:10px">${r.qid && Q.some(q => q.id === r.qid) ? `<button class="btn sm" data-a="fixr" data-v="${r.qid}">প্রশ্ন এডিট করুন</button>` : ''}<button class="btn sm good" data-a="rsolve" data-v="${r.id}">সমাধান হয়েছে</button><button class="btn sm ghost" data-a="rdrop" data-v="${r.id}">বাতিল</button></div>` : ''}</div>`; }).join('')}</div>` : '<div class="card"><div class="empty">কোনো রিপোর্ট নেই</div></div>'}`;
+}
+function vNotice(){
+  return `<div class="sec"><div><h1>নোটিশ</h1><p class="sub">অ্যাপের হোম পেজে ব্যানার হিসেবে দেখানোর জন্য</p></div></div><div class="cols2"><div class="card"><h2>নতুন নোটিশ</h2><label for="nt">বার্তা</label><textarea id="nt"></textarea><div class="two"><div><label for="na">কাকে পাঠাবেন</label><select id="na">${opts(['সবাই','চালু পরীক্ষার অংশগ্রহণকারী','শুধু সক্রিয় ইউজার'], 'সবাই')}</select></div><div><label for="nk">ধরন</label><select id="nk">${opts(['নোটিশ','জরুরি ব্যানার'], 'নোটিশ')}</select></div></div><div style="margin-top:12px"><button class="btn" data-a="sendn">সেভ ও পাঠান</button></div></div>
+  <div class="card"><h2>আগের নোটিশ</h2>${N.length ? N.slice().sort((a, b) => (b.at && b.at.seconds || 0) - (a.at && a.at.seconds || 0)).map(n => `<div class="row"><div><div class="t">${esc(n.text)}</div><div class="s">${esc(n.audience || '')} · ${esc(fmtDate(n.at))}</div></div>${delBtn('n' + n.id, 'deln', n.id)}</div>`).join('') : '<div class="empty">কোনো নোটিশ নেই</div>'}</div></div>`;
+}
+function vAdmins(){
+  return `<div class="sec"><div><h1>অ্যাডমিন ও সিকিউরিটি</h1><p class="sub">কে এই প্যানেল চালাতে পারবে</p></div></div><div class="cols2"><div class="card"><h2>এই প্যানেলের অ্যাডমিন</h2><div class="row"><div><div class="t">${esc(ME ? ME.email : '')}</div><div class="s">মালিক · UID: ${esc(ADMIN_UID)}</div></div></div><div class="msg">অ্যাডমিন যোগ করতে হলে কোডের ADMIN_UID ও Firestore রুলে নতুন UID বসাতে হয়। এটা আমি করে দিতে পারি, বললেই হবে।</div></div>
+  <div class="card"><h2>নিরাপত্তা করণীয় তালিকা</h2><p class="sub">নিজে যাচাই করে টিক দিন</p>${SEC_ITEMS.map((c, i) => `<label class="chk" style="margin:0;color:var(--ink);font-size:1em"><input type="checkbox" data-a="sec" data-v="${i}"${CFG.sec['i' + i] ? ' checked' : ''}><span>${esc(c)}</span></label>`).join('')}</div></div>
+  <div class="card" style="margin-top:12px"><h2>নতুন অংশের জন্য Firestore রুল</h2><p class="sub">নোটিশ, রিপোর্ট, কন্ট্রোল ও ইতিহাস সেভ করতে এই রুল লাগবে। এগুলো না দিলে ওই অংশগুলো "অনুমতি নেই" দেখাবে, বাকি সব ঠিক চলবে।</p>
+  <textarea id="rulebox" readonly style="font-family:monospace;font-size:.8em;min-height:240px;margin-top:10px">${esc(RULES_SNIPPET)}</textarea><div style="margin-top:10px"><button class="btn ghost" data-a="copyrules">কপি করুন</button></div>
+  <div class="msg">Firebase Console → Firestore Database → Rules ট্যাবে গিয়ে আগের রুলের শেষে (শেষ দুটো } এর আগে) পেস্ট করে Publish চাপুন।</div></div>`;
+}
+function vAudit(){
+  return `<div class="sec"><div><h1>কাজের ইতিহাস</h1><p class="sub">কে কখন কী বদলেছে (সর্বশেষ ৪০টি)</p></div></div><div class="card">${AUD.length ? AUD.map(r => `<div class="row"><div class="t">${esc(r.msg)}</div><div class="s" style="white-space:nowrap">${esc(fmtDate(r.at))}</div></div>`).join('') : '<div class="empty">এখনো কোনো ইতিহাস নেই</div>'}</div>`;
+}
+function vCtl(){
+  const c = CFG.app, r = (k, t, s) => `<div class="row"><div><div class="t">${t}</div><div class="s">${s}</div></div>${sw(`data-a="ctl" data-v="${k}"`, c[k], t)}</div>`;
+  return `<div class="sec"><div><h1>অ্যাপ কন্ট্রোল</h1><p class="sub">অ্যাপ এই সেটিং দেখে চলবে</p></div></div><div class="cols2"><div class="card">${r('maint','মেইনটেন্যান্স মোড','চালু করলে ইউজাররা অ্যাপ খুলতে পারবে না')}${r('force','জোর করে আপডেট','পুরোনো ভার্সনে অ্যাপ বন্ধ হবে')}${r('reg','নতুন রেজিস্ট্রেশন','বন্ধ করলে নতুন কেউ অ্যাকাউন্ট খুলতে পারবে না')}${r('board','মেধা তালিকা দেখানো','বন্ধ করলে অ্যাপে তালিকা লুকানো থাকবে')}</div>
+  <div class="card"><h2>অ্যাপের তথ্য</h2><label for="cv">সর্বশেষ ভার্সন</label><input id="cv" value="${esc(c.ver)}"><label for="cs">সাপোর্ট ইমেইল</label><input id="cs" value="${esc(c.support)}"><div style="margin-top:12px"><button class="btn" data-a="savec">সেভ করুন</button></div></div></div>
+  <div class="msg">এই সেটিং Firebase-এ সেভ হয়। অ্যাপকে এগুলো পড়ে কাজ করতে হবে, সেটা অ্যাপে যোগ করার প্রম্পট চাইলে বলুন।</div>`;
+}
+function vLook(){
+  const T = [['soft','আরামদায়ক','চোখে কম চাপ, ডিফল্ট',['#e9efeb','#f6f9f7','#0b6b63']],['light','উজ্জ্বল','সাদা ও পরিষ্কার',['#f5f8f7','#ffffff','#0f766e']],['dark','ডার্ক','রাতে পড়ার জন্য',['#0e1917','#16251f','#2dd4bf']],['auto','ফোনের মতো','ফোনের সেটিং অনুযায়ী',['#e9efeb','#0e1917','#0b6b63']]];
+  return `<div class="sec"><div><h1>চেহারা ও লেখা</h1><p class="sub">আপনার জন্য যেটা পড়তে আরাম লাগে</p></div></div><div class="card"><h2>থিম</h2><div class="themes" style="margin-top:10px">${T.map(t => `<button data-a="theme" data-v="${t[0]}" aria-pressed="${S.look.theme === t[0]}"><div class="sample">${t[3].map(c => `<i style="background:${c}"></i>`).join('')}</div><div class="t">${t[1]}</div><div class="s">${t[2]}</div></button>`).join('')}</div></div>
+  <div class="card" style="margin-top:12px"><h2>লেখার সাইজ</h2>${seg('fsz', [['15','ছোট'],['17','মাঝারি'],['19','বড়'],['21','অনেক বড়']], S.look.size)}<p>এটি একটি নমুনা লেখা। প্রশ্ন, উত্তর ও ব্যাখ্যা এই সাইজে দেখাবে।</p></div>`;
+}
+function vMore(){
+  return `<div class="sec"><div><h1>আরও</h1><p class="sub">বাকি সব পেজ এখানে</p></div></div><div class="menu">${MORE.map(m => `<button data-a="go" data-v="${m[0]}"><span class="ic">${icon(m[2])}</span><span><b>${m[1]}</b><span class="d">${m[3]}</span></span></button>`).join('')}</div>`;
+}
+const V = {home:vHome,q:vQ,exam:vExam,user:vUser,more:vMore,rank:vRank,mission:vMission,struct:vStruct,report:vReport,notice:vNotice,admins:vAdmins,audit:vAudit,ctl:vCtl,look:vLook};
+
+function navs(){
+  const cur = MOREKEYS.indexOf(S.tab) > -1 ? 'more' : S.tab;
+  $('mob').innerHTML = MAIN.concat([['more','আরও','more']]).map(t => `<button data-a="go" data-v="${t[0]}" aria-current="${cur === t[0]}">${icon(t[2])}<span>${t[1]}</span></button>`).join('');
+  $('side').innerHTML = MAIN.map(t => [t[0], t[1], t[2]]).concat(MORE.map(m => [m[0], m[1], m[2]])).map(t => `<button data-a="go" data-v="${t[0]}" aria-current="${S.tab === t[0]}">${icon(t[2])}<span>${t[1]}</span></button>`).join('');
+}
+function render(){
+  if (!ME) return;
+  navs();
+  const denied = Object.keys(perm);
+  const banner = denied.length ? `<div class="demo" style="background:var(--bad-soft);color:var(--bad)">কিছু অংশ (${denied.map(esc).join(', ')}) পড়া যাচ্ছে না। Firestore রুল ঠিক করুন: আরও → অ্যাডমিন ও সিকিউরিটি।</div>` : '';
+  $('main').innerHTML = banner + V[S.tab]();
+  try { history.replaceState(null, '', '#' + S.tab); } catch(x) {}
+}
+function go(t){
+  if (t === 'logout') { signOut(auth); return; }
+  S.tab = t; S.cf = null; render(); window.scrollTo(0, 0);
+}
+
+/* ---------- কাজ (ক্লিক) ---------- */
+const byId = (arr, id) => arr.filter(x => x.id === id)[0];
+document.addEventListener('click', async ev => {
+  const b = ev.target.closest('[data-a]'); if (!b || b.tagName === 'INPUT' || b.tagName === 'SELECT') return;
+  const a = b.dataset.a, v = b.dataset.v;
+  if (S.cf && !/^(delq|dele|deln|delc|delm|reset|xdel)$/.test(a)) S.cf = null;
+  switch (a) {
+    case 'login': return login();
+    case 'go': return go(v);
+    case 'seg':
+      if (b.dataset.n === 'fsz') { S.look.size = v; applyLook(); render(); return; }
+      S[b.dataset.n] = v; if (b.dataset.n === 'qseg' && v !== 'form') S.eq = null; if (b.dataset.n === 'qseg' || b.dataset.n === 'iseg') S.imp = S.ximp = null; render(); return;
+    case 'theme': S.look.theme = v; applyLook(); render(); return;
+    case 'newq': S.eq = null; S.qseg = 'form'; return go('q');
+    case 'newe': S.eseg = 'form'; return go('exam');
+    case 'qfilter': S.qst = v; S.qseg = 'list'; return go('q');
+    case 'qmore': S.qlimit += 50; render(); return;
+    case 'editq': S.eq = v; S.qseg = 'form'; render(); window.scrollTo(0, 0); return;
+    case 'qcancel': S.eq = null; S.qseg = 'list'; render(); return;
+    case 'delq': if (!ask('q' + v)) return; if (await run(deleteDoc(doc(db, 'questions', v)), 'প্রশ্ন মুছে গেছে')) log('একটি প্রশ্ন মুছে ফেলা হয়েছে'); return;
+    case 'dele': { if (!ask('e' + v)) return; const e = byId(E, v); if (await run(deleteDoc(doc(db, 'exams', v)), 'পরীক্ষা মুছে গেছে')) log('পরীক্ষা মুছে ফেলা: ' + (e ? e.name : '')); return; }
+    case 'exitems': S.exq = v; S.eseg = 'items'; S.iseg = 'list'; S.xasub = S.xainst = null; S.ximp = null; render(); window.scrollTo(0, 0); return;
+    case 'exback': S.eseg = 'list'; render(); return;
+    case 'exres': S.rx = v; S.eseg = 'res'; render(); return;
+    case 'pubres': { const e = byId(E, v); if (await run(updateDoc(doc(db, 'exams', v), {resultPublished: !e.resultPublished}), e.resultPublished ? 'ফলাফল লুকানো হয়েছে' : 'ফলাফল প্রকাশ হয়েছে')) log('ফলাফল ' + (e.resultPublished ? 'লুকানো' : 'প্রকাশ') + ': ' + e.name); return; }
+    case 'xdel': { if (!ask('x' + v)) return; const e = byId(E, S.exq), items = (e.items || []).slice(); items.splice(+v, 1); await run(updateDoc(doc(db, 'exams', e.id), {items}), 'প্রশ্ন সরানো হয়েছে'); return; }
+    case 'xbank': { const e = byId(E, S.exq), bq = byId(Q, v), items = (e.items || []).concat([{question:bq.question, options:bq.options.slice(), answer:bq.answer, explanation:bq.explanation || '', src:bq.id}]); if (await run(updateDoc(doc(db, 'exams', e.id), {items}), 'প্রশ্ন যোগ হয়েছে')) log(e.name + ': ব্যাংক থেকে একটি প্রশ্ন নেওয়া হয়েছে'); return; }
+    case 'xauto': {
+      const e = byId(E, S.exq), mg = e.type === 'Mega', sb = $('xasub').value, chv = mg ? 'সব অধ্যায়' : $('xach').value, ins = mg ? $('xainst').value : '', cn = +$('xcnt').value || 0, cur = (e.items || []), ua = cur.map(x => x.src);
+      const pool = Q.filter(q => q.status === 'প্রকাশিত' && inGroup(e, q) && ua.indexOf(q.id) < 0 && (sb === 'সব বিষয়' || q.subject === sb) && (!mg || ins === 'সব প্রতিষ্ঠান' || q.board === ins) && chMatch(q.chapter, chv));
+      for (let k = pool.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)), tmp = pool[k]; pool[k] = pool[j]; pool[j] = tmp; }
+      const pick = pool.slice(0, cn), items = cur.concat(pick.map(q => ({question:q.question, options:q.options.slice(), answer:q.answer, explanation:q.explanation || '', src:q.id})));
+      const msg = bn(pick.length) + 'টি প্রশ্ন যোগ হয়েছে' + (pick.length < cn ? ' (ব্যাংকে এর বেশি নেই)' : '');
+      if (await run(updateDoc(doc(db, 'exams', e.id), {items}), msg)) log(e.name + ': অটো বাছাই, ' + msg); return;
+    }
+    case 'adv': { const bx = $('advbox'); if (bx) { const o = bx.classList.toggle('open'); b.setAttribute('aria-expanded', o ? 'true' : 'false'); } return; }
+    case 'impexfill': case 'ximpexfill': { $('itext').value = EXAMPLE_JSON; toast('উদাহরণ বসেছে। এখন "আগে যাচাই করুন" চাপুন'); return; }
+    case 'impfile': case 'ximpfile': return;
+    case 'impcheck': case 'ximpcheck': {
+      const p = a === 'impcheck' ? 'imp' : 'ximp', def = a === 'impcheck' ? {subject:$('isub').value, board:$('ibd').value, year:$('iyr').value, chapter:$('ich').value.trim()} : {};
+      S[p + 'Form'] = a === 'impcheck' ? {text:$('itext').value, bank:$('ibk').value, status:$('ist').value, subject:$('isub').value, board:$('ibd').value, year:$('iyr').value, chapter:$('ich').value} : {text:$('itext').value};
+      const r = parseRows($('itext').value, def);
+      if (r.err) { S[p] = null; $('main').querySelector('[id$="res"]').innerHTML = `<span style="color:var(--bad)">${r.err}</span>`; return; }
+      S[p] = r; S[p + 'Opts'] = a === 'impcheck' ? {bank:$('ibk').value, status:$('ist').value} : {}; render(); return;
+    }
+    case 'impgo': {
+      const p = S.imp; if (!p || !p.ok.length) return;
+      try {
+        for (let i = 0; i < p.ok.length; i += 400) { const bt = writeBatch(db); p.ok.slice(i, i + 400).forEach(q => bt.set(doc(collection(db, 'questions')), {...q, bank:S.impOpts.bank, status:S.impOpts.status, type:'MCQ', createdAt:serverTimestamp()})); await bt.commit(); }
+        toast(bn(p.ok.length) + 'টি প্রশ্ন যোগ হয়েছে'); log('বাল্ক ইমপোর্ট: ' + bn(p.ok.length) + 'টি প্রশ্ন (' + S.impOpts.bank + ')'); S.imp = null; S.impForm = null; render();
+      } catch(e) { toast('ইমপোর্ট হয়নি: ' + errMsg(e)); }
+      return;
+    }
+    case 'ximpgo': {
+      const p = S.ximp, e = byId(E, S.exq); if (!p || !p.ok.length) return;
+      const items = (e.items || []).concat(p.ok.map(q => ({question:q.question, options:q.options, answer:q.answer, explanation:q.explanation || ''})));
+      if (await run(updateDoc(doc(db, 'exams', e.id), {items}), bn(p.ok.length) + 'টি প্রশ্ন যোগ হয়েছে')) { log(e.name + ': বাল্ক ইমপোর্ট, ' + bn(p.ok.length) + 'টি'); S.ximp = null; S.ximpForm = null; render(); }
+      return;
+    }
+    case 'uopen': S.us = S.us === v ? null : v; render(); return;
+    case 'blk': { const u = byId(U, v); if (await run(updateDoc(doc(db, 'users', v), {blocked: !u.blocked}), u.blocked ? 'আনব্লক হয়েছে' : 'ব্লক হয়েছে')) log(userName(u) + (u.blocked ? ' আনব্লক' : ' ব্লক') + ' করা হয়েছে'); return; }
+    case 'xp': { const i = v.lastIndexOf(':'), id = v.slice(0, i), d = +v.slice(i + 1), u = byId(U, id); if (await run(updateDoc(doc(db, 'users', id), {xp: increment(d)}), 'XP আপডেট হয়েছে')) log(userName(u) + '-এর XP ' + (d > 0 ? 'বাড়ানো' : 'কমানো') + ' হয়েছে'); return; }
+    case 'rkhide': { const u = byId(U, v); await run(updateDoc(doc(db, 'users', v), {hidden: !u.hidden}), u.hidden ? 'তালিকায় দেখানো হবে' : 'মেধা তালিকা থেকে লুকানো হয়েছে'); return; }
+    case 'reset': { if (!ask('rp' + v)) return; const u = byId(U, v); if (await run(updateDoc(doc(db, 'users', v), {xp: 0}), 'XP রিসেট হয়েছে')) log(userName(u) + '-এর XP রিসেট হয়েছে'); return; }
+    case 'addm': { const mt = $('mt'); if (!mt.value.trim()) return toast('মিশনের নাম লিখুন'); const list = CFG.missions.concat([{t:mt.value.trim(), xp:50, on:true}]); if (await run(setDoc(doc(db, 'config', 'missions'), {list}), 'মিশন যোগ হয়েছে')) log('নতুন মিশন যোগ হয়েছে'); return; }
+    case 'delm': { if (!ask('m' + v)) return; const list = CFG.missions.slice(); list.splice(+v, 1); await run(setDoc(doc(db, 'config', 'missions'), {list}), 'মিশন মুছে গেছে'); return; }
+    case 'savem': { const list = CFG.missions.map((m, i) => ({t:m.t, xp:+$('mxp' + i).value || 0, on:$('mon' + i).checked})); if (await run(setDoc(doc(db, 'config', 'missions'), {list}), 'মিশন সেভ হয়েছে')) log('মিশন বদলানো হয়েছে'); return; }
+    case 'addc': { const nc = $('nch'); if (!nc.value.trim()) return toast('অধ্যায়ের নাম লিখুন'); const data = JSON.parse(JSON.stringify(CFG.struct)); data[S.sSub] = (data[S.sSub] || []).concat([nc.value.trim()]); if (await run(setDoc(doc(db, 'config', 'struct'), {data}), 'অধ্যায় যোগ হয়েছে')) log('নতুন অধ্যায় যোগ: ' + nc.value.trim()); return; }
+    case 'delc': { if (!ask('c' + v)) return; const data = JSON.parse(JSON.stringify(CFG.struct)); data[S.sSub].splice(+v, 1); await run(setDoc(doc(db, 'config', 'struct'), {data}), 'অধ্যায় মুছে গেছে'); return; }
+    case 'adds': { const ns = $('nsub'), nm = ns.value.trim(); if (!nm || CFG.struct[nm]) return toast('নতুন নাম লিখুন'); const data = JSON.parse(JSON.stringify(CFG.struct)); data[nm] = []; S.sSub = nm; if (await run(setDoc(doc(db, 'config', 'struct'), {data}), 'বিষয় যোগ হয়েছে')) log('নতুন বিষয় যোগ: ' + nm); return; }
+    case 'fixr': S.eq = v; S.qseg = 'form'; S.tab = 'q'; render(); window.scrollTo(0, 0); return;
+    case 'rsolve': await run(updateDoc(doc(db, 'reports', v), {status:'সমাধান হয়েছে'}), 'সমাধান হিসেবে চিহ্নিত'); return;
+    case 'rdrop': await run(deleteDoc(doc(db, 'reports', v)), 'রিপোর্ট বাতিল হয়েছে'); return;
+    case 'sendn': { const nt = $('nt'); if (!nt.value.trim()) return toast('বার্তা লিখুন'); if (await run(addDoc(collection(db, 'notices'), {text:nt.value.trim(), audience:$('na').value, kind:$('nk').value, at:serverTimestamp()}), 'নোটিশ সেভ হয়েছে')) { log('নোটিশ পাঠানো হয়েছে'); nt.value = ''; } return; }
+    case 'deln': if (!ask('n' + v)) return; await run(deleteDoc(doc(db, 'notices', v)), 'নোটিশ মুছে গেছে'); return;
+    case 'savec': if (await run(setDoc(doc(db, 'config', 'app'), {ver:$('cv').value.trim(), support:$('cs').value.trim()}, {merge:true}), 'সেভ হয়েছে')) log('অ্যাপের তথ্য আপডেট হয়েছে'); return;
+    case 'copyrules': { const t = $('rulebox'); try { await navigator.clipboard.writeText(t.value); toast('কপি হয়েছে'); } catch(e) { t.select(); toast('লেখাটি বাছা হয়েছে, কপি করে নিন'); } return; }
+  }
+});
+document.addEventListener('change', async ev => {
+  const t = ev.target, a = t.dataset && t.dataset.a, v = t.dataset && t.dataset.v;
+  if (a === 'toge') {
+    const e = byId(E, v);
+    if (t.checked && Array.isArray(e.items) && e.items.length < e.count) { render(); toast('প্রশ্ন অসম্পূর্ণ: ' + bn(e.items.length) + '/' + bn(e.count) + ' যোগ হয়েছে। বাকি ' + bn(e.count - e.items.length) + 'টি যোগ করুন'); return; }
+    if (await run(updateDoc(doc(db, 'exams', v), {live: t.checked, status: t.checked ? 'চালু' : 'খসড়া'}), t.checked ? 'পরীক্ষা চালু হয়েছে' : 'পরীক্ষা বন্ধ হয়েছে')) log(e.name + (t.checked ? ' চালু হয়েছে' : ' বন্ধ হয়েছে'));
+    else render();
+    return;
+  }
+  if (a === 'ctl') { if (await run(setDoc(doc(db, 'config', 'app'), {[v]: t.checked}, {merge:true}), 'সেটিং সেভ হয়েছে')) log('অ্যাপ কন্ট্রোল বদলেছে: ' + v); else render(); return; }
+  if (a === 'sec') { await run(setDoc(doc(db, 'config', 'security'), {['i' + v]: t.checked}, {merge:true})); return; }
+  if (a === 'impfile' || a === 'ximpfile') { const f = t.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { $('itext').value = r.result; }; r.readAsText(f); return; }
+  if (t.id === 'qsub') { S.qsub = t.value; render(); }
+  else if (t.id === 'qbank') { S.qbank = t.value; render(); }
+  else if (t.id === 'qst') { S.qst = t.value; render(); }
+  else if (t.id === 'ufil') { S.ufil = t.value; render(); }
+  else if (t.id === 'ssub') { S.sSub = t.value; render(); }
+  else if (t.id === 'rxs') { S.rx = t.value; render(); }
+  else if (t.id === 'xasub') { S.xasub = t.value; render(); }
+  else if (t.id === 'xainst') { S.xainst = t.value; render(); }
+});
+document.addEventListener('input', ev => {
+  const t = ev.target;
+  if (t.id === 'qs') { S.qf = t.value; S.qlimit = 50; render(); const n = $('qs'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }
+  else if (t.id === 'us') { S.uq = t.value; render(); const n = $('us'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && (ev.target.id === 'pw' || ev.target.id === 'em')) login(); });
+document.addEventListener('submit', async ev => {
+  ev.preventDefault(); const f = ev.target;
+  if (f.id === 'fq') {
+    const a = f.querySelector('input[name=ans]:checked'), o = [0,1,2,3].map(i => $('o' + i).value.trim());
+    if (!$('fq1').value.trim()) { $('fmsg').textContent = 'প্রশ্ন লিখুন।'; return; }
+    if (o.some(x => !x)) { $('fmsg').textContent = 'চারটি অপশনই লিখুন।'; return; }
+    if (!a) { $('fmsg').textContent = 'সঠিক উত্তর বেছে নিন। উত্তর ছাড়া প্রশ্ন সেভ হয় না।'; return; }
+    const d = {bank:$('fbk').value, status:$('fst').value, type:'MCQ', subject:$('fs').value, board:$('fb').value, year:String($('fy').value), difficulty:$('fd').value, chapter:$('fc').value.trim(), session:$('fss').value.trim(), unit:$('fun').value.trim(),
+      question:$('fq1').value.trim(), options:o, answer:+a.value, explanation:$('fe').value.trim(), imageUrl:$('fi').value.trim(), updatedAt:serverTimestamp()};
+    const ok = S.eq ? await run(updateDoc(doc(db, 'questions', S.eq), d), 'পরিবর্তন সেভ হয়েছে') : await run(addDoc(collection(db, 'questions'), {...d, createdAt:serverTimestamp()}), 'প্রশ্ন সেভ হয়েছে');
+    if (ok) { log(S.eq ? 'একটি প্রশ্ন এডিট করা হয়েছে' : 'নতুন প্রশ্ন যোগ হয়েছে (' + d.bank + ')'); S.eq = null; S.qseg = 'list'; render(); }
+    return;
+  }
+  if (f.id === 'fe2') {
+    const neg = $('eng').value === 'নেই' ? 0 : ($('eng').value === '০.৫' ? 0.5 : 0.25), type = $('et').value;
+    const data = {name:$('en').value.trim(), type, subject:$('esub').value, inst:$('einst').value, duration:+$('em').value || 20, count:+$('eq').value || 20, negative:neg, passMark:+$('epm').value || 0,
+      startAt:$('ew').value || '', showAnswer:$('eshow').checked, live:false, status:'খসড়া', items:[], createdAt:serverTimestamp()};
+    try {
+      const ref = await addDoc(collection(db, 'exams'), data);
+      log('নতুন পরীক্ষা তৈরি: ' + data.name); toast('পরীক্ষা তৈরি হয়েছে। এবার প্রশ্ন যোগ করুন');
+      S.exq = ref.id; S.eseg = 'items'; S.iseg = (type === 'Live' || type === 'Weekly') ? 'add' : 'auto'; S.xasub = S.xainst = null; render();
+    } catch(e) { toast(errMsg(e)); }
+    return;
+  }
+  if (f.id === 'fxq') {
+    const e = byId(E, S.exq), a = f.querySelector('input[name=xa]:checked'), o = [0,1,2,3].map(i => $('xo' + i).value.trim());
+    if (!a) { $('xmsg').textContent = 'সঠিক উত্তর বেছে নিন।'; return; }
+    if (o.some(x => !x)) { $('xmsg').textContent = 'চারটি অপশনই লিখুন।'; return; }
+    const items = (e.items || []).concat([{question:$('xq').value.trim(), options:o, answer:+a.value, explanation:$('xe').value.trim()}]);
+    if (await run(updateDoc(doc(db, 'exams', e.id), {items}), 'প্রশ্ন যোগ হয়েছে (' + bn(items.length) + '/' + bn(e.count) + ')')) { log(e.name + ': নতুন প্রশ্ন যোগ হয়েছে'); S.iseg = 'add'; render(); }
+  }
+});
+$('lookbtn').innerHTML = icon('brush'); $('lookbtn').onclick = () => go('look');
+$('outbtn').innerHTML = icon('out'); $('outbtn').onclick = () => signOut(auth);
+$('logo').innerHTML = icon('exam').replace('<svg', '<svg width="20" height="20"');
+const h = (location.hash || '').slice(1); if (V[h]) S.tab = h;
+applyLook();
+
 </script>
 </body>
 </html>
