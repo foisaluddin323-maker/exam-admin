@@ -152,6 +152,11 @@ code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-ra
 .adv-toggle[aria-expanded="true"] svg{transform:rotate(90deg)}
 .adv-box{display:none}.adv-box.open{display:block}
 .example-json{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:ui-monospace,monospace;font-size:.8em;white-space:pre-wrap;overflow-wrap:anywhere;margin:12px 0 8px;max-height:140px;overflow:auto}
+input.sel{width:22px;height:22px;min-height:0;flex:none;margin-top:3px;accent-color:var(--accent)}
+.po{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:6px}
+.po.ok{border-color:var(--good);background:var(--good-soft)}
+.po b{flex:none;width:22px}
+details summary{min-height:36px;display:flex;align-items:center}
 @media (min-width:900px){.tools.two-row{grid-template-columns:2fr 1fr 1fr 1fr}.tools.two-row input{grid-column:auto}}
 </style>
 </head>
@@ -236,7 +241,7 @@ const DEFAULT_STRUCT = {
   'উচ্চতর গণিত ২য় পত্র':['১ম: বাস্তব সংখ্যা ও অসমতা','২য়: যোগাশ্রয়ী প্রোগ্রাম','৩য়: জটিল সংখ্যা','৪র্থ: বহুপদী ও বহুপদী সমীকরণ','৫ম: দ্বিপদী বিস্তৃতি','৬ষ্ঠ: কণিক','৭ম: বিপরীত ত্রিকোণমিতিক ফাংশন ও সমীকরণ','৮ম: স্থিতিবিদ্যা','৯ম: সমতলে বস্তুকণার গতি','১০ম: বিস্তার পরিমাপ ও সম্ভাবনা']
 };
 const DEFAULT_MISSIONS = [{t:'দৈনিক ১০টি MCQ সমাধান',xp:50,on:true},{t:'একটি পূর্ণাঙ্গ মডেল টেস্ট',xp:100,on:true},{t:'১টি সৃজনশীল (CQ) অনুশীলন',xp:60,on:true},{t:'ভুল উত্তর রিভিশন টেস্ট',xp:40,on:true}];
-const DEFAULT_APP = {maint:false,force:false,reg:true,board:true,ver:'',support:''};
+const DEFAULT_APP = {maint:false,force:false,reg:true,board:true,ver:'',minVer:'',support:'',maintMsg:'',storeUrl:'',community:'',feat:{}};
 const SEC_ITEMS = ['Firestore রুল: শুধু অ্যাডমিন লিখতে পারবে','Firebase Auth-এ শুধু Email/Password চালু','রুলে অ্যাডমিন UID বসানো','App Check চালু করা','নিয়মিত ব্যাকআপ এক্সপোর্ট'];
 const BOARDS = ['সকল বোর্ড','ঢাকা','চট্টগ্রাম','রাজশাহী','কুমিল্লা','যশোর','বরিশাল','সিলেট','দিনাজপুর','ময়মনসিংহ','মাদ্রাসা'];
 const INST = ['DU','BUET','মেডিকেল','CKRUET','JU','RU','CU','GST','কৃষি'];
@@ -262,7 +267,7 @@ match /audit/{id} {
 }`;
 
 /* ---------- state ---------- */
-const S = {tab:'home',qseg:'list',eseg:'list',iseg:'list',qf:'',qsub:'সব',qst:'সব',qbank:'সব',qlimit:50,eq:null,exq:null,cf:null,us:null,uq:'',ufil:'সব',sSub:'ICT',xasub:null,xainst:null,rx:null,imp:null,ximp:null,look:{theme:'soft',size:'17'}};
+const S = {tab:'home',qseg:'list',eseg:'list',iseg:'list',qf:'',qsub:'সব',qst:'সব',qbank:'সব',qlimit:50,eq:null,exq:null,cf:null,us:null,uq:'',ufil:'সব',sSub:'ICT',xasub:null,xainst:null,rx:null,imp:null,ximp:null,qch:'সব',qflag:'সব',qsort:'নতুন',sel:{},qprev:null,impAll:false,impReport:null,fileInfo:null,ulimit:50,usort:'নতুন',rf:'খোলা',rprev:null,eedit:null,look:{theme:'soft',size:'17'}};
 let Q = [], E = [], U = [], R = [], N = [], AUD = [], unsubs = [];
 let CFG = {app:{...DEFAULT_APP}, struct:DEFAULT_STRUCT, missions:DEFAULT_MISSIONS, sec:{}};
 const perm = {};
@@ -296,6 +301,75 @@ function en(e){ return {...e, type:e.type || 'Academic', status:e.status || (e.l
 function ownMode(e){ return e.type === 'Live' || e.type === 'Weekly'; }
 function inGroup(e, q){ return e.type === 'Mega' ? q.bank === 'মেগা' : (e.type === 'Academic' ? (q.bank === 'HSC বোর্ড' || q.bank === 'স্মার্ট প্র্যাকটিস') : true); }
 function qcount(e){ return Array.isArray(e.items) ? `প্রশ্ন ${bn(e.items.length)}/${bn(e.count)} যোগ হয়েছে` : `${bn(e.count)}টি প্রশ্ন`; }
+
+/* ---------- নতুন সাহায্যকারী: ছবি, ডুপ্লিকেট, মান যাচাই, ডাউনলোড ---------- */
+const FEATS = [['ai','AI টিউটর ও ব্যাখ্যা'],['cq','সৃজনশীল (CQ)'],['practice','প্র্যাকটিস'],['mega','Mega পরীক্ষা'],['live','লাইভ ও সাপ্তাহিক পরীক্ষা'],['smart','স্মার্ট প্র্যাকটিস'],['notif','নোটিফিকেশন']];
+const bd = s => String(s ?? '').replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d));
+const nk = s => String(s ?? '').normalize('NFC').replace(/[‌‍]/g, '').replace(/\s+/g, ' ').replace(/[?？।.,;:!"'“”‘’()\[\]{}\-–—]/g, '').trim().toLowerCase();
+function fixImg(u){ u = String(u || '').trim(); if (!u) return ''; const m = u.match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/i); return m ? 'https://raw.githubusercontent.com/' + m[1] + '/' + m[2] + '/' + m[3].replace(/\?.*$/, '') : u; }
+const isUrl = u => /^https?:\/\/\S+$/i.test(String(u || ''));
+function tsSec(t){ if (!t) return 0; if (t.seconds) return t.seconds; if (typeof t === 'number') return t > 1e12 ? t / 1000 : t; const d = Date.parse(t); return isNaN(d) ? 0 : d / 1000; }
+function dupKeyOf(q){ return nk(q.stimulus) + '¦' + nk(q.question) + '¦' + (q.options || []).map(x => nk(x)).sort().join('¦'); }
+let _dk = null, _dm = null;
+function dupInfo(){ if (_dk !== Q) { _dk = Q; _dm = {}; Q.forEach(q => { const k = dupKeyOf(q); (_dm[k] = _dm[k] || []).push(q.id); }); } return _dm; }
+function isDup(q){ const l = dupInfo()[dupKeyOf(q)]; return !!(l && l.length > 1); }
+function qIssues(q){
+  const r = [];
+  if (!(q.explanation || '').trim()) r.push('ব্যাখ্যা নেই');
+  if (!(q.chapter || '').trim()) r.push('অধ্যায় নেই');
+  if (!(q.subject || '').trim()) r.push('বিষয় নেই');
+  if ([q.imageUrl, q.stimulusImageUrl].concat(q.optionImageUrls || []).some(u => u && !isUrl(u))) r.push('ছবির লিংক ঠিক নয়');
+  if (q.options.some(o => !String(o || '').trim())) r.push('অপশন ফাঁকা');
+  if (isDup(q)) r.push('ডুপ্লিকেট');
+  return r;
+}
+const QFLAGS = ['সব','ছবি আছে','ছবি নেই','উদ্দীপক আছে','বহুপদী','অপশনে ছবি','ব্যাখ্যা নেই','অধ্যায় নেই','ডুপ্লিকেট','সমস্যা আছে'];
+function qHas(q, f){
+  switch (f) {
+    case 'ছবি আছে': return !!q.imageUrl;
+    case 'ছবি নেই': return !q.imageUrl;
+    case 'উদ্দীপক আছে': return !!(q.stimulus || q.stimulusImageUrl);
+    case 'বহুপদী': return Array.isArray(q.statements) && q.statements.length > 0;
+    case 'অপশনে ছবি': return Array.isArray(q.optionImageUrls) && q.optionImageUrls.some(Boolean);
+    case 'ব্যাখ্যা নেই': return !(q.explanation || '').trim();
+    case 'অধ্যায় নেই': return !(q.chapter || '').trim();
+    case 'ডুপ্লিকেট': return isDup(q);
+    case 'সমস্যা আছে': return qIssues(q).length > 0;
+    default: return true;
+  }
+}
+const ROMAN = ['i','ii','iii','iv','v','vi','vii','viii'];
+function itemOf(q, src){
+  const o = {question:q.question, options:q.options.slice(), answer:q.answer, explanation:q.explanation || ''};
+  if (src) o.src = src;
+  if (q.stimulus) o.stimulus = q.stimulus;
+  if (q.stimulusImageUrl) o.stimulusImageUrl = q.stimulusImageUrl;
+  if (Array.isArray(q.statements) && q.statements.length) o.statements = q.statements.slice();
+  if (q.imageUrl) o.imageUrl = q.imageUrl;
+  if (Array.isArray(q.optionImageUrls) && q.optionImageUrls.some(Boolean)) o.optionImageUrls = q.optionImageUrls.slice();
+  if (q.subject) o.subject = q.subject;
+  if (q.chapter) o.chapter = q.chapter;
+  return o;
+}
+const IMGERR = `onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'pill bad',textContent:'ছবি লোড হয়নি'}))"`;
+const imgTag = u => u ? `<img src="${esc(u)}" alt="" loading="lazy" referrerpolicy="no-referrer" ${IMGERR} style="max-width:100%;max-height:200px;border-radius:10px;margin-top:8px;display:block">` : '';
+function qPrev(q){
+  const oi = q.optionImageUrls || [], sm = q.statements || [];
+  return `<div class="panel">${q.stimulus || q.stimulusImageUrl ? `<div class="panel" style="margin-top:0;background:var(--accent-soft)"><div class="s">উদ্দীপক</div><div style="white-space:pre-wrap">${esc(q.stimulus || '')}</div>${imgTag(q.stimulusImageUrl)}</div>` : ''}
+  <div class="t" style="margin-top:8px;white-space:pre-wrap">${esc(q.question)}</div>${sm.length ? `<div style="margin-top:6px">${sm.map((s, i) => `<div>${ROMAN[i] || bn(i + 1)}. ${esc(s)}</div>`).join('')}</div>` : ''}${imgTag(q.imageUrl)}
+  <div style="margin-top:8px">${q.options.map((o, i) => `<div class="po${i === q.answer ? ' ok' : ''}"><b>${L[i]}</b><span style="flex:1;min-width:0;overflow-wrap:anywhere">${esc(o)}${imgTag(oi[i])}</span>${i === q.answer ? '<span class="pill good">সঠিক</span>' : ''}</div>`).join('')}</div>
+  ${q.explanation ? `<div class="s" style="margin-top:8px;white-space:pre-wrap"><b>ব্যাখ্যা:</b> ${esc(q.explanation)}</div>` : ''}</div>`;
+}
+function dl(name, text, mime){ const b = new Blob([text], {type:mime || 'text/plain;charset=utf-8'}), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 800); }
+function csvCell(v){ v = v === null || v === undefined ? '' : (typeof v === 'object' ? (v.toDate ? v.toDate().toISOString() : JSON.stringify(v)) : String(v)); return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+function toCSV(rows, cols){ return '﻿' + [cols.join(',')].concat(rows.map(r => cols.map(c => csvCell(r[c])).join(','))).join('\r\n'); }
+const QCOLS = ['question','a','b','c','d','answer','explanation','subject','chapter','board','year','session','unit','difficulty','stimulus','statements','imageUrl','stimulusImageUrl','imageA','imageB','imageC','imageD','bank','status'];
+function qRow(q){
+  const oi = q.optionImageUrls || [];
+  return {question:q.question, a:q.options[0], b:q.options[1], c:q.options[2], d:q.options[3], answer:L[q.answer], explanation:q.explanation || '', subject:q.subject || '', chapter:q.chapter || '', board:q.board || '', year:q.year || '', session:q.session || '', unit:q.unit || '', difficulty:q.difficulty || '', stimulus:q.stimulus || '', statements:(q.statements || []).join(' | '), imageUrl:q.imageUrl || '', stimulusImageUrl:q.stimulusImageUrl || '', imageA:oi[0] || '', imageB:oi[1] || '', imageC:oi[2] || '', imageD:oi[3] || '', bank:q.bank || '', status:q.status || ''};
+}
+function plain(o){ return JSON.parse(JSON.stringify(o, (k, v) => v && v.toDate ? v.toDate().toISOString() : v)); }
+function sheetDoc(){ return document.createElement('div'); }
 
 /* ---------- লগইন ---------- */
 async function login(){
@@ -332,7 +406,7 @@ function listen(){
   onCol('reports', d => { R = d; });
   onCol('notices', d => { N = d; });
   onCol('audit', d => { AUD = d.sort((a,b) => (b.at && b.at.seconds || 0) - (a.at && a.at.seconds || 0)).slice(0, 40); });
-  onDoc('app', d => { CFG.app = {...DEFAULT_APP, ...(d || {})}; });
+  onDoc('app', d => { CFG.app = {...DEFAULT_APP, ...(d || {}), feat:{...((d && d.feat) || {})}}; });
   onDoc('struct', d => { CFG.struct = d && d.data ? d.data : DEFAULT_STRUCT; });
   onDoc('missions', d => { CFG.missions = d && d.list ? d.list : DEFAULT_MISSIONS; });
   onDoc('security', d => { CFG.sec = d || {}; });
@@ -354,7 +428,8 @@ const IC = {
  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
  log:'<path d="M6 3h9l4 4v14H6zM9 12h7M9 16h7M9 8h3"/>',
  brush:'<circle cx="12" cy="12" r="9"/><path d="M12 3v18M12 3a9 9 0 0 1 0 18" fill="currentColor"/>',
- out:'<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/>'};
+ out:'<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/>',
+ dl:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>'};
 const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 const MAIN = [['home','ড্যাশবোর্ড','home'],['q','প্রশ্ন','q'],['exam','পরীক্ষা','exam'],['user','ইউজার','user']];
 const MORE = [
@@ -364,6 +439,7 @@ const MORE = [
  ['report','ভুল রিপোর্ট','flag','ইউজারদের জানানো প্রশ্নের ভুল'],
  ['notice','নোটিশ','bell','সবাইকে বার্তা'],
  ['admins','অ্যাডমিন ও সিকিউরিটি','shield','Firestore রুল ও নিরাপত্তা তালিকা'],
+ ['backup','ব্যাকআপ ও টেমপ্লেট','dl','ডেটা নামান, Excel টেমপ্লেট'],
  ['audit','কাজের ইতিহাস','log','কে কখন কী বদলেছে'],
  ['ctl','অ্যাপ কন্ট্রোল','set','মেইনটেন্যান্স, আপডেট, রেজিস্ট্রেশন'],
  ['look','চেহারা ও লেখা','brush','থিম এবং লেখার সাইজ'],
@@ -373,24 +449,6 @@ const MOREKEYS = MORE.map(m => m[0]);
 /* ---------- পেজ ---------- */
 const stat = (l, n, d) => `<div class="card stat"><div class="l">${l}</div><div class="n">${n}</div><div class="d">${d}</div></div>`;
 
-function vHome(){
-  const live = E.filter(e => e.status === 'চালু').length, openR = R.filter(r => (r.status || 'খোলা') === 'খোলা').length,
-        rev = Q.filter(q => q.status === 'রিভিউ দরকার').length, dr = E.filter(e => e.status === 'খসড়া').length;
-  const cnt = {}; Q.forEach(q => { const k = q.subject || 'বিষয় নেই'; cnt[k] = (cnt[k] || 0) + 1; });
-  const top = Object.keys(cnt).map(k => [k, cnt[k]]).sort((a,b) => b[1] - a[1]).slice(0, 6), mx = top.length ? top[0][1] : 1;
-  const bc = BANKS.map(b => [b, Q.filter(q => q.bank === b).length]);
-  let al = '';
-  if (openR) al += `<div class="alert bad"><span>${bn(openR)}টি ভুল রিপোর্ট দেখা বাকি</span><button class="btn sm" data-a="go" data-v="report">দেখুন</button></div>`;
-  if (rev) al += `<div class="alert"><span>${bn(rev)}টি প্রশ্নের রিভিউ দরকার</span><button class="btn sm" data-a="qfilter" data-v="রিভিউ দরকার">দেখুন</button></div>`;
-  if (dr) al += `<div class="alert"><span>${bn(dr)}টি পরীক্ষা খসড়া অবস্থায়</span><button class="btn sm" data-a="go" data-v="exam">দেখুন</button></div>`;
-  return `<div class="sec"><div><h1>ড্যাশবোর্ড</h1><p class="sub">আজকের অবস্থা এক নজরে</p></div></div>
-  <div class="card"><h2>করণীয়</h2>${al || '<div class="empty">এখন কোনো করণীয় নেই</div>'}</div>
-  <div class="grid stats" style="margin-top:12px">${stat('মোট ইউজার', bn(U.length), 'নিবন্ধিত')}${stat('মোট প্রশ্ন', bn(Q.length), 'সব ব্যাংক মিলিয়ে')}${stat('চালু পরীক্ষা', bn(live), bn(E.length) + 'টির মধ্যে')}${stat('ভুল রিপোর্ট', bn(openR), 'খোলা')}</div>
-  <div class="cols2" style="margin-top:12px"><div class="card"><h2>বিষয় অনুযায়ী প্রশ্ন</h2>${top.length ? top.map(x => `<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(x[0])}</span><span class="s">${bn(x[1])}টি</span></div><div class="bar"><b style="width:${Math.round(x[1] / mx * 100)}%"></b></div></div>`).join('') : '<div class="empty">এখনো কোনো প্রশ্ন নেই</div>'}</div>
-  <div class="card"><h2>ব্যাংক অনুযায়ী প্রশ্ন</h2>${bc.map(b => `<div class="row"><div class="t">${b[0]}</div><div class="s">${bn(b[1])}টি</div></div>`).join('')}</div></div>
-  <div class="card" style="margin-top:12px"><h2>দ্রুত কাজ</h2><div class="btns" style="margin-top:10px"><button class="btn" data-a="newq">নতুন প্রশ্ন</button><button class="btn ghost" data-a="newe">নতুন পরীক্ষা</button><button class="btn ghost" data-a="go" data-v="notice">নোটিশ পাঠান</button></div></div>
-  <div class="card" style="margin-top:12px"><h2>সাম্প্রতিক কাজ</h2>${AUD.length ? AUD.slice(0, 5).map(r => `<div class="row"><div class="t">${esc(r.msg)}</div><div class="s" style="white-space:nowrap">${fmtDate(r.at)}</div></div>`).join('') : '<div class="empty">এখনো কোনো কাজের ইতিহাস নেই</div>'}</div>`;
-}
 
 function qForm(){
   const q = S.eq ? Q.filter(x => x.id === S.eq)[0] : null, v = (k, d) => q && q[k] !== undefined ? q[k] : d, subs = subjects();
@@ -411,82 +469,24 @@ function qForm(){
   <label for="fi">প্রশ্নের ছবির লিংক (ঐচ্ছিক)</label><input id="fi" value="${esc(v('imageUrl',''))}">
   <div class="btns" style="margin-top:14px"><button class="btn" type="submit">${q ? 'পরিবর্তন সেভ করুন' : 'সেভ করুন'}</button>${q ? '<button class="btn ghost" type="button" data-a="qcancel">বাতিল</button>' : ''}</div><div class="msg" id="fmsg">সঠিক উত্তর না বেছে সেভ করা যাবে না। উত্তর কখনো আন্দাজ করা হবে না।</div></form>`;
 }
-function impBox(prefix, target){
-  const p = S[prefix], f = S[prefix + 'Form'] || {};
-  return `<div class="card"><h2>একসাথে অনেক প্রশ্ন (বাল্ক ইমপোর্ট)</h2><p class="sub">JSON ফাইল বা লেখা দিন। উত্তর না থাকলে বা ভুল হলে ওই প্রশ্ন নেওয়া হবে না, আন্দাজে উত্তর বসানো হয় না।</p>
-  ${target === 'q' ? `<div class="two"><div><label for="ibk">কোন ব্যাংকে যাবে</label><select id="ibk">${opts(BANKS, f.bank || 'HSC বোর্ড')}</select></div><div><label for="ist">অবস্থা</label><select id="ist">${opts(QSTATUS, f.status || 'খসড়া')}</select></div></div>
-  <p class="sub" style="margin-top:12px">নিচের ঘরগুলো ফাঁকা থাকলে প্রতিটি প্রশ্নে এই মান বসবে (প্রশ্নে নিজের মান থাকলে সেটাই থাকবে):</p>
-  <div class="two"><div><label for="isub">বিষয়</label><select id="isub">${opts([''].concat(subjects()), f.subject || '')}</select></div><div><label for="ibd">বোর্ড / প্রতিষ্ঠান</label><select id="ibd">${opts([''].concat(BOARDS.concat(INST)), f.board || '')}</select></div></div>
-  <div class="two"><div><label for="iyr">সাল</label><input id="iyr" type="number" placeholder="যেমন ২০২৪" value="${esc(f.year || '')}"></div><div><label for="ich">অধ্যায়</label><input id="ich" placeholder="যেমন ৩য় অধ্যায়" value="${esc(f.chapter || '')}"></div></div>` : ''}
-  <label for="ifile">ফাইল (.json বা .txt)</label><input type="file" id="ifile" accept=".json,.txt" data-a="${prefix}file">
-  <div class="example-json" id="${prefix}ex">${esc(EXAMPLE_JSON)}</div><button class="btn sm ghost" type="button" data-a="${prefix}exfill">উদাহরণ বসান</button>
-  <label for="itext">অথবা এখানে পেস্ট করুন</label><textarea id="itext" placeholder='[{"question":"...","options":["ক","খ","গ","ঘ"],"answer":"খ","explanation":"..."}]' style="min-height:140px;font-family:monospace;font-size:.85em">${esc(f.text || '')}</textarea>
-  <div class="msg">উত্তর অক্ষরে ("ক", "খ", "গ", "ঘ") অথবা ০ থেকে ৩ সংখ্যায় দিন: ০=ক, ১=খ, ২=গ, ৩=ঘ। যাচাইয়ের পর প্রথম ৫টির সঠিক উত্তর দেখে নিন।</div>
-  <div class="btns" style="margin-top:12px"><button class="btn ghost" data-a="${prefix}check">আগে যাচাই করুন</button></div>
-  <div id="${prefix}res" style="margin:10px 0">${p ? impResult(p) : ''}</div>
-  ${p && p.ok.length ? `<button class="btn" data-a="${prefix}go">${target === 'q' ? 'Firebase-এ যোগ করুন' : 'এই পরীক্ষায় যোগ করুন'} (${bn(p.ok.length)}টি)</button>` : ''}</div>`;
-}
-function impResult(p){
-  return `<b style="color:var(--good)">ঠিক: ${bn(p.ok.length)}টি</b>` + (p.bad.length ? `<br><span style="color:var(--bad)">বাদ: ${bn(p.bad.length)}টি (উত্তর বা অপশন নেই/ভুল) — নম্বর: ${p.bad.slice(0, 30).map(bn).join(', ')}</span>` : '') +
-  (p.ok.length ? `<div class="panel"><div class="s" style="margin-bottom:6px">প্রথম ${bn(Math.min(5, p.ok.length))}টি দেখে নিন, সঠিক উত্তর ঠিক আছে কিনা:</div>${p.ok.slice(0, 5).map(q => `<div class="row" style="display:block"><div class="t">${esc(q.question)}</div><div class="s">সঠিক: ${L[q.answer]}) ${esc(q.options[q.answer])}</div><div class="s">${esc([q.subject, q.chapter, q.board, q.year].filter(Boolean).join(' · ') || 'বিষয় বা সাল দেওয়া নেই')}</div></div>`).join('')}</div>` : '');
-}
-function parseAns(r){
-  const v = r.answer !== undefined && r.answer !== null ? r.answer : r.a;
-  if (v === undefined || v === null) return -1;
-  if (typeof v === 'number') return Number.isInteger(v) && v >= 0 && v < 4 ? v : -1;
-  const s = String(v).trim().toLowerCase(), m = {'ক':0,'খ':1,'গ':2,'ঘ':3,'a':0,'b':1,'c':2,'d':3};
-  return s in m ? m[s] : -1;
-}
-function normSubject(sub, paper){
-  sub = String(sub || '').trim(); paper = String(paper || '').trim();
-  if (!sub) return '';
-  const alias = {'তথ্য ও যোগাযোগ প্রযুক্তি':'ICT','আইসিটি':'ICT'}; sub = alias[sub] || sub;
-  if (paper && paper !== 'একক পত্র' && subjects().indexOf(sub + ' ' + paper) > -1) return sub + ' ' + paper;
-  return sub;
-}
 function chMatch(qc, c){
   if (c === 'সব অধ্যায়') return true; qc = (qc || '').trim(); if (!qc) return false;
   const i = c.indexOf(':'), key = i > -1 ? c.slice(0, i).trim() : c, name = i > -1 ? c.slice(i + 1).trim() : c;
   return qc.indexOf(key) === 0 || (name && (qc.indexOf(name) > -1 || name.indexOf(qc) > -1));
 }
-function parseRows(text, def){
-  let arr; try { arr = JSON.parse(text); if (!Array.isArray(arr)) throw 0; } catch(e) { return {err:'JSON ঠিক নেই। [ ] এর ভেতরে প্রশ্নের তালিকা দিন।'}; }
-  const ok = [], bad = [];
-  arr.forEach((r, i) => {
-    r = r || {};
-    let o = r.options || r.o; if (!Array.isArray(o)) o = L.map(k => r[k]);
-    const qt = r.question || r.q, a = parseAns(r);
-    if (!qt || !o || o.length !== 4 || o.some(x => !String(x || '').trim()) || a < 0) { bad.push(i + 1); return; }
-    ok.push({subject:normSubject(r.subject || r.sub, r.paper) || def.subject || '', chapter:r.chapter || r.ch || def.chapter || '', board:String(r.board || def.board || '').replace(/\s*বোর্ড$/, ''), year:String(r.year || def.year || ''),
-      question:String(qt).trim(), options:o.map(x => String(x).trim()), answer:a, explanation:r.explanation || r.ex || '', imageUrl:r.imageUrl || '',
-      stimulus:String(r.stimulus || r.uddipok || '').trim(), stimulusImageUrl:String(r.stimulusImageUrl || '').trim(),
-      statements:Array.isArray(r.statements) ? r.statements.map(x => String(x).trim()).filter(Boolean) : [],
-      optionImageUrls:Array.isArray(r.optionImageUrls) && r.optionImageUrls.length === 4 && r.optionImageUrls.some(x => String(x || '').trim()) ? r.optionImageUrls.map(x => String(x || '').trim()) : [],
-      university:String(r.university || r.institution || '').trim(),
-      session:r.session || '', unit:r.unit || '', difficulty:['সহজ','মাঝারি','কঠিন'].indexOf(r.difficulty) > -1 ? r.difficulty : 'মাঝারি'});
-  });
-  return {ok, bad};
-}
 
-function vQ(){
-  const head = `<div class="sec"><div><h1>প্রশ্ন ম্যানেজার</h1><p class="sub">মোট ${bn(Q.length)}টি প্রশ্ন</p></div></div>` + seg('qseg', [['list','তালিকা'],['form', S.eq ? 'এডিট' : 'নতুন প্রশ্ন'],['bulk','বাল্ক ইমপোর্ট']], S.qseg);
-  if (S.qseg === 'form') return head + qForm();
-  if (S.qseg === 'bulk') return head + impBox('imp', 'q');
-  const l = Q.filter(q => (S.qsub === 'সব' || q.subject === S.qsub) && (S.qst === 'সব' || q.status === S.qst) && (S.qbank === 'সব' || q.bank === S.qbank) && (!S.qf || (q.question || '').toLowerCase().includes(S.qf.toLowerCase())));
-  return head + `<div class="tools two-row"><input id="qs" placeholder="প্রশ্ন খুঁজুন" value="${esc(S.qf)}" aria-label="খুঁজুন"><select id="qsub" aria-label="বিষয়">${opts(['সব'].concat(subjects()), S.qsub)}</select><select id="qbank" aria-label="ব্যাংক">${opts(['সব'].concat(BANKS), S.qbank)}</select><select id="qst" aria-label="অবস্থা">${opts(['সব'].concat(QSTATUS), S.qst)}</select></div>
-  <div class="card">${l.length ? l.slice(0, S.qlimit).map(q => `<div class="row" style="align-items:flex-start"><div><div class="t">${esc(q.question)}</div><div class="s">${stBadge(q.status)} <span class="pill gray">${esc(q.bank)}</span> ${esc(q.subject || '')} · ${esc(q.board || '')} ${esc(q.year || '')}${q.session ? ' · ' + esc(q.session) : ''}${q.unit ? ' · ' + esc(q.unit) : ''}</div><div class="s">সঠিক: ${L[q.answer] || '?'}) ${esc(q.options[q.answer])}</div></div><div class="btns" style="flex-direction:column;align-items:stretch"><button class="btn sm ghost" data-a="editq" data-v="${q.id}">এডিট</button>${delBtn('q' + q.id, 'delq', q.id)}</div></div>`).join('') + (l.length > S.qlimit ? `<div style="text-align:center;margin-top:10px"><button class="btn ghost" data-a="qmore">আরও দেখুন (${bn(l.length - S.qlimit)}টি বাকি)</button></div>` : '') : '<div class="empty">কোনো প্রশ্ন নেই। "নতুন প্রশ্ন" বা "বাল্ক ইমপোর্ট" থেকে যোগ করুন।</div>'}</div>`;
-}
 
-function eForm(){
-  return `<form class="card" id="fe2"><h2>নতুন পরীক্ষা</h2><label for="en">পরীক্ষার নাম</label><input id="en" required>
-  <div class="two"><div><label for="et">ধরন</label><select id="et">${opts(['Academic','Mega','Live','Weekly'], 'Academic')}</select></div><div><label for="esub">বিষয়</label><select id="esub">${opts(['সব বিষয়'].concat(subjects()), 'সব বিষয়')}</select></div></div>
-  <div class="two"><div><label for="eq">প্রশ্ন সংখ্যা</label><input id="eq" type="number" value="25" min="1"></div><div><label for="em">সময় (মিনিট)</label><input id="em" type="number" value="25" min="1"></div></div>
-  <div class="two"><div><label for="eng">নেগেটিভ মার্কিং</label><select id="eng">${opts(['নেই','০.২৫','০.৫'], '০.২৫')}</select></div><div><label for="epm">পাস মার্ক (%)</label><input id="epm" type="number" value="40" min="0" max="100"></div></div>
-  <label for="einst">প্রতিষ্ঠান (শুধু Mega পরীক্ষার জন্য)</label><select id="einst">${opts(['সব প্রতিষ্ঠান'].concat(INST), 'সব প্রতিষ্ঠান')}</select>
-  <label for="ew">শুরুর সময়</label><input id="ew" type="datetime-local">
-  <div class="row" style="margin-top:6px"><div><div class="t">পরীক্ষার পর উত্তর দেখানো</div><div class="s">শেষ হলে ব্যাখ্যাসহ উত্তর দেখা যাবে</div></div><label class="sw" aria-label="উত্তর দেখানো"><input type="checkbox" id="eshow" checked><i></i></label></div>
+function eForm(e){
+  const v = (k, d) => e && e[k] !== undefined ? e[k] : d, neg = e ? (e.negative === 0 ? 'নেই' : e.negative === 0.5 ? '০.৫' : '০.২৫') : '০.২৫';
+  return `<form class="card" id="fe2"><h2>${e ? 'পরীক্ষা এডিট করুন' : 'নতুন পরীক্ষা'}</h2><label for="en">পরীক্ষার নাম</label><input id="en" required value="${esc(v('name',''))}">
+  <div class="two"><div><label for="et">ধরন${e ? ' (বদলানো যায় না)' : ''}</label><select id="et"${e ? ' disabled' : ''}>${opts(['Academic','Mega','Live','Weekly'], v('type','Academic'))}</select></div><div><label for="esub">বিষয়</label><select id="esub">${opts(['সব বিষয়'].concat(subjects()), v('subject','সব বিষয়'))}</select></div></div>
+  <div class="two"><div><label for="eq">প্রশ্ন সংখ্যা</label><input id="eq" type="number" value="${esc(v('count',25))}" min="1"></div><div><label for="edur">সময় (মিনিট)</label><input id="edur" type="number" value="${esc(v('duration',25))}" min="1"></div></div>
+  <div class="two"><div><label for="eng">নেগেটিভ মার্কিং</label><select id="eng">${opts(['নেই','০.২৫','০.৫'], neg)}</select></div><div><label for="epm">পাস মার্ক (%)</label><input id="epm" type="number" value="${esc(v('passMark',40))}" min="0" max="100"></div></div>
+  <label for="einst">প্রতিষ্ঠান (শুধু Mega পরীক্ষার জন্য)</label><select id="einst">${opts(['সব প্রতিষ্ঠান'].concat(INST), v('inst','সব প্রতিষ্ঠান'))}</select>
+  <label for="ew">শুরুর সময়</label><input id="ew" type="datetime-local" value="${esc(v('startAt',''))}">
+  <div class="row" style="margin-top:6px"><div><div class="t">পরীক্ষার পর উত্তর দেখানো</div><div class="s">শেষ হলে ব্যাখ্যাসহ উত্তর দেখা যাবে</div></div><label class="sw" aria-label="উত্তর দেখানো"><input type="checkbox" id="eshow"${e && e.showAnswer === false ? '' : ' checked'}><i></i></label></div>
   <div class="msg">Academic পরীক্ষার প্রশ্ন আসবে প্রশ্নব্যাংক থেকে, আর Mega পরীক্ষার প্রশ্ন আসবে আলাদা Mega প্রশ্নব্যাংক থেকে (অটো বা হাতে বাছা)। Live ও Weekly পরীক্ষায় নিজের প্রশ্ন লিখে যোগ করবেন। শুরুতে পরীক্ষা খসড়া থাকবে।</div>
-  <div style="margin-top:12px"><button class="btn" type="submit">তৈরি করে প্রশ্ন যোগ করুন</button></div></form>`;
+  <div class="btns" style="margin-top:12px"><button class="btn" type="submit">${e ? 'পরিবর্তন সেভ করুন' : 'তৈরি করে প্রশ্ন যোগ করুন'}</button>${e ? '<button class="btn ghost" type="button" data-a="ecancel">বাতিল</button>' : ''}</div></form>`;
 }
 function vItems(){
   const e = E.filter(x => x.id === S.exq)[0];
@@ -510,18 +510,18 @@ function vItems(){
     <label for="xcnt">কয়টি প্রশ্ন</label><input id="xcnt" type="number" min="1" value="${Math.max(1, e.count - n)}">
     <div class="msg">এই বাছাইয়ে ব্যাংকে প্রকাশিত ${bn(pool0.length)}টি প্রশ্ন বাকি আছে।</div><div style="margin-top:12px"><button class="btn" data-a="xauto">বাছাই করুন</button></div></div>`;
   }
-  if (S.iseg === 'add') return head + `<form class="card" id="fxq"><h2>এই পরীক্ষার নতুন প্রশ্ন</h2><label for="xq">প্রশ্ন</label><textarea id="xq" required></textarea><label>অপশন (সঠিকটির পাশে গোল চিহ্নে ট্যাপ করুন)</label>${[0,1,2,3].map(i => `<div class="opt"><input type="radio" name="xa" value="${i}" aria-label="সঠিক উত্তর ${i + 1}"><input type="text" id="xo${i}" placeholder="${L[i]}) অপশন"></div>`).join('')}<label for="xe">ব্যাখ্যা</label><textarea id="xe" style="min-height:64px"></textarea><div style="margin-top:14px"><button class="btn" type="submit">প্রশ্ন যোগ করুন</button></div><div class="msg" id="xmsg">সঠিক উত্তর না বেছে যোগ করা যাবে না।</div></form>`;
+  if (S.iseg === 'add') return head + `<form class="card" id="fxq"><h2>এই পরীক্ষার নতুন প্রশ্ন</h2><label for="xq">প্রশ্ন</label><textarea id="xq" required></textarea><label>অপশন (সঠিকটির পাশে গোল চিহ্নে ট্যাপ করুন)</label>${[0,1,2,3].map(i => `<div class="opt"><input type="radio" name="xa" value="${i}" aria-label="সঠিক উত্তর ${i + 1}"><input type="text" id="xo${i}" placeholder="${L[i]}) অপশন"></div>`).join('')}<label for="xst">উদ্দীপক (ঐচ্ছিক)</label><textarea id="xst" style="min-height:56px"></textarea><label for="xsi">উদ্দীপকের ছবির লিংক (ঐচ্ছিক)</label><input id="xsi" placeholder="https://..."><label for="xsm">বহুপদী বিবৃতি (ঐচ্ছিক, প্রতি লাইনে একটি)</label><textarea id="xsm" style="min-height:56px"></textarea><label for="xim">প্রশ্নের ছবির লিংক (ঐচ্ছিক)</label><input id="xim" placeholder="https://..."><details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600">অপশনের ছবির লিংক (ঐচ্ছিক)</summary>${[0,1,2,3].map(i => `<label for="xoi${i}">${L[i]}) অপশনের ছবি</label><input id="xoi${i}" placeholder="https://...">`).join('')}</details><label for="xe">ব্যাখ্যা</label><textarea id="xe" style="min-height:64px"></textarea><div style="margin-top:14px"><button class="btn" type="submit">প্রশ্ন যোগ করুন</button></div><div class="msg" id="xmsg">সঠিক উত্তর না বেছে যোগ করা যাবে না।</div></form>`;
   if (S.iseg === 'bulk') return head + impBox('ximp', 'x');
   if (S.iseg === 'bank') {
     const av = Q.filter(q => q.status === 'প্রকাশিত' && inGroup(e, q));
     return head + `<div class="card"><h2>${ownMode(e) ? 'প্রশ্নব্যাংক থেকে নিন (ঐচ্ছিক)' : 'হাতে বেছে নিন'}</h2><p class="sub">${e.type === 'Mega' ? 'শুধু Mega প্রশ্নব্যাংকের প্রশ্ন দেখাচ্ছে। ' : ''}ব্যাংকের প্রশ্নের কপি এই পরীক্ষায় যাবে। মূল প্রশ্ন বদলাবে না।</p>${av.length ? av.slice(0, 100).map(q => `<div class="row"><div><div class="t">${esc(q.question)}</div><div class="s">${esc(q.subject || '')}${e.type === 'Mega' ? ' · ' + esc(q.board || '') : ''}</div></div>${used.indexOf(q.id) > -1 ? '<span class="pill good">যোগ আছে</span>' : `<button class="btn sm" data-a="xbank" data-v="${q.id}">যোগ করুন</button>`}</div>`).join('') : '<div class="empty">ব্যাংকে প্রকাশিত প্রশ্ন নেই</div>'}</div>`;
   }
-  return head + `<div class="card">${n ? items.map((x, i) => `<div class="row" style="align-items:flex-start"><div><div class="t">${bn(i + 1)}. ${esc(x.question)}</div><div class="s">সঠিক: ${L[x.answer]}) ${esc(x.options[x.answer])}</div></div>${delBtn('x' + i, 'xdel', i)}</div>`).join('') : `<div class="empty">এই পরীক্ষায় এখনো প্রশ্ন নেই। ${ownMode(e) ? '"নতুন প্রশ্ন" ট্যাবে গিয়ে যোগ করুন।' : '"অটো বাছাই" ট্যাবে গিয়ে বাছুন।'}</div>`}</div>`;
+  return head + `<div class="card">${n ? `<div style="text-align:right;margin-bottom:6px">${delBtn('xclear', 'xclear', 'x', 'সব প্রশ্ন মুছুন')}</div>` : ''}${n ? items.map((x, i) => `<div class="row" style="align-items:flex-start"><div><div class="t">${bn(i + 1)}. ${esc(x.question)}</div><div class="s">সঠিক: ${L[x.answer]}) ${esc(x.options[x.answer])}${x.stimulus ? ' · উদ্দীপক' : ''}${(x.statements || []).length ? ' · বহুপদী' : ''}${x.imageUrl ? ' · ছবি' : ''}</div></div>${delBtn('x' + i, 'xdel', i)}</div>`).join('') : `<div class="empty">এই পরীক্ষায় এখনো প্রশ্ন নেই। ${ownMode(e) ? '"নতুন প্রশ্ন" ট্যাবে গিয়ে যোগ করুন।' : '"অটো বাছাই" ট্যাবে গিয়ে বাছুন।'}</div>`}</div>`;
 }
 function vExam(){
   if (S.eseg === 'items') return vItems();
-  const head = `<div class="sec"><div><h1>পরীক্ষা ম্যানেজার</h1><p class="sub">চালু করলেই সবার অ্যাপে দেখা যাবে</p></div></div>` + seg('eseg', [['list','তালিকা'],['form','নতুন পরীক্ষা'],['res','ফলাফল']], S.eseg);
-  if (S.eseg === 'form') return head + eForm();
+  const head = `<div class="sec"><div><h1>পরীক্ষা ম্যানেজার</h1><p class="sub">চালু করলেই সবার অ্যাপে দেখা যাবে</p></div></div>` + seg('eseg', [['list','তালিকা'],['form', S.eedit ? 'এডিট' : 'নতুন পরীক্ষা'],['res','ফলাফল']], S.eseg);
+  if (S.eseg === 'form') return head + eForm(S.eedit ? byId(E, S.eedit) : null);
   if (S.eseg === 'res') {
     const e = E.filter(x => x.id === S.rx)[0] || E[0];
     if (!e) return head + '<div class="card"><div class="empty">এখনো কোনো পরীক্ষা নেই</div></div>';
@@ -530,18 +530,9 @@ function vExam(){
     <div class="msg">কে কত পেল তার তালিকা এখানে দেখাতে হলে অ্যাপকে প্রতিটি পরীক্ষার ফলাফল Firebase-এ সেভ করতে হবে। সেটা অ্যাপে যোগ হলে আমি এই পেজে দেখানোর ব্যবস্থা করে দেব।</div></div>`;
   }
   return head + (E.length ? `<div class="grid">${E.map(e => `<div class="card"><div class="row" style="border:0;padding:0;align-items:flex-start"><div><div class="t">${esc(e.name)}</div><div class="s"><span class="pill${e.type === 'Live' ? ' bad' : e.type === 'Weekly' ? ' warn' : ''}">${e.type}</span> ${stBadge(e.status)}</div><div class="s">${qcount(e)} · ${bn(e.duration)} মিনিট · নেগেটিভ ${e.negative ? bn(e.negative) : 'নেই'}</div><div class="s">${esc(e.subject || '')}${e.startAt ? ' · ' + esc(String(e.startAt).replace('T', ' ')) : ''}</div></div>${e.status !== 'শেষ' ? sw(`data-a="toge" data-v="${e.id}"`, e.status === 'চালু', 'চালু বা বন্ধ') : ''}</div>
-  <div class="btns" style="margin-top:10px"><button class="btn sm" data-a="exitems" data-v="${e.id}">প্রশ্ন দেখুন/যোগ করুন</button><button class="btn sm ghost" data-a="exres" data-v="${e.id}">ফলাফল</button>${delBtn('e' + e.id, 'dele', e.id)}</div></div>`).join('')}</div>` : '<div class="card"><div class="empty">এখনো কোনো পরীক্ষা নেই। "নতুন পরীক্ষা" ট্যাব থেকে বানান।</div></div>');
+  <div class="btns" style="margin-top:10px"><button class="btn sm" data-a="exitems" data-v="${e.id}">প্রশ্ন দেখুন/যোগ করুন</button><button class="btn sm ghost" data-a="exres" data-v="${e.id}">ফলাফল</button><button class="btn sm ghost" data-a="editex" data-v="${e.id}">এডিট</button><button class="btn sm ghost" data-a="dupex" data-v="${e.id}">কপি</button>${delBtn('e' + e.id, 'dele', e.id)}</div></div>`).join('')}</div>` : '<div class="card"><div class="empty">এখনো কোনো পরীক্ষা নেই। "নতুন পরীক্ষা" ট্যাব থেকে বানান।</div></div>');
 }
 
-function userName(u){ return u.name || u.displayName || 'নাম নেই'; }
-function vUser(){
-  const t = S.uq.toLowerCase(), l = U.filter(u => (!t || JSON.stringify(u).toLowerCase().includes(t)) && (S.ufil === 'সব' || (S.ufil === 'ব্লক' ? u.blocked : !u.blocked)));
-  return `<div class="sec"><div><h1>ইউজার ম্যানেজার</h1><p class="sub">মোট ${bn(U.length)} জন নিবন্ধিত</p></div></div>
-  <div class="tools"><input id="us" placeholder="নাম বা ইমেইল দিয়ে খুঁজুন" value="${esc(S.uq)}" aria-label="খুঁজুন"><select id="ufil" aria-label="ফিল্টার">${opts(['সব','সক্রিয়','ব্লক'], S.ufil)}</select></div><div class="card">
-  ${l.length ? l.slice(0, 80).map(u => { const open = S.us === u.id; return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div style="min-width:0"><div class="t">${esc(userName(u))} ${u.blocked ? '<span class="pill bad">ব্লক</span>' : ''}</div><div class="s">${esc(u.email || u.phone || u.id)} · XP ${bn(u.xp || 0)}</div></div><button class="btn sm ghost" data-a="uopen" data-v="${u.id}">${open ? 'বন্ধ' : 'খুলুন'}</button></div>
-  ${open ? `<div class="panel"><div class="s">যোগ দিয়েছে: ${esc(fmtDate(u.createdAt) || '—')}</div><div class="s">ID: ${esc(u.id)}</div><div class="btns" style="margin-top:10px"><button class="btn sm ${u.blocked ? 'good' : 'danger'}" data-a="blk" data-v="${u.id}">${u.blocked ? 'আনব্লক' : 'ব্লক করুন'}</button><button class="btn sm ghost" data-a="xp" data-v="${u.id}:50">+৫০ XP</button><button class="btn sm ghost" data-a="xp" data-v="${u.id}:-50">−৫০ XP</button><button class="btn sm ghost" data-a="rkhide" data-v="${u.id}">${u.hidden ? 'তালিকায় দেখান' : 'মেধা তালিকা থেকে লুকান'}</button>${delBtn('rp' + u.id, 'reset', u.id, 'XP রিসেট')}</div></div>` : ''}</div>`; }).join('') : '<div class="empty">কেউ পাওয়া যায়নি</div>'}</div>
-  <div class="msg">ব্লক করলে ইউজারকে আটকানোর কাজ অ্যাপকে করতে হবে (blocked ফিল্ড দেখে)। সেটা অ্যাপে যোগ করার প্রম্পট চাইলে বলুন।</div>`;
-}
 function vRank(){
   const l = U.filter(u => !u.hidden).sort((a, b) => (b.xp || 0) - (a.xp || 0)), m = l[0] && l[0].xp ? l[0].xp : 1;
   const top = l.slice(0, 3), ord = [top[1], top[0], top[2]], cls = ['', 'p1', ''], rk = [2, 1, 3];
@@ -561,13 +552,6 @@ function vStruct(){
   <label for="nch">নতুন অধ্যায়</label><input id="nch" placeholder="যেমন ৭ম: নতুন অধ্যায়"><div style="margin-top:10px"><button class="btn" data-a="addc">অধ্যায় যোগ করুন</button></div></div>
   <div class="card"><h2>নতুন বিষয়</h2><label for="nsub">বিষয়ের নাম</label><input id="nsub"><div style="margin-top:10px"><button class="btn" data-a="adds">বিষয় যোগ করুন</button></div><h3 style="margin-top:18px">বোর্ড</h3><div class="btns" style="margin-top:8px">${BOARDS.map(b => `<span class="pill">${b}</span>`).join('')}</div></div></div>`;
 }
-function vReport(){
-  return `<div class="sec"><div><h1>ভুল রিপোর্ট</h1><p class="sub">ইউজাররা প্রশ্নে ভুল পেলে এখানে আসে</p></div></div>${R.length ? `<div class="grid">${R.map(r => { const st = r.status || 'খোলা'; return `<div class="card"><div class="t">${esc(r.question || r.q || '')}</div><div class="s">কারণ: ${esc(r.reason || r.why || '—')}</div><div class="s">জানিয়েছে: ${esc(r.by || r.userName || '—')} · ${st === 'খোলা' ? '<span class="pill bad">খোলা</span>' : `<span class="pill good">${esc(st)}</span>`}</div>${st === 'খোলা' ? `<div class="btns" style="margin-top:10px">${r.qid && Q.some(q => q.id === r.qid) ? `<button class="btn sm" data-a="fixr" data-v="${r.qid}">প্রশ্ন এডিট করুন</button>` : ''}<button class="btn sm good" data-a="rsolve" data-v="${r.id}">সমাধান হয়েছে</button><button class="btn sm ghost" data-a="rdrop" data-v="${r.id}">বাতিল</button></div>` : ''}</div>`; }).join('')}</div>` : '<div class="card"><div class="empty">কোনো রিপোর্ট নেই</div></div>'}`;
-}
-function vNotice(){
-  return `<div class="sec"><div><h1>নোটিশ</h1><p class="sub">অ্যাপের হোম পেজে ব্যানার হিসেবে দেখানোর জন্য</p></div></div><div class="cols2"><div class="card"><h2>নতুন নোটিশ</h2><label for="nt">বার্তা</label><textarea id="nt"></textarea><div class="two"><div><label for="na">কাকে পাঠাবেন</label><select id="na">${opts(['সবাই','চালু পরীক্ষার অংশগ্রহণকারী','শুধু সক্রিয় ইউজার'], 'সবাই')}</select></div><div><label for="nk">ধরন</label><select id="nk">${opts(['নোটিশ','জরুরি ব্যানার'], 'নোটিশ')}</select></div></div><div style="margin-top:12px"><button class="btn" data-a="sendn">সেভ ও পাঠান</button></div></div>
-  <div class="card"><h2>আগের নোটিশ</h2>${N.length ? N.slice().sort((a, b) => (b.at && b.at.seconds || 0) - (a.at && a.at.seconds || 0)).map(n => `<div class="row"><div><div class="t">${esc(n.text)}</div><div class="s">${esc(n.audience || '')} · ${esc(fmtDate(n.at))}</div></div>${delBtn('n' + n.id, 'deln', n.id)}</div>`).join('') : '<div class="empty">কোনো নোটিশ নেই</div>'}</div></div>`;
-}
 function vAdmins(){
   return `<div class="sec"><div><h1>অ্যাডমিন ও সিকিউরিটি</h1><p class="sub">কে এই প্যানেল চালাতে পারবে</p></div></div><div class="cols2"><div class="card"><h2>এই প্যানেলের অ্যাডমিন</h2><div class="row"><div><div class="t">${esc(ME ? ME.email : '')}</div><div class="s">মালিক · UID: ${esc(ADMIN_UID)}</div></div></div><div class="msg">অ্যাডমিন যোগ করতে হলে কোডের ADMIN_UID ও Firestore রুলে নতুন UID বসাতে হয়। এটা আমি করে দিতে পারি, বললেই হবে।</div></div>
   <div class="card"><h2>নিরাপত্তা করণীয় তালিকা</h2><p class="sub">নিজে যাচাই করে টিক দিন</p>${SEC_ITEMS.map((c, i) => `<label class="chk" style="margin:0;color:var(--ink);font-size:1em"><input type="checkbox" data-a="sec" data-v="${i}"${CFG.sec['i' + i] ? ' checked' : ''}><span>${esc(c)}</span></label>`).join('')}</div></div>
@@ -578,12 +562,6 @@ function vAdmins(){
 function vAudit(){
   return `<div class="sec"><div><h1>কাজের ইতিহাস</h1><p class="sub">কে কখন কী বদলেছে (সর্বশেষ ৪০টি)</p></div></div><div class="card">${AUD.length ? AUD.map(r => `<div class="row"><div class="t">${esc(r.msg)}</div><div class="s" style="white-space:nowrap">${esc(fmtDate(r.at))}</div></div>`).join('') : '<div class="empty">এখনো কোনো ইতিহাস নেই</div>'}</div>`;
 }
-function vCtl(){
-  const c = CFG.app, r = (k, t, s) => `<div class="row"><div><div class="t">${t}</div><div class="s">${s}</div></div>${sw(`data-a="ctl" data-v="${k}"`, c[k], t)}</div>`;
-  return `<div class="sec"><div><h1>অ্যাপ কন্ট্রোল</h1><p class="sub">অ্যাপ এই সেটিং দেখে চলবে</p></div></div><div class="cols2"><div class="card">${r('maint','মেইনটেন্যান্স মোড','চালু করলে ইউজাররা অ্যাপ খুলতে পারবে না')}${r('force','জোর করে আপডেট','পুরোনো ভার্সনে অ্যাপ বন্ধ হবে')}${r('reg','নতুন রেজিস্ট্রেশন','বন্ধ করলে নতুন কেউ অ্যাকাউন্ট খুলতে পারবে না')}${r('board','মেধা তালিকা দেখানো','বন্ধ করলে অ্যাপে তালিকা লুকানো থাকবে')}</div>
-  <div class="card"><h2>অ্যাপের তথ্য</h2><label for="cv">সর্বশেষ ভার্সন</label><input id="cv" value="${esc(c.ver)}"><label for="cs">সাপোর্ট ইমেইল</label><input id="cs" value="${esc(c.support)}"><div style="margin-top:12px"><button class="btn" data-a="savec">সেভ করুন</button></div></div></div>
-  <div class="msg">এই সেটিং Firebase-এ সেভ হয়। অ্যাপকে এগুলো পড়ে কাজ করতে হবে, সেটা অ্যাপে যোগ করার প্রম্পট চাইলে বলুন।</div>`;
-}
 function vLook(){
   const T = [['soft','আরামদায়ক','চোখে কম চাপ, ডিফল্ট',['#e9efeb','#f6f9f7','#0b6b63']],['light','উজ্জ্বল','সাদা ও পরিষ্কার',['#f5f8f7','#ffffff','#0f766e']],['dark','ডার্ক','রাতে পড়ার জন্য',['#0e1917','#16251f','#2dd4bf']],['auto','ফোনের মতো','ফোনের সেটিং অনুযায়ী',['#e9efeb','#0e1917','#0b6b63']]];
   return `<div class="sec"><div><h1>চেহারা ও লেখা</h1><p class="sub">আপনার জন্য যেটা পড়তে আরাম লাগে</p></div></div><div class="card"><h2>থিম</h2><div class="themes" style="margin-top:10px">${T.map(t => `<button data-a="theme" data-v="${t[0]}" aria-pressed="${S.look.theme === t[0]}"><div class="sample">${t[3].map(c => `<i style="background:${c}"></i>`).join('')}</div><div class="t">${t[1]}</div><div class="s">${t[2]}</div></button>`).join('')}</div></div>
@@ -592,7 +570,326 @@ function vLook(){
 function vMore(){
   return `<div class="sec"><div><h1>আরও</h1><p class="sub">বাকি সব পেজ এখানে</p></div></div><div class="menu">${MORE.map(m => `<button data-a="go" data-v="${m[0]}"><span class="ic">${icon(m[2])}</span><span><b>${m[1]}</b><span class="d">${m[3]}</span></span></button>`).join('')}</div>`;
 }
-const V = {home:vHome,q:vQ,exam:vExam,user:vUser,more:vMore,rank:vRank,mission:vMission,struct:vStruct,report:vReport,notice:vNotice,admins:vAdmins,audit:vAudit,ctl:vCtl,look:vLook};
+const normH = h => String(h ?? '').trim().toLowerCase().replace(/[\s_\-.()\/]/g, '');
+const H = {
+  q:['question','q','প্রশ্ন','প্রশ্নটি','questiontext'],
+  opts:['options','o','অপশন','অপশনসমূহ','choices'],
+  o:[['a','opta','optiona','option1','opt1','অপশনক','কঅপশন','ক','optionক'],['b','optb','optionb','option2','opt2','অপশনখ','খঅপশন','খ','optionখ'],['c','optc','optionc','option3','opt3','অপশনগ','গঅপশন','গ','optionগ'],['d','optd','optiond','option4','opt4','অপশনঘ','ঘঅপশন','ঘ','optionঘ']],
+  oimg:[['imagea','imga','optimagea','optionimagea','ছবিক','কছবি','অপশনকছবি'],['imageb','imgb','optimageb','optionimageb','ছবিখ','খছবি','অপশনখছবি'],['imagec','imgc','optimagec','optionimagec','ছবিগ','গছবি','অপশনগছবি'],['imaged','imgd','optimaged','optionimaged','ছবিঘ','ঘছবি','অপশনঘছবি']],
+  oimgs:['optionimageurls','optionimages','অপশনছবি','অপশনেরছবি'],
+  ans:['answer','ans','correct','correctanswer','উত্তর','সঠিকউত্তর','সঠিক'],
+  exp:['explanation','ex','exp','ব্যাখ্যা','সমাধান'],
+  sub:['subject','sub','বিষয়'], paper:['paper','পত্র'], ch:['chapter','ch','অধ্যায়'],
+  board:['board','institution','প্রতিষ্ঠান','বোর্ড','বোর্ডপ্রতিষ্ঠান'], uni:['university','বিশ্ববিদ্যালয়'],
+  year:['year','সাল','বছর'], sess:['session','সেশন'], unit:['unit','ইউনিট'], diff:['difficulty','level','কঠিনতা'],
+  stim:['stimulus','uddipok','উদ্দীপক','passage'], stimg:['stimulusimageurl','stimulusimage','উদ্দীপকেরছবি','উদ্দীপকছবি'],
+  stm:['statements','statement','বিবৃতি','বহুপদী','বিবৃতিসমূহ'], img:['imageurl','image','ছবি','প্রশ্নেরছবি','photo'],
+  bank:['bank','ব্যাংক'], status:['status','অবস্থা']
+};
+function rowGet(idx, names){ for (const n of names) { const v = idx[n]; if (v !== undefined && v !== null && String(v).trim() !== '') return v; } return ''; }
+function splitList(s){ return String(s).split(/\r?\n|\|/).map(x => x.trim()).filter(Boolean); }
+function ansIdx(v, zero){
+  if (v === undefined || v === null || String(v).trim() === '') return -1;
+  if (typeof v === 'number') return zero ? (Number.isInteger(v) && v >= 0 && v < 4 ? v : -1) : (Number.isInteger(v) && v >= 1 && v <= 4 ? v - 1 : -1);
+  const s = bd(String(v)).trim().toLowerCase().replace(/[()\s.)।:]/g, ''), m = {'ক':0,'খ':1,'গ':2,'ঘ':3,'a':0,'b':1,'c':2,'d':3};
+  if (s in m) return m[s];
+  if (!zero && /^[1-4]$/.test(s)) return +s - 1;
+  return -1;
+}
+const DIFF = {'easy':'সহজ','সহজ':'সহজ','medium':'মাঝারি','মাঝারি':'মাঝারি','hard':'কঠিন','কঠিন':'কঠিন'};
+function buildRow(raw, def, mode){
+  const idx = {}; Object.keys(raw || {}).forEach(k => { idx[normH(k)] = raw[k]; });
+  const g = names => rowGet(idx, names), warns = [];
+  const qt = String(g(H.q)).trim(), ov = g(H.opts);
+  let o;
+  if (Array.isArray(ov)) o = ov.map(x => String(x ?? '').trim());
+  else if (typeof ov === 'string' && ov.trim()) o = splitList(ov).map(x => x.replace(/^\s*\(?[কখগঘA-Da-d]\s*[).।:]\s*/, ''));
+  else o = H.o.map(n => String(rowGet(idx, n)).trim());
+  const why = [], miss = [];
+  for (let i = 0; i < 4; i++) if (!o[i]) miss.push(L[i]);
+  if (o.length > 4) why.push('অপশন ৪টির বেশি');
+  if (!qt) why.push('প্রশ্ন নেই');
+  if (miss.length) why.push('অপশন নেই: ' + miss.join(', '));
+  let av = g(H.ans); if (av === '' && Array.isArray(ov)) av = g(['a']);
+  const a = ansIdx(av, mode === 'json');
+  if (a < 0) why.push(String(av) === '' ? 'সঠিক উত্তর নেই' : 'উত্তর বোঝা যায়নি ("' + String(av).slice(0, 12) + '")');
+  if (why.length) return {bad:why.join('; '), src:(qt || o.filter(Boolean).join(' / ') || '').slice(0, 70)};
+  o = o.slice(0, 4);
+  if (new Set(o.map(nk)).size < 4) warns.push('দুটি অপশন একই');
+  const img = (u, lb) => { const x = fixImg(u); if (!x) return ''; if (!isUrl(x)) { warns.push(lb + ' লিংক ঠিক নয়, বাদ'); return ''; } return x; };
+  let oi = [];
+  const oiv = g(H.oimgs);
+  if (Array.isArray(oiv)) oi = oiv.map(x => String(x || '').trim()); else if (typeof oiv === 'string' && oiv.trim()) oi = String(oiv).split(/\r?\n|\|/).map(x => x.trim());
+  if (!oi.some(Boolean)) oi = H.oimg.map(n => String(rowGet(idx, n)).trim());
+  oi = [0,1,2,3].map(i => img(oi[i] || '', 'অপশন ' + L[i] + '-এর ছবি'));
+  const sv = g(H.stm);
+  let st = Array.isArray(sv) ? sv.map(x => String(x).trim()) : (sv ? splitList(sv) : []);
+  st = st.map(x => x.replace(/^\s*(i{1,3}|iv|v|vi{0,3}|[১-৮1-8])\s*[.)।:]\s+/i, '')).filter(Boolean);
+  const subRaw = normSubject(g(H.sub), g(H.paper)) || def.subject || '';
+  if (subRaw && subjects().indexOf(subRaw) < 0) warns.push('বিষয় তালিকায় নেই: ' + subRaw);
+  const bankRaw = String(g(H.bank)).trim(), stRaw = String(g(H.status)).trim();
+  const q = {subject:subRaw, chapter:String(g(H.ch) || def.chapter || '').trim(), board:String(g(H.board) || def.board || '').replace(/\s*বোর্ড$/, '').trim(), year:bd(String(g(H.year) || def.year || '')).trim(),
+    question:qt, options:o, answer:a, explanation:String(g(H.exp) || '').trim(), imageUrl:img(g(H.img), 'প্রশ্নের ছবি'),
+    stimulus:String(g(H.stim) || '').trim(), stimulusImageUrl:img(g(H.stimg), 'উদ্দীপকের ছবি'), statements:st, optionImageUrls:oi.some(Boolean) ? oi : [],
+    university:String(g(H.uni) || '').trim(), session:String(g(H.sess) || def.session || '').trim(), unit:String(g(H.unit) || '').trim(), difficulty:DIFF[String(g(H.diff)).trim().toLowerCase()] || 'মাঝারি'};
+  if (BANKS.indexOf(bankRaw) > -1) q.bank = bankRaw;
+  if (QSTATUS.indexOf(stRaw) > -1) q.rstatus = stRaw;
+  return {ok:q, warns};
+}
+function parseCSV(t, d){
+  const rows = []; let row = [], c = '', q = false;
+  for (let i = 0; i < t.length; i++) {
+    const ch = t[i];
+    if (q) { if (ch === '"') { if (t[i + 1] === '"') { c += '"'; i++; } else q = false; } else c += ch; }
+    else if (ch === '"' && c === '') q = true;
+    else if (ch === d) { row.push(c); c = ''; }
+    else if (ch === '\n') { row.push(c); rows.push(row); row = []; c = ''; }
+    else if (ch !== '\r') c += ch;
+  }
+  if (c !== '' || row.length) { row.push(c); rows.push(row); }
+  return rows;
+}
+function delimOf(line){ if (line.indexOf('\t') > -1) return '\t'; return line.split(';').length > line.split(',').length ? ';' : ','; }
+function looksTabular(t){
+  const first = t.split('\n')[0], cells = first.split(delimOf(first)).map(normH);
+  return cells.length >= 3 && cells.some(c => H.q.indexOf(c) > -1);
+}
+function parseDelim(t){
+  const first = t.split('\n')[0], rows = parseCSV(t, delimOf(first)).filter(r => r.some(x => String(x).trim())), hdr = rows.shift() || [];
+  return rows.map(r => { const o = {}; hdr.forEach((h, i) => { if (String(h).trim()) o[String(h).trim()] = r[i] === undefined ? '' : r[i]; }); return o; });
+}
+function parseText(t){
+  const lines = t.replace(/\r/g, '').split('\n'), out = [];
+  let cur = null, mode = '', pS = '', pSI = '', last = -1;
+  const OPT = /^\s*\(?([কখগঘ]|[A-Da-d])\s*[).।:]\s*(.*)$/, QN = /^\s*(?:প্রশ্ন\s*|Q\.?\s*)?([০-৯0-9]+)\s*[.।):\-]\s*(.*)$/i;
+  const li = c => 'কখগঘ'.indexOf(c) > -1 ? 'কখগঘ'.indexOf(c) : 'abcd'.indexOf(c.toLowerCase());
+  const start = txt => { cur = {question:txt, options:[], answer:'', explanation:'', stimulus:pS, stimulusImageUrl:pSI, statements:[], imageUrl:''}; pS = ''; pSI = ''; out.push(cur); mode = 'q'; last = -1; };
+  for (const raw of lines) {
+    const ln = raw.trim();
+    if (!ln) { if (mode === 'e' || mode === 'o') mode = cur && cur.answer ? 'done' : ''; else if (mode === 'q' && cur && cur.options.length) mode = ''; continue; }
+    let m;
+    if ((m = ln.match(/^(উদ্দীপকের\s*ছবি|Stimulus\s*image)\s*[:：]\s*(\S+)/i))) { pSI = m[2]; continue; }
+    if ((m = ln.match(/^(উদ্দীপক|Stimulus|Passage)\s*[:：]\s*(.*)$/i))) { pS = m[2]; mode = 's'; continue; }
+    if ((m = ln.match(/^(প্রশ্নের\s*ছবি|ছবি|Image)\s*[:：]\s*(\S+)/i))) { if (cur) cur.imageUrl = m[2]; continue; }
+    if ((m = ln.match(/^(সঠিক\s*উত্তর|উত্তর|সঠিক|Answer|Ans)\s*[:：\-]\s*(.*)$/i)) && cur) { const x = m[2].match(/[\(\s]*([কখগঘA-Da-d১-৪1-4])/); cur.answer = x ? x[1] : m[2].trim(); mode = 'done'; continue; }
+    if ((m = ln.match(/^(ব্যাখ্যা|Explanation|Exp|সমাধান)\s*[:：\-]\s*(.*)$/i)) && cur) { cur.explanation = m[2]; mode = 'e'; continue; }
+    if ((m = ln.match(QN)) && (!cur || cur.options.length || cur.answer)) { start(m[2]); continue; }
+    const marks = [...ln.matchAll(/(?:^|\s)\(?([কখগঘ])\s*[).।]\s*/g)];
+    if (cur && marks.length >= 3) {
+      for (let i = 0; i < marks.length; i++) { const s = marks[i].index + marks[i][0].length, e = i + 1 < marks.length ? marks[i + 1].index : ln.length; cur.options[li(marks[i][1])] = ln.slice(s, e).trim(); last = li(marks[i][1]); }
+      mode = 'o'; continue;
+    }
+    if (cur && (m = ln.match(OPT)) && cur.options.filter(Boolean).length < 4) { last = li(m[1]); cur.options[last] = m[2].trim(); mode = 'o'; continue; }
+    if (cur && !cur.options.length && (m = ln.match(/^\s*(i{1,3}|iv|v|vi{0,3})\s*[.)।]\s*(.+)$/i))) { cur.statements.push(m[2].trim()); continue; }
+    if (mode === 's') { pS += '\n' + ln; continue; }
+    if (!cur || mode === 'done') { start(ln); continue; }
+    if (mode === 'q' || (mode === '' && !cur.options.length)) { cur.question += '\n' + ln; mode = 'q'; continue; }
+    if (mode === 'o' && last > -1) { cur.options[last] += ' ' + ln; continue; }
+    if (mode === 'e') { cur.explanation += '\n' + ln; continue; }
+  }
+  out.forEach(c => { const o = []; for (let i = 0; i < 4; i++) o.push(c.options[i] || ''); c.options = o; });
+  return out;
+}
+function parseAny(text, def, frows, skipDup){
+  let rows, mode;
+  if (frows && frows.length) { rows = frows; mode = 'tab'; }
+  else {
+    const t = String(text || '').replace(/^﻿/, '').trim();
+    if (!t) return {err:'কিছু দেওয়া হয়নি। ফাইল বাছুন বা লেখা পেস্ট করুন।'};
+    if (t[0] === '[' || t[0] === '{') {
+      try { let j = JSON.parse(t); if (!Array.isArray(j)) j = Array.isArray(j.questions) ? j.questions : [j]; rows = j; mode = 'json'; }
+      catch(e) { return {err:'JSON ঠিক নেই (কমা, কোটেশন বা বন্ধনী ভুল থাকতে পারে)।'}; }
+    } else if (looksTabular(t)) { rows = parseDelim(t); mode = 'tab'; }
+    else { rows = parseText(t); mode = 'text'; }
+  }
+  if (!rows.length) return {err:'কোনো প্রশ্ন পাওয়া যায়নি। লেখার নিয়ম ঠিক আছে কিনা দেখুন।'};
+  const ok = [], bad = [], dup = [], warns = [], seen = {}, ex = dupInfo();
+  rows.forEach((r, i) => {
+    const res = buildRow(r, def, mode === 'text' ? 'text' : mode);
+    if (res.bad) { bad.push({n:i + 1, why:res.bad, src:res.src, raw:r}); return; }
+    const q = res.ok, k = dupKeyOf(q);
+    res.warns.forEach(w => warns.push({n:i + 1, msg:w}));
+    q._n = i + 1;
+    if (skipDup && ex[k]) { dup.push({n:i + 1, q, where:'ব্যাংকে আগে থেকেই আছে'}); return; }
+    if (skipDup && seen[k]) { dup.push({n:i + 1, q, where:'ফাইলে নিজেই দুবার (প্রশ্ন ' + bn(seen[k]) + ')'}); return; }
+    seen[k] = i + 1; ok.push(q);
+  });
+  return {ok, bad, dup, warns, total:rows.length, mode};
+}
+let FROWS = null;
+function collectImp(prefix){
+  const g = id => { const e = $(id); return e ? e.value : undefined; };
+  const f = {text:g('itext') || '', skip:$('iskip') ? $('iskip').checked : true};
+  if (prefix === 'imp') Object.assign(f, {bank:g('ibk'), status:g('ist'), subject:g('isub'), board:g('ibd'), year:g('iyr'), chapter:g('ich'), session:g('iss')});
+  return f;
+}
+function impBox(prefix, target){
+  const p = S[prefix], f = S[prefix + 'Form'] || {}, fi = S.fileInfo && S.fileInfo.p === prefix ? S.fileInfo : null;
+  return `<div class="card"><h2>একসাথে অনেক প্রশ্ন (বাল্ক ইমপোর্ট)</h2><p class="sub">Excel (.xlsx), CSV, JSON বা সাধারণ লেখা, যেটা সুবিধা। আগে যাচাই হবে, তারপর আপনি দেখে নিয়ে যোগ করবেন। উত্তর না থাকলে বা বোঝা না গেলে ওই প্রশ্ন নেওয়া হবে না, আন্দাজে উত্তর বসানো হয় না।</p>
+  ${target === 'q' ? `<div class="two"><div><label for="ibk">কোন ব্যাংকে যাবে</label><select id="ibk">${opts(BANKS, f.bank || 'HSC বোর্ড')}</select></div><div><label for="ist">অবস্থা</label><select id="ist">${opts(QSTATUS, f.status || 'খসড়া')}</select></div></div>
+  <p class="sub" style="margin-top:12px">নিচের ঘর ফাঁকা থাকলে প্রতিটি প্রশ্নে এই মান বসবে (প্রশ্নে নিজের মান থাকলে সেটাই থাকবে):</p>
+  <div class="two"><div><label for="isub">বিষয়</label><select id="isub">${opts([''].concat(subjects()), f.subject || '')}</select></div><div><label for="ibd">বোর্ড / প্রতিষ্ঠান</label><select id="ibd">${opts([''].concat(BOARDS.concat(INST)), f.board || '')}</select></div></div>
+  <div class="two"><div><label for="iyr">সাল</label><input id="iyr" type="number" placeholder="যেমন ২০২৪" value="${esc(f.year || '')}"></div><div><label for="ich">অধ্যায়</label><input id="ich" placeholder="যেমন ৩য় অধ্যায়" value="${esc(f.chapter || '')}"></div></div>
+  <label for="iss">সেশন (ঐচ্ছিক)</label><input id="iss" placeholder="যেমন ২০২২-২৩" value="${esc(f.session || '')}">` : ''}
+  <label for="ifile">ফাইল (.xlsx, .csv, .json, .txt)</label><input type="file" id="ifile" accept=".xlsx,.xls,.csv,.json,.txt" data-a="${prefix}file">
+  ${fi ? `<div class="alert" style="background:var(--good-soft);color:var(--good)"><span>${esc(fi.name)}: ${bn(fi.n)}টি সারি পড়া হয়েছে</span><button class="btn sm ghost" data-a="${prefix}clearfile">ফাইল বাদ দিন</button></div>` : ''}
+  <label for="itext">অথবা এখানে পেস্ট করুন</label><textarea id="itext" placeholder="JSON, CSV বা সাধারণ লেখা (নিয়ম নিচে দেখুন)" style="min-height:140px;font-family:monospace;font-size:.85em">${esc(f.text || '')}</textarea>
+  <label class="chk" style="margin:10px 0 0;color:var(--ink);font-size:1em;border:0"><input type="checkbox" id="iskip"${f.skip === false ? '' : ' checked'}><span>ডুপ্লিকেট প্রশ্ন বাদ দিন (ব্যাংকে বা ফাইলে একই প্রশ্ন ও অপশন থাকলে)</span></label>
+  <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:600">লেখার নিয়ম ও উদাহরণ</summary>
+  <div class="msg"><b>সাধারণ লেখা:</b> প্রশ্নের নম্বর, ক) খ) গ) ঘ) অপশন, তারপর "উত্তর: খ" ও "ব্যাখ্যা: ..."। উদ্দীপক থাকলে প্রশ্নের আগে "উদ্দীপক: ..." লাইন। বহুপদীতে প্রশ্নের পরে i. ii. iii. লাইন। ছবি থাকলে "ছবি: https://..." লাইন।</div>
+  <div class="example-json">${esc(EXAMPLE_TEXT)}</div>
+  <div class="msg"><b>Excel/CSV:</b> প্রথম সারিতে কলামের নাম (question, a, b, c, d, answer, explanation, subject, chapter, board, year, stimulus, statements, imageUrl, imageA…imageD)। বাংলা নামও চলে (প্রশ্ন, উত্তর, ব্যাখ্যা, অধ্যায়, সাল, উদ্দীপক, বিবৃতি)। উত্তর ক/খ/গ/ঘ বা A/B/C/D লিখুন। সংখ্যা লিখলে ১=ক, ২=খ, ৩=গ, ৪=ঘ। বিবৃতি ও অপশনের ছবি একই ঘরে একাধিক হলে | চিহ্ন দিয়ে আলাদা করুন। "ব্যাকআপ ও টেমপ্লেট" পেজ থেকে তৈরি টেমপ্লেট নামিয়ে নিতে পারেন।</div>
+  <div class="msg"><b>JSON:</b> উত্তর অক্ষরে ("ক"…"ঘ") অথবা ০ থেকে ৩ সংখ্যায় (০=ক, ১=খ, ২=গ, ৩=ঘ)।</div>
+  <div class="example-json" id="${prefix}ex">${esc(EXAMPLE_JSON)}</div><button class="btn sm ghost" type="button" data-a="${prefix}exfill">JSON উদাহরণ বসান</button>
+  <div class="msg">ছবি দিতে GitHub-এ ছবি তুলে তার লিংক দিন। github.com/.../blob/... লিংক দিলে নিজে raw লিংকে বদলে নেওয়া হবে।</div></details>
+  <div class="btns" style="margin-top:12px"><button class="btn ghost" data-a="${prefix}check">আগে যাচাই করুন</button></div>
+  <div id="${prefix}res" style="margin:10px 0">${p ? (p.err ? '<span style="color:var(--bad)">' + esc(p.err) + '</span>' : impResult(p, prefix)) : ''}</div>
+  ${p && p.ok && p.ok.length ? `<button class="btn" data-a="${prefix}go">${target === 'q' ? 'Firebase-এ যোগ করুন' : 'এই পরীক্ষায় যোগ করুন'} (${bn(p.ok.length)}টি)</button>` : ''}</div>`;
+}
+const EXAMPLE_TEXT = '১। SI পদ্ধতিতে বলের একক কোনটি?\nক) জুল\nখ) নিউটন\nগ) ওয়াট\nঘ) প্যাসকেল\nউত্তর: খ\nব্যাখ্যা: বলের SI একক নিউটন (N)।\n\nউদ্দীপক: একটি বস্তুর ভর ২ কেজি, ত্বরণ ৩ মি/সে²।\n২। নিচের কোনটি সঠিক?\ni. বলের মান ৬ N\nii. বলের একক নিউটন\niii. বল স্কেলার রাশি\nক) i ও ii\nখ) i ও iii\nগ) ii ও iii\nঘ) i, ii ও iii\nউত্তর: ক';
+function impResult(p, prefix){
+  const sm = (n, lb, c) => `<span class="pill ${c}" style="margin:0 6px 6px 0">${lb}: ${bn(n)}</span>`;
+  const list = S.impAll ? p.ok.slice(0, 300) : p.ok.slice(0, 5);
+  return `<div>${sm(p.total, 'মোট', 'gray')}${sm(p.ok.length, 'ঠিক', 'good')}${p.bad.length ? sm(p.bad.length, 'বাদ', 'bad') : ''}${p.dup.length ? sm(p.dup.length, 'ডুপ্লিকেট', 'warn') : ''}${p.warns.length ? sm(p.warns.length, 'সতর্কতা', 'warn') : ''}</div>` +
+  (p.bad.length ? `<div class="panel"><div class="s" style="margin-bottom:6px;color:var(--bad)"><b>বাদ পড়েছে (এগুলো ঠিক করে আবার দিন):</b></div>${p.bad.slice(0, 40).map(b => `<div class="row" style="display:block;padding:6px 0"><div class="s"><b>সারি ${bn(b.n)}:</b> ${esc(b.why)}</div><div class="s" style="opacity:.8">${esc(b.src)}</div></div>`).join('')}${p.bad.length > 40 ? `<div class="s">আরও ${bn(p.bad.length - 40)}টি আছে। নিচের বোতামে সব নামান।</div>` : ''}<button class="btn sm ghost" style="margin-top:8px" data-a="impbad">বাদ পড়াগুলো নামান (JSON)</button></div>` : '') +
+  (p.dup.length ? `<div class="panel"><div class="s" style="margin-bottom:6px"><b>ডুপ্লিকেট, যোগ হবে না:</b></div>${p.dup.slice(0, 15).map(d => `<div class="s">সারি ${bn(d.n)}: ${esc(d.q.question.slice(0, 60))} — ${esc(d.where)}</div>`).join('')}${p.dup.length > 15 ? `<div class="s">আরও ${bn(p.dup.length - 15)}টি</div>` : ''}</div>` : '') +
+  (p.warns.length ? `<div class="panel"><div class="s" style="margin-bottom:6px"><b>সতর্কতা (প্রশ্ন যোগ হবে, তবু দেখে নিন):</b></div>${p.warns.slice(0, 15).map(w => `<div class="s">সারি ${bn(w.n)}: ${esc(w.msg)}</div>`).join('')}${p.warns.length > 15 ? `<div class="s">আরও ${bn(p.warns.length - 15)}টি</div>` : ''}</div>` : '') +
+  (p.ok.length ? `<div class="panel"><div class="s" style="margin-bottom:6px"><b>${S.impAll ? 'সব' : 'প্রথম ' + bn(Math.min(5, p.ok.length)) + 'টি'} দেখে নিন, সঠিক উত্তর ঠিক আছে কিনা:</b></div>${list.map(q => `<div style="border-top:1px solid var(--line);padding:8px 0">${q.stimulus ? `<div class="s">উদ্দীপক: ${esc(q.stimulus.slice(0, 120))}</div>` : ''}<div class="t">${bn(q._n)}. ${esc(q.question)}</div>${(q.statements || []).map((s, i) => `<div class="s">${ROMAN[i] || bn(i + 1)}. ${esc(s)}</div>`).join('')}<div class="s">সঠিক: ${L[q.answer]}) ${esc(q.options[q.answer])}</div><div class="s">${esc([q.subject, q.chapter, q.board, q.year].filter(Boolean).join(' · ') || 'বিষয় বা সাল দেওয়া নেই')}${q.imageUrl ? ' · ছবি আছে' : ''}${q.optionImageUrls.length ? ' · অপশনে ছবি' : ''}${q.explanation ? '' : ' · ব্যাখ্যা নেই'}</div></div>`).join('')}${p.ok.length > 5 ? `<button class="btn sm ghost" style="margin-top:8px" data-a="impall">${S.impAll ? 'কম দেখান' : 'সবগুলো দেখুন'}</button>` : ''}</div>` : '');
+}
+function normSubject(sub, paper){
+  sub = String(sub || '').trim(); paper = String(paper || '').trim();
+  if (!sub) return '';
+  const alias = {'তথ্য ও যোগাযোগ প্রযুক্তি':'ICT','আইসিটি':'ICT'}; sub = alias[sub] || sub;
+  if (paper && paper !== 'একক পত্র' && subjects().indexOf(sub + ' ' + paper) > -1) return sub + ' ' + paper;
+  return sub;
+}
+let _xl = null;
+function loadXlsx(){
+  if (window.XLSX) return Promise.resolve(window.XLSX);
+  if (_xl) return _xl;
+  _xl = new Promise((res, rej) => { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'; s.onload = () => res(window.XLSX); s.onerror = () => { _xl = null; rej(new Error('xlsx')); }; document.head.appendChild(s); });
+  return _xl;
+}
+async function readImpFile(f, prefix){
+  const ext = (f.name.split('.').pop() || '').toLowerCase(), form = collectImp(prefix);
+  try {
+    if (ext === 'xlsx' || ext === 'xls') {
+      const X = await loadXlsx(), wb = X.read(await f.arrayBuffer(), {type:'array'});
+      let rows = []; wb.SheetNames.forEach(n => { rows = rows.concat(X.utils.sheet_to_json(wb.Sheets[n], {defval:''})); });
+      FROWS = rows; form.text = ''; S.fileInfo = {p:prefix, name:f.name, n:rows.length};
+    } else {
+      const t = await f.text();
+      if (t.indexOf('�') > -1) toast('ফাইলের বাংলা অক্ষর ভেঙে গেছে। Excel-এ "CSV UTF-8" বা .xlsx হিসেবে সেভ করে দিন');
+      FROWS = null; S.fileInfo = null; form.text = t;
+    }
+  } catch(e) { toast('ফাইল পড়া যায়নি' + (ext.indexOf('xls') === 0 ? ' (ইন্টারনেট চালু আছে কিনা দেখুন)' : '')); return; }
+  S[prefix + 'Form'] = form; S[prefix] = null; render();
+}
+
+function vHome(){
+  const now = Date.now() / 1000, live = E.filter(e => e.status === 'চালু').length, openR = R.filter(r => (r.status || 'খোলা') === 'খোলা').length,
+    pub = Q.filter(q => q.status === 'প্রকাশিত').length, dr = Q.filter(q => q.status === 'খসড়া').length, rev = Q.filter(q => q.status === 'রিভিউ দরকার').length, edr = E.filter(e => e.status === 'খসড়া').length,
+    newU = U.filter(u => tsSec(u.createdAt) > now - 7 * 86400).length, noExp = Q.filter(q => qHas(q, 'ব্যাখ্যা নেই')).length, noCh = Q.filter(q => qHas(q, 'অধ্যায় নেই')).length, dups = Q.filter(q => isDup(q)).length,
+    badImg = Q.filter(q => qIssues(q).indexOf('ছবির লিংক ঠিক নয়') > -1).length, A = CFG.app;
+  const cnt = {}; Q.forEach(q => { const k = q.subject || 'বিষয় নেই'; cnt[k] = (cnt[k] || 0) + 1; });
+  const top = Object.keys(cnt).map(k => [k, cnt[k]]).sort((a, b) => b[1] - a[1]).slice(0, 8), mx = top.length ? top[0][1] : 1;
+  const al = (cls, t, btn) => `<div class="alert${cls}"><span>${t}</span>${btn}</div>`;
+  let todo = '';
+  if (openR) todo += al(' bad', bn(openR) + 'টি ভুল রিপোর্ট দেখা বাকি', '<button class="btn sm" data-a="go" data-v="report">দেখুন</button>');
+  if (rev) todo += al('', bn(rev) + 'টি প্রশ্নের রিভিউ দরকার', '<button class="btn sm" data-a="qfilter" data-v="রিভিউ দরকার">দেখুন</button>');
+  if (dr) todo += al('', bn(dr) + 'টি প্রশ্ন খসড়া, প্রকাশ হয়নি', '<button class="btn sm" data-a="qfilter" data-v="খসড়া">দেখুন</button>');
+  if (dups) todo += al('', bn(dups) + 'টি প্রশ্ন ডুপ্লিকেট', '<button class="btn sm" data-a="qflagset" data-v="ডুপ্লিকেট">দেখুন</button>');
+  if (badImg) todo += al(' bad', bn(badImg) + 'টি প্রশ্নে ছবির লিংক ঠিক নয়', '<button class="btn sm" data-a="qflagset" data-v="সমস্যা আছে">দেখুন</button>');
+  if (noExp) todo += al('', bn(noExp) + 'টি প্রশ্নে ব্যাখ্যা নেই', '<button class="btn sm" data-a="qflagset" data-v="ব্যাখ্যা নেই">দেখুন</button>');
+  if (noCh) todo += al('', bn(noCh) + 'টি প্রশ্নে অধ্যায় নেই', '<button class="btn sm" data-a="qflagset" data-v="অধ্যায় নেই">দেখুন</button>');
+  if (edr) todo += al('', bn(edr) + 'টি পরীক্ষা খসড়া অবস্থায়', '<button class="btn sm" data-a="go" data-v="exam">দেখুন</button>');
+  const sub = BANKS.map(b => { const l = Q.filter(q => q.bank === b); return [b, l.length, l.filter(q => q.status === 'প্রকাশিত').length, l.filter(q => q.status === 'খসড়া').length]; });
+  const sw2 = (on, y, n) => `<span class="pill ${on ? 'bad' : 'good'}">${on ? y : n}</span>`;
+  return `<div class="sec"><div><h1>ড্যাশবোর্ড</h1><p class="sub">অ্যাপের অবস্থা এক নজরে</p></div></div>
+  <div class="grid stats">${stat('মোট ইউজার', bn(U.length), 'এই সপ্তাহে নতুন ' + bn(newU))}${stat('প্রশ্ন', bn(Q.length), 'প্রকাশিত ' + bn(pub) + ' · খসড়া ' + bn(dr))}${stat('চালু পরীক্ষা', bn(live), bn(E.length) + 'টির মধ্যে')}${stat('ভুল রিপোর্ট', bn(openR), 'খোলা')}</div>
+  <div class="card" style="margin-top:12px"><h2>করণীয়</h2>${todo || '<div class="empty">এখন কোনো করণীয় নেই</div>'}</div>
+  <div class="cols2" style="margin-top:12px"><div class="card"><h2>ব্যাংক অনুযায়ী প্রশ্ন</h2>${sub.map(b => `<div class="row"><div class="t">${b[0]}</div><div class="s" style="text-align:right">মোট ${bn(b[1])} · প্রকাশিত ${bn(b[2])} · খসড়া ${bn(b[3])}</div></div>`).join('')}</div>
+  <div class="card"><h2>অ্যাপের অবস্থা</h2><div class="row"><div class="t">মেইনটেন্যান্স মোড</div>${sw2(A.maint, 'চালু', 'বন্ধ')}</div><div class="row"><div class="t">নতুন রেজিস্ট্রেশন</div>${sw2(!A.reg, 'বন্ধ', 'চালু')}</div><div class="row"><div class="t">সর্বশেষ ভার্সন</div><div class="s">${esc(A.ver || '—')}</div></div><div class="row"><div class="t">ন্যূনতম ভার্সন</div><div class="s">${esc(A.minVer || '—')}</div></div><div style="margin-top:10px"><button class="btn sm ghost" data-a="go" data-v="ctl">অ্যাপ কন্ট্রোল</button></div></div></div>
+  <div class="cols2" style="margin-top:12px"><div class="card"><h2>বিষয় অনুযায়ী প্রশ্ন</h2>${top.length ? top.map(x => `<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(x[0])}</span><span class="s">${bn(x[1])}টি</span></div><div class="bar"><b style="width:${Math.round(x[1] / mx * 100)}%"></b></div></div>`).join('') : '<div class="empty">এখনো কোনো প্রশ্ন নেই</div>'}</div>
+  <div class="card"><h2>দ্রুত কাজ</h2><div class="btns" style="margin-top:10px"><button class="btn" data-a="newq">নতুন প্রশ্ন</button><button class="btn ghost" data-a="bulkq">বাল্ক ইমপোর্ট</button><button class="btn ghost" data-a="newe">নতুন পরীক্ষা</button><button class="btn ghost" data-a="go" data-v="notice">নোটিশ পাঠান</button><button class="btn ghost" data-a="go" data-v="backup">ব্যাকআপ</button></div>
+  <h3 style="margin-top:16px">সাম্প্রতিক কাজ</h3>${AUD.length ? AUD.slice(0, 5).map(r => `<div class="row"><div class="t">${esc(r.msg)}</div><div class="s" style="white-space:nowrap">${fmtDate(r.at)}</div></div>`).join('') : '<div class="empty">এখনো কোনো কাজের ইতিহাস নেই</div>'}</div></div>`;
+}
+function qList(){
+  const t = (S.qf || '').toLowerCase();
+  let l = Q.filter(q => (S.qsub === 'সব' || q.subject === S.qsub) && (S.qch === 'সব' || q.chapter === S.qch) && (S.qst === 'সব' || q.status === S.qst) && (S.qbank === 'সব' || q.bank === S.qbank) && qHas(q, S.qflag) &&
+    (!t || [q.question, q.stimulus, q.explanation, q.chapter, q.id].concat(q.options).join(' ').toLowerCase().includes(t)));
+  const cs = q => tsSec(q.createdAt) || 9e9;
+  if (S.qsort === 'পুরোনো') l.sort((a, b) => cs(a) - cs(b)); else if (S.qsort === 'বিষয়') l.sort((a, b) => (a.subject || '').localeCompare(b.subject || '') || (a.chapter || '').localeCompare(b.chapter || '')); else l.sort((a, b) => cs(b) - cs(a));
+  return l;
+}
+function vQ(){
+  const head = `<div class="sec"><div><h1>প্রশ্ন ম্যানেজার</h1><p class="sub">মোট ${bn(Q.length)}টি প্রশ্ন</p></div></div>` + seg('qseg', [['list','তালিকা'],['form', S.eq ? 'এডিট' : 'নতুন প্রশ্ন'],['bulk','বাল্ক ইমপোর্ট']], S.qseg);
+  if (S.qseg === 'form') return head + qForm();
+  if (S.qseg === 'bulk') return head + (S.impReport ? impReportCard() : '') + impBox('imp', 'q');
+  const l = qList(), nsel = Object.keys(S.sel).length;
+  const chs = S.qsub !== 'সব' && CFG.struct[S.qsub] ? CFG.struct[S.qsub] : Array.from(new Set(Q.filter(q => S.qsub === 'সব' || q.subject === S.qsub).map(q => q.chapter).filter(Boolean))).sort();
+  const chOpts = ['সব'].concat(chs); if (S.qch !== 'সব' && chOpts.indexOf(S.qch) < 0) chOpts.push(S.qch);
+  const badge = q => [q.imageUrl ? 'ছবি' : '', q.stimulus || q.stimulusImageUrl ? 'উদ্দীপক' : '', (q.statements || []).length ? 'বহুপদী' : '', (q.optionImageUrls || []).some(Boolean) ? 'অপশনে ছবি' : ''].filter(Boolean).map(x => `<span class="pill">${x}</span>`).join(' ');
+  return head + `<div class="tools two-row"><input id="qs" placeholder="প্রশ্ন, অপশন বা ব্যাখ্যা খুঁজুন" value="${esc(S.qf)}" aria-label="খুঁজুন"><select id="qsub" aria-label="বিষয়">${opts(['সব'].concat(subjects()), S.qsub)}</select><select id="qbank" aria-label="ব্যাংক">${opts(['সব'].concat(BANKS), S.qbank)}</select><select id="qst" aria-label="অবস্থা">${opts(['সব'].concat(QSTATUS), S.qst)}</select></div>
+  <div class="tools"><select id="qch" aria-label="অধ্যায়">${opts(chOpts, S.qch)}</select><select id="qflag" aria-label="ধরন">${opts(QFLAGS, S.qflag)}</select><select id="qsort" aria-label="সাজান">${opts(['নতুন','পুরোনো','বিষয়'], S.qsort)}</select></div>
+  <div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><div class="s"><b>${bn(l.length)}টি প্রশ্ন পাওয়া গেছে</b>${nsel ? ' · বাছা ' + bn(nsel) + 'টি' : ''}</div><div class="btns"><button class="btn sm ghost" data-a="qselall">ফিল্টার করা সব বাছুন</button>${nsel ? '<button class="btn sm ghost" data-a="qselnone">বাছাই বাতিল</button>' : ''}<button class="btn sm ghost" data-a="expq">CSV নামান</button></div></div>
+  ${nsel ? `<div class="btns" style="margin-top:10px"><button class="btn sm good" data-a="qbulk" data-v="প্রকাশিত">প্রকাশ করুন</button><button class="btn sm ghost" data-a="qbulk" data-v="খসড়া">খসড়া করুন</button><button class="btn sm ghost" data-a="qbulk" data-v="রিভিউ দরকার">রিভিউ দরকার</button><select id="qmv" aria-label="ব্যাংক বদলান" style="flex:0 1 150px;min-height:36px;padding:4px 8px">${opts(BANKS, BANKS[0])}</select><button class="btn sm ghost" data-a="qmove">ব্যাংক বদলান</button>${delBtn('qbulkdel', 'qbulkdel', 'x', 'বাছাগুলো মুছুন')}</div>` : ''}</div>
+  <div class="card">${l.length ? l.slice(0, S.qlimit).map(q => { const iss = qIssues(q); return `<div class="row" style="align-items:flex-start"><input type="checkbox" class="sel" data-a="qsel" data-v="${q.id}" aria-label="বাছুন"${S.sel[q.id] ? ' checked' : ''}><div style="flex:1;min-width:0"><div class="t">${esc(q.question)}</div><div class="s">${stBadge(q.status)} <span class="pill gray">${esc(q.bank)}</span> ${badge(q)} ${esc(q.subject || '')}${q.chapter ? ' · ' + esc(q.chapter) : ''} · ${esc(q.board || '')} ${esc(q.year || '')}${q.session ? ' · ' + esc(q.session) : ''}${q.unit ? ' · ' + esc(q.unit) : ''}</div><div class="s">সঠিক: ${L[q.answer] || '?'}) ${esc(q.options[q.answer])}</div>${iss.length ? `<div class="s" style="color:var(--warn)">⚠ ${iss.map(esc).join(' · ')}</div>` : ''}${S.qprev === q.id ? qPrev(q) : ''}</div><div class="btns" style="flex-direction:column;align-items:stretch"><button class="btn sm ghost" data-a="editq" data-v="${q.id}">এডিট</button><button class="btn sm ghost" data-a="qprev" data-v="${q.id}">${S.qprev === q.id ? 'বন্ধ' : 'প্রিভিউ'}</button><button class="btn sm ghost" data-a="qtog" data-v="${q.id}">${q.status === 'প্রকাশিত' ? 'খসড়া করুন' : 'প্রকাশ করুন'}</button><button class="btn sm ghost" data-a="qdup" data-v="${q.id}">কপি</button>${delBtn('q' + q.id, 'delq', q.id)}</div></div>`; }).join('') + (l.length > S.qlimit ? `<div style="text-align:center;margin-top:10px"><button class="btn ghost" data-a="qmore">আরও দেখুন (${bn(l.length - S.qlimit)}টি বাকি)</button></div>` : '') : '<div class="empty">কোনো প্রশ্ন নেই। "নতুন প্রশ্ন" বা "বাল্ক ইমপোর্ট" থেকে যোগ করুন।</div>'}</div>`;
+}
+function impReportCard(){
+  const r = S.impReport;
+  return `<div class="card" style="margin-bottom:12px;border-color:var(--good)"><h2>ইমপোর্ট শেষ</h2><div class="s">${bn(r.added)}টি প্রশ্ন যোগ হয়েছে (${esc(r.bank)} · ${esc(r.status)})${r.bad ? ` · বাদ ${bn(r.bad)}টি` : ''}${r.dup ? ` · ডুপ্লিকেট ${bn(r.dup)}টি` : ''}</div>
+  <div class="btns" style="margin-top:10px"><button class="btn sm" data-a="qfilter" data-v="${esc(r.status)}">তালিকায় দেখুন</button>${delBtn('undoimp', 'undoimp', 'x', 'এই ইমপোর্ট বাতিল করুন')}<button class="btn sm ghost" data-a="impokrep">ঠিক আছে</button></div></div>`;
+}
+
+function userName(u){ return u.name || u.displayName || 'নাম নেই'; }
+const UFIELDS = [['email','ইমেইল'],['phone','ফোন'],['college','কলেজ'],['institution','প্রতিষ্ঠান'],['studentClass','শ্রেণি'],['target','লক্ষ্য'],['district','জেলা'],['deviceModel','ডিভাইস'],['accountStatus','অ্যাকাউন্ট']];
+const isVer = u => !!(u.isEmailVerified || u.emailVerified);
+function vUser(){
+  const t = S.uq.toLowerCase(), now = Date.now() / 1000;
+  const l = U.filter(u => (!t || JSON.stringify(u).toLowerCase().includes(t)) && (S.ufil === 'সব' || (S.ufil === 'ব্লক' ? u.blocked : S.ufil === 'সক্রিয়' ? !u.blocked : S.ufil === 'ভেরিফাই হয়নি' ? !isVer(u) : tsSec(u.createdAt) > now - 7 * 86400)));
+  if (S.usort === 'XP') l.sort((a, b) => (b.xp || 0) - (a.xp || 0)); else if (S.usort === 'নাম') l.sort((a, b) => userName(a).localeCompare(userName(b))); else l.sort((a, b) => tsSec(b.createdAt) - tsSec(a.createdAt));
+  return `<div class="sec"><div><h1>ইউজার ম্যানেজার</h1><p class="sub">মোট ${bn(U.length)} জন · ইমেইল ভেরিফাই ${bn(U.filter(isVer).length)} · ব্লক ${bn(U.filter(u => u.blocked).length)} · এই সপ্তাহে নতুন ${bn(U.filter(u => tsSec(u.createdAt) > now - 7 * 86400).length)}</p></div><button class="btn sm ghost" data-a="expu">CSV নামান</button></div>
+  <div class="tools"><input id="us" placeholder="নাম, ইমেইল বা ফোন দিয়ে খুঁজুন" value="${esc(S.uq)}" aria-label="খুঁজুন"><select id="ufil" aria-label="ফিল্টার">${opts(['সব','সক্রিয়','ব্লক','ভেরিফাই হয়নি','নতুন (৭ দিন)'], S.ufil)}</select><select id="usort" aria-label="সাজান">${opts(['নতুন','XP','নাম'], S.usort)}</select></div><div class="card">
+  ${l.length ? l.slice(0, S.ulimit).map(u => { const open = S.us === u.id; return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div style="min-width:0"><div class="t">${esc(userName(u))} ${u.blocked ? '<span class="pill bad">ব্লক</span>' : ''} ${isVer(u) ? '' : '<span class="pill warn">ভেরিফাই হয়নি</span>'}</div><div class="s">${esc(u.email || u.phone || u.id)} · XP ${bn(u.xp || 0)}</div></div><button class="btn sm ghost" data-a="uopen" data-v="${u.id}">${open ? 'বন্ধ' : 'খুলুন'}</button></div>
+  ${open ? `<div class="panel">${UFIELDS.filter(f => u[f[0]]).map(f => `<div class="s"><b>${f[1]}:</b> ${esc(u[f[0]])}</div>`).join('')}<div class="s"><b>যোগ দিয়েছে:</b> ${esc(fmtDate(u.createdAt) || '—')}</div><div class="s"><b>ID:</b> ${esc(u.id)}</div><div class="btns" style="margin-top:10px"><button class="btn sm ${u.blocked ? 'good' : 'danger'}" data-a="blk" data-v="${u.id}">${u.blocked ? 'আনব্লক' : 'ব্লক করুন'}</button><button class="btn sm ghost" data-a="xp" data-v="${u.id}:50">+৫০ XP</button><button class="btn sm ghost" data-a="xp" data-v="${u.id}:-50">−৫০ XP</button><button class="btn sm ghost" data-a="rkhide" data-v="${u.id}">${u.hidden ? 'তালিকায় দেখান' : 'মেধা তালিকা থেকে লুকান'}</button>${delBtn('rp' + u.id, 'reset', u.id, 'XP রিসেট')}</div></div>` : ''}</div>`; }).join('') + (l.length > S.ulimit ? `<div style="text-align:center;margin-top:10px"><button class="btn ghost" data-a="umore">আরও দেখুন (${bn(l.length - S.ulimit)} জন বাকি)</button></div>` : '') : '<div class="empty">কেউ পাওয়া যায়নি</div>'}</div>
+  <div class="msg">ব্লক করলে ইউজারকে আটকানোর কাজ অ্যাপকে করতে হবে (blocked ফিল্ড দেখে)।</div>`;
+}
+function vReport(){
+  const f = S.rf, l = R.filter(r => f === 'সব' || (f === 'খোলা') === ((r.status || 'খোলা') === 'খোলা'));
+  return `<div class="sec"><div><h1>ভুল রিপোর্ট</h1><p class="sub">ইউজাররা প্রশ্নে ভুল পেলে এখানে আসে · খোলা ${bn(R.filter(r => (r.status || 'খোলা') === 'খোলা').length)}টি</p></div></div>` + seg('rf', [['খোলা','খোলা'],['সমাধান','সমাধান হয়েছে'],['সব','সব']], f) +
+  (l.length ? `<div class="grid">${l.map(r => { const st = r.status || 'খোলা', q = (r.qid && byId(Q, r.qid)) || Q.filter(x => x.question === (r.question || r.q))[0]; return `<div class="card"><div class="t">${esc(r.question || r.q || (q && q.question) || '')}</div><div class="s">কারণ: ${esc(r.reason || r.why || '—')}</div><div class="s">জানিয়েছে: ${esc(r.by || r.userName || '—')} · ${esc(fmtDate(r.at || r.createdAt))} · ${st === 'খোলা' ? '<span class="pill bad">খোলা</span>' : `<span class="pill good">${esc(st)}</span>`}</div>${S.rprev === r.id && q ? qPrev(q) : ''}<div class="btns" style="margin-top:10px">${q ? `<button class="btn sm" data-a="fixr" data-v="${q.id}">প্রশ্ন এডিট করুন</button><button class="btn sm ghost" data-a="rprev" data-v="${r.id}">${S.rprev === r.id ? 'প্রিভিউ বন্ধ' : 'প্রিভিউ'}</button>` : ''}${st === 'খোলা' ? `<button class="btn sm good" data-a="rsolve" data-v="${r.id}">সমাধান হয়েছে</button>` : `<button class="btn sm ghost" data-a="ropen" data-v="${r.id}">আবার খুলুন</button>`}<button class="btn sm ghost" data-a="rdrop" data-v="${r.id}">বাতিল</button></div></div>`; }).join('')}</div>` : '<div class="card"><div class="empty">কোনো রিপোর্ট নেই</div></div>');
+}
+function vNotice(){
+  const L2 = N.slice().sort((a, b) => tsSec(b.at) - tsSec(a.at));
+  return `<div class="sec"><div><h1>নোটিশ</h1><p class="sub">অ্যাপে ব্যানার ও নোটিফিকেশন তালিকায় দেখানোর জন্য</p></div></div><div class="cols2"><div class="card"><h2>নতুন নোটিশ</h2><label for="ntt">শিরোনাম</label><input id="ntt" placeholder="ছোট শিরোনাম"><label for="nt">বার্তা</label><textarea id="nt"></textarea><div class="two"><div><label for="na">কাকে পাঠাবেন</label><select id="na">${opts(['সবাই','চালু পরীক্ষার অংশগ্রহণকারী','শুধু সক্রিয় ইউজার'], 'সবাই')}</select></div><div><label for="nk">ধরন</label><select id="nk">${opts(['নোটিশ','জরুরি ব্যানার','পরীক্ষা','আপডেট','নতুন প্রশ্ন'], 'নোটিশ')}</select></div></div>
+  <div class="two"><div><label for="nl">লিংক (ঐচ্ছিক)</label><input id="nl" placeholder="https://..."></div><div><label for="nx">কবে পর্যন্ত দেখাবে (ঐচ্ছিক)</label><input id="nx" type="date"></div></div><div style="margin-top:12px"><button class="btn" data-a="sendn">সেভ ও পাঠান</button></div></div>
+  <div class="card"><h2>আগের নোটিশ</h2>${L2.length ? L2.map(n => `<div class="row"><div><div class="t">${n.title ? '<b>' + esc(n.title) + '</b> · ' : ''}${esc(n.text)}</div><div class="s">${esc(n.kind || '')} · ${esc(n.audience || '')} · ${esc(fmtDate(n.at))}${n.expiry ? ' · শেষ ' + esc(n.expiry) : ''}${n.link ? ' · লিংক আছে' : ''}</div></div><div style="display:flex;gap:8px;align-items:center">${sw(`data-a="ntog" data-v="${n.id}"`, n.active !== false, 'চালু বা বন্ধ')}${delBtn('n' + n.id, 'deln', n.id)}</div></div>`).join('') : '<div class="empty">কোনো নোটিশ নেই</div>'}</div></div>`;
+}
+function vCtl(){
+  const c = CFG.app, r = (k, t, s) => `<div class="row"><div><div class="t">${t}</div><div class="s">${s}</div></div>${sw(`data-a="ctl" data-v="${k}"`, c[k], t)}</div>`;
+  return `<div class="sec"><div><h1>অ্যাপ কন্ট্রোল</h1><p class="sub">অ্যাপ এই সেটিং দেখে চলবে</p></div></div><div class="cols2"><div class="card"><h2>অ্যাপের অবস্থা</h2>${r('maint','মেইনটেন্যান্স মোড','চালু করলে ইউজাররা অ্যাপ খুলতে পারবে না')}${r('force','জোর করে আপডেট','পুরোনো ভার্সনে অ্যাপ বন্ধ হবে')}${r('reg','নতুন রেজিস্ট্রেশন','বন্ধ করলে নতুন কেউ অ্যাকাউন্ট খুলতে পারবে না')}${r('board','মেধা তালিকা দেখানো','বন্ধ করলে অ্যাপে তালিকা লুকানো থাকবে')}</div>
+  <div class="card"><h2>ফিচার চালু/বন্ধ</h2>${FEATS.map(f => `<div class="row"><div class="t">${f[1]}</div>${sw(`data-a="feat" data-v="${f[0]}"`, c.feat[f[0]] !== false, f[1])}</div>`).join('')}</div></div>
+  <div class="card" style="margin-top:12px"><h2>অ্যাপের তথ্য</h2><div class="two"><div><label for="cv">সর্বশেষ ভার্সন</label><input id="cv" value="${esc(c.ver)}" placeholder="যেমন 1.2.0"></div><div><label for="cmv">ন্যূনতম ভার্সন (এর নিচে হলে আপডেট চাইবে)</label><input id="cmv" value="${esc(c.minVer)}" placeholder="যেমন 1.0.0"></div></div>
+  <label for="cmm">মেইনটেন্যান্সের বার্তা</label><textarea id="cmm" style="min-height:64px" placeholder="যেমন: কিছুক্ষণের জন্য সার্ভিস বন্ধ আছে">${esc(c.maintMsg)}</textarea>
+  <div class="two"><div><label for="csu">প্লে স্টোর / আপডেট লিংক</label><input id="csu" value="${esc(c.storeUrl)}" placeholder="https://..."></div><div><label for="ccm">কমিউনিটি গ্রুপ লিংক</label><input id="ccm" value="${esc(c.community)}" placeholder="https://..."></div></div>
+  <label for="cs">সাপোর্ট ইমেইল</label><input id="cs" value="${esc(c.support)}"><div style="margin-top:12px"><button class="btn" data-a="savec">সেভ করুন</button></div></div>
+  <div class="msg">এই সেটিং Firebase-এর config/app-এ সেভ হয়। অ্যাপকে এগুলো পড়ে কাজ করতে হবে, সেজন্য AI Studio-র আলাদা প্রম্পট লাগবে।</div>`;
+}
+function vBackup(){
+  return `<div class="sec"><div><h1>ব্যাকআপ ও টেমপ্লেট</h1><p class="sub">ডেটা নিজের ফোনে নামিয়ে রাখুন, নিরাপদ থাকবে</p></div></div>
+  <div class="cols2"><div class="card"><h2>ব্যাকআপ নামান</h2><p class="sub">প্রতি সপ্তাহে একবার সব ডেটা নামিয়ে রাখা ভালো।</p><div class="btns" style="margin-top:10px;flex-direction:column;align-items:stretch">
+  <button class="btn" data-a="bkall">সব ডেটা (JSON) · ${bn(Q.length)} প্রশ্ন, ${bn(E.length)} পরীক্ষা, ${bn(U.length)} ইউজার</button>
+  <button class="btn ghost" data-a="expq">প্রশ্ন (CSV, Excel-এ খোলা যায়)</button>
+  <button class="btn ghost" data-a="bkq">প্রশ্ন (JSON)</button>
+  <button class="btn ghost" data-a="bke">পরীক্ষা (JSON)</button>
+  <button class="btn ghost" data-a="expu">ইউজার (CSV)</button></div></div>
+  <div class="card"><h2>Excel / CSV টেমপ্লেট</h2><p class="sub">এই ফাইল Excel বা Google Sheets-এ খুলে প্রশ্ন বসান, তারপর "প্রশ্ন → বাল্ক ইমপোর্ট"-এ দিন। উদাহরণের দুটি সারি মুছে দেবেন।</p><div class="btns" style="margin-top:10px;flex-direction:column;align-items:stretch"><button class="btn" data-a="tpl">টেমপ্লেট নামান (CSV)</button></div>
+  <div class="msg">কলাম: question, a, b, c, d, answer (ক/খ/গ/ঘ), explanation, subject, chapter, board, year, session, unit, difficulty, stimulus (উদ্দীপক), statements (বিবৃতি, | দিয়ে আলাদা), imageUrl, stimulusImageUrl, imageA…imageD (অপশনের ছবি), bank, status।</div></div></div>
+  <div class="card" style="margin-top:12px"><h2>ছবির লিংক কীভাবে দেবেন</h2><div class="msg">১) GitHub-এ আপনার রিপোজিটরিতে "images" নামে ফোল্ডার খুলে ছবি আপলোড করুন। ২) ছবি খুলে "Raw" বা "Download" চেপে যে লিংক পাবেন সেটা দিন। github.com/.../blob/... লিংক দিলেও চলবে, ইমপোর্টে নিজে raw লিংকে বদলে যাবে। ৩) প্রশ্নের তালিকায় "প্রিভিউ" চেপে ছবি আসছে কিনা দেখে নিন।</div></div>`;
+}
+
+const V = {home:vHome,q:vQ,exam:vExam,user:vUser,more:vMore,rank:vRank,mission:vMission,struct:vStruct,report:vReport,notice:vNotice,admins:vAdmins,audit:vAudit,ctl:vCtl,look:vLook,backup:vBackup};
 
 function navs(){
   const cur = MOREKEYS.indexOf(S.tab) > -1 ? 'more' : S.tab;
@@ -614,20 +911,23 @@ function go(t){
 
 /* ---------- কাজ (ক্লিক) ---------- */
 const byId = (arr, id) => arr.filter(x => x.id === id)[0];
+async function batchDo(ids, fn){ for (let i = 0; i < ids.length; i += 400) { const bt = writeBatch(db); ids.slice(i, i + 400).forEach(id => fn(bt, id)); await bt.commit(); } }
 document.addEventListener('click', async ev => {
   const b = ev.target.closest('[data-a]'); if (!b || b.tagName === 'INPUT' || b.tagName === 'SELECT') return;
   const a = b.dataset.a, v = b.dataset.v;
-  if (S.cf && !/^(delq|dele|deln|delc|delm|reset|xdel)$/.test(a)) S.cf = null;
+  if (S.cf && !/^(delq|dele|deln|delc|delm|reset|xdel|qbulkdel|xclear|undoimp)$/.test(a)) S.cf = null;
   switch (a) {
     case 'login': return login();
     case 'go': return go(v);
     case 'seg':
       if (b.dataset.n === 'fsz') { S.look.size = v; applyLook(); render(); return; }
-      S[b.dataset.n] = v; if (b.dataset.n === 'qseg' && v !== 'form') S.eq = null; if (b.dataset.n === 'qseg' || b.dataset.n === 'iseg') S.imp = S.ximp = null; render(); return;
+      S[b.dataset.n] = v; if (b.dataset.n === 'qseg' && v !== 'form') S.eq = null; if (b.dataset.n === 'eseg' && v !== 'form') S.eedit = null; if (b.dataset.n === 'qseg' || b.dataset.n === 'iseg') S.imp = S.ximp = null; render(); return;
     case 'theme': S.look.theme = v; applyLook(); render(); return;
     case 'newq': S.eq = null; S.qseg = 'form'; return go('q');
-    case 'newe': S.eseg = 'form'; return go('exam');
-    case 'qfilter': S.qst = v; S.qseg = 'list'; return go('q');
+    case 'newe': S.eseg = 'form'; S.eedit = null; return go('exam');
+    case 'bulkq': S.qseg = 'bulk'; return go('q');
+    case 'qfilter': S.qst = v; S.qflag = 'সব'; S.qseg = 'list'; return go('q');
+    case 'qflagset': S.qflag = v; S.qst = 'সব'; S.qseg = 'list'; return go('q');
     case 'qmore': S.qlimit += 50; render(); return;
     case 'editq': S.eq = v; S.qseg = 'form'; render(); window.scrollTo(0, 0); return;
     case 'qcancel': S.eq = null; S.qseg = 'list'; render(); return;
@@ -638,39 +938,84 @@ document.addEventListener('click', async ev => {
     case 'exres': S.rx = v; S.eseg = 'res'; render(); return;
     case 'pubres': { const e = byId(E, v); if (await run(updateDoc(doc(db, 'exams', v), {resultPublished: !e.resultPublished}), e.resultPublished ? 'ফলাফল লুকানো হয়েছে' : 'ফলাফল প্রকাশ হয়েছে')) log('ফলাফল ' + (e.resultPublished ? 'লুকানো' : 'প্রকাশ') + ': ' + e.name); return; }
     case 'xdel': { if (!ask('x' + v)) return; const e = byId(E, S.exq), items = (e.items || []).slice(); items.splice(+v, 1); await run(updateDoc(doc(db, 'exams', e.id), {items}), 'প্রশ্ন সরানো হয়েছে'); return; }
-    case 'xbank': { const e = byId(E, S.exq), bq = byId(Q, v), items = (e.items || []).concat([{question:bq.question, options:bq.options.slice(), answer:bq.answer, explanation:bq.explanation || '', src:bq.id}]); if (await run(updateDoc(doc(db, 'exams', e.id), {items}), 'প্রশ্ন যোগ হয়েছে')) log(e.name + ': ব্যাংক থেকে একটি প্রশ্ন নেওয়া হয়েছে'); return; }
+    case 'xbank': { const e = byId(E, S.exq), bq = byId(Q, v), items = (e.items || []).concat([itemOf(bq, bq.id)]); if (await run(updateDoc(doc(db, 'exams', e.id), {items}), 'প্রশ্ন যোগ হয়েছে')) log(e.name + ': ব্যাংক থেকে একটি প্রশ্ন নেওয়া হয়েছে'); return; }
     case 'xauto': {
       const e = byId(E, S.exq), mg = e.type === 'Mega', sb = $('xasub').value, chv = mg ? 'সব অধ্যায়' : $('xach').value, ins = mg ? $('xainst').value : '', cn = +$('xcnt').value || 0, cur = (e.items || []), ua = cur.map(x => x.src);
       const pool = Q.filter(q => q.status === 'প্রকাশিত' && inGroup(e, q) && ua.indexOf(q.id) < 0 && (sb === 'সব বিষয়' || q.subject === sb) && (!mg || ins === 'সব প্রতিষ্ঠান' || q.board === ins) && chMatch(q.chapter, chv));
       for (let k = pool.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)), tmp = pool[k]; pool[k] = pool[j]; pool[j] = tmp; }
-      const pick = pool.slice(0, cn), items = cur.concat(pick.map(q => ({question:q.question, options:q.options.slice(), answer:q.answer, explanation:q.explanation || '', src:q.id})));
+      const pick = pool.slice(0, cn), items = cur.concat(pick.map(q => itemOf(q, q.id)));
       const msg = bn(pick.length) + 'টি প্রশ্ন যোগ হয়েছে' + (pick.length < cn ? ' (ব্যাংকে এর বেশি নেই)' : '');
       if (await run(updateDoc(doc(db, 'exams', e.id), {items}), msg)) log(e.name + ': অটো বাছাই, ' + msg); return;
     }
     case 'adv': { const bx = $('advbox'); if (bx) { const o = bx.classList.toggle('open'); b.setAttribute('aria-expanded', o ? 'true' : 'false'); } return; }
     case 'impexfill': case 'ximpexfill': { $('itext').value = EXAMPLE_JSON; toast('উদাহরণ বসেছে। এখন "আগে যাচাই করুন" চাপুন'); return; }
     case 'impfile': case 'ximpfile': return;
+    case 'impclearfile': case 'ximpclearfile': { const pre = a === 'impclearfile' ? 'imp' : 'ximp'; FROWS = null; S.fileInfo = null; S[pre + 'Form'] = collectImp(pre); S[pre] = null; render(); return; }
     case 'impcheck': case 'ximpcheck': {
-      const p = a === 'impcheck' ? 'imp' : 'ximp', def = a === 'impcheck' ? {subject:$('isub').value, board:$('ibd').value, year:$('iyr').value, chapter:$('ich').value.trim()} : {};
-      S[p + 'Form'] = a === 'impcheck' ? {text:$('itext').value, bank:$('ibk').value, status:$('ist').value, subject:$('isub').value, board:$('ibd').value, year:$('iyr').value, chapter:$('ich').value} : {text:$('itext').value};
-      const r = parseRows($('itext').value, def);
-      if (r.err) { S[p] = null; $('main').querySelector('[id$="res"]').innerHTML = `<span style="color:var(--bad)">${r.err}</span>`; return; }
-      S[p] = r; S[p + 'Opts'] = a === 'impcheck' ? {bank:$('ibk').value, status:$('ist').value} : {}; render(); return;
+      const pre = a === 'impcheck' ? 'imp' : 'ximp', f = collectImp(pre), def = pre === 'imp' ? {subject:f.subject, board:f.board, year:f.year, chapter:(f.chapter || '').trim(), session:(f.session || '').trim()} : {};
+      S[pre + 'Form'] = f; S.impAll = false; S[pre + 'Opts'] = pre === 'imp' ? {bank:f.bank, status:f.status} : {};
+      S[pre] = parseAny(f.text, def, FROWS, pre === 'imp' ? f.skip : false); render(); return;
     }
+    case 'impall': S.impAll = !S.impAll; S.imp = S.imp || null; render(); return;
+    case 'impbad': { const p = S.imp; if (p && p.bad.length) dl('bad-rows.json', JSON.stringify(p.bad.map(b => ({row:b.n, reason:b.why, data:b.raw})), null, 1), 'application/json'); return; }
     case 'impgo': {
-      const p = S.imp; if (!p || !p.ok.length) return;
+      const p = S.imp; if (!p || !p.ok || !p.ok.length) return;
+      const bk = S.impOpts.bank || 'HSC বোর্ড', stt = S.impOpts.status || 'খসড়া', bid = 'b' + Date.now().toString(36);
       try {
-        for (let i = 0; i < p.ok.length; i += 400) { const bt = writeBatch(db); p.ok.slice(i, i + 400).forEach(q => { const x = {...q, bank:S.impOpts.bank, status:S.impOpts.status, type:'MCQ', createdAt:serverTimestamp()}; if ((x.bank === 'বিশ্ববিদ্যালয়' || x.bank === 'মেগা') && !x.university) x.university = x.board || ''; if (!x.university) delete x.university; bt.set(doc(collection(db, 'questions')), x); }); await bt.commit(); }
-        toast(bn(p.ok.length) + 'টি প্রশ্ন যোগ হয়েছে'); log('বাল্ক ইমপোর্ট: ' + bn(p.ok.length) + 'টি প্রশ্ন (' + S.impOpts.bank + ')'); S.imp = null; S.impForm = null; render();
+        await batchDo(p.ok.map((q, i) => i), (bt, i) => { const x = {...p.ok[i]}; delete x._n; const rs = x.rstatus; delete x.rstatus; x.bank = x.bank || bk; x.status = rs || stt; x.type = 'MCQ'; x.importBatch = bid; x.createdAt = serverTimestamp(); if ((x.bank === 'বিশ্ববিদ্যালয়' || x.bank === 'মেগা') && !x.university) x.university = x.board || ''; if (!x.university) delete x.university; bt.set(doc(collection(db, 'questions')), x); });
+        S.impReport = {added:p.ok.length, bank:bk, status:stt, bad:p.bad.length, dup:p.dup.length, batch:bid};
+        toast(bn(p.ok.length) + 'টি প্রশ্ন যোগ হয়েছে'); log('বাল্ক ইমপোর্ট: ' + bn(p.ok.length) + 'টি প্রশ্ন (' + bk + ')'); S.imp = null; S.impForm = null; FROWS = null; S.fileInfo = null; S.impAll = false; render(); window.scrollTo(0, 0);
       } catch(e) { toast('ইমপোর্ট হয়নি: ' + errMsg(e)); }
       return;
     }
-    case 'ximpgo': {
-      const p = S.ximp, e = byId(E, S.exq); if (!p || !p.ok.length) return;
-      const items = (e.items || []).concat(p.ok.map(q => ({question:q.question, options:q.options, answer:q.answer, explanation:q.explanation || ''})));
-      if (await run(updateDoc(doc(db, 'exams', e.id), {items}), bn(p.ok.length) + 'টি প্রশ্ন যোগ হয়েছে')) { log(e.name + ': বাল্ক ইমপোর্ট, ' + bn(p.ok.length) + 'টি'); S.ximp = null; S.ximpForm = null; render(); }
+    case 'impokrep': S.impReport = null; render(); return;
+    case 'undoimp': {
+      if (!ask('undoimp')) return; const bid = S.impReport && S.impReport.batch; if (!bid) return;
+      const ids = Q.filter(q => q.importBatch === bid).map(q => q.id);
+      try { await batchDo(ids, (bt, id) => bt.delete(doc(db, 'questions', id))); toast(bn(ids.length) + 'টি প্রশ্ন সরানো হয়েছে'); log('ইমপোর্ট বাতিল: ' + bn(ids.length) + 'টি প্রশ্ন'); S.impReport = null; render(); } catch(e) { toast(errMsg(e)); }
       return;
     }
+    case 'ximpgo': {
+      const p = S.ximp, e = byId(E, S.exq); if (!p || !p.ok || !p.ok.length) return;
+      const items = (e.items || []).concat(p.ok.map(q => itemOf(q)));
+      if (await run(updateDoc(doc(db, 'exams', e.id), {items}), bn(p.ok.length) + 'টি প্রশ্ন যোগ হয়েছে')) { log(e.name + ': বাল্ক ইমপোর্ট, ' + bn(p.ok.length) + 'টি'); S.ximp = null; S.ximpForm = null; FROWS = null; S.fileInfo = null; render(); }
+      return;
+    }
+    case 'qselall': qList().forEach(q => { S.sel[q.id] = true; }); render(); return;
+    case 'qselnone': S.sel = {}; render(); return;
+    case 'qprev': S.qprev = S.qprev === v ? null : v; render(); return;
+    case 'qtog': { const q = byId(Q, v), ns = q.status === 'প্রকাশিত' ? 'খসড়া' : 'প্রকাশিত'; if (await run(updateDoc(doc(db, 'questions', v), {status:ns, updatedAt:serverTimestamp()}), ns === 'প্রকাশিত' ? 'প্রকাশ হয়েছে' : 'খসড়া করা হয়েছে')) log('প্রশ্নের অবস্থা: ' + ns); return; }
+    case 'qdup': { const q = byId(Q, v), x = {...q}; delete x.id; delete x.importBatch; if (await run(addDoc(collection(db, 'questions'), {...x, status:'খসড়া', createdAt:serverTimestamp(), updatedAt:serverTimestamp()}), 'কপি হয়েছে (খসড়া)')) log('একটি প্রশ্নের কপি করা হয়েছে'); return; }
+    case 'qbulk': {
+      const ids = Object.keys(S.sel); if (!ids.length) return;
+      try { await batchDo(ids, (bt, id) => bt.update(doc(db, 'questions', id), {status:v, updatedAt:serverTimestamp()})); toast(bn(ids.length) + 'টি প্রশ্ন: ' + v); log(bn(ids.length) + 'টি প্রশ্ন "' + v + '" করা হয়েছে'); S.sel = {}; render(); } catch(e) { toast(errMsg(e)); }
+      return;
+    }
+    case 'qmove': {
+      const ids = Object.keys(S.sel); if (!ids.length) return; const bk = $('qmv').value;
+      try { await batchDo(ids, (bt, id) => bt.update(doc(db, 'questions', id), {bank:bk, updatedAt:serverTimestamp()})); toast(bn(ids.length) + 'টি প্রশ্ন গেল: ' + bk); log(bn(ids.length) + 'টি প্রশ্ন "' + bk + '" ব্যাংকে সরানো হয়েছে'); S.sel = {}; render(); } catch(e) { toast(errMsg(e)); }
+      return;
+    }
+    case 'qbulkdel': {
+      if (!ask('qbulkdel')) return; const ids = Object.keys(S.sel); if (!ids.length) return;
+      try { await batchDo(ids, (bt, id) => bt.delete(doc(db, 'questions', id))); toast(bn(ids.length) + 'টি প্রশ্ন মুছে গেছে'); log(bn(ids.length) + 'টি প্রশ্ন মুছে ফেলা হয়েছে'); S.sel = {}; render(); } catch(e) { toast(errMsg(e)); }
+      return;
+    }
+    case 'expq': { const l = S.tab === 'q' ? qList() : Q; dl('questions.csv', toCSV(l.map(qRow), QCOLS), 'text/csv;charset=utf-8'); toast(bn(l.length) + 'টি প্রশ্ন নামানো হয়েছে'); return; }
+    case 'bkq': dl('questions.json', JSON.stringify(plain(Q), null, 1), 'application/json'); return;
+    case 'bke': dl('exams.json', JSON.stringify(plain(E), null, 1), 'application/json'); return;
+    case 'bkall': dl('exam-master-backup-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(plain({questions:Q, exams:E, users:U, notices:N, reports:R, config:{app:CFG.app, struct:CFG.struct, missions:CFG.missions}}), null, 1), 'application/json'); toast('ব্যাকআপ নামানো হয়েছে'); return;
+    case 'expu': dl('users.csv', toCSV(U.map(u => ({...u, createdAt:u.createdAt && u.createdAt.toDate ? u.createdAt.toDate().toISOString() : u.createdAt})), ['id','name','email','phone','college','institution','studentClass','target','district','createdAt','isEmailVerified','accountStatus','deviceModel','xp','blocked']), 'text/csv;charset=utf-8'); return;
+    case 'tpl': dl('exam-master-question-template.csv', toCSV([
+      {question:'SI পদ্ধতিতে বলের একক কোনটি?', a:'জুল', b:'নিউটন', c:'ওয়াট', d:'প্যাসকেল', answer:'খ', explanation:'বলের SI একক নিউটন (N)।', subject:'পদার্থবিজ্ঞান ১ম পত্র', chapter:'৪র্থ: নিউটনিয়ান বলবিদ্যা', board:'ঢাকা', year:'2024', difficulty:'সহজ'},
+      {question:'নিচের কোনটি সঠিক?', a:'i ও ii', b:'i ও iii', c:'ii ও iii', d:'i, ii ও iii', answer:'ক', explanation:'বল ভেক্টর রাশি।', subject:'পদার্থবিজ্ঞান ১ম পত্র', chapter:'৪র্থ: নিউটনিয়ান বলবিদ্যা', board:'ঢাকা', year:'2024', difficulty:'মাঝারি', stimulus:'একটি বস্তুর ভর ২ কেজি, ত্বরণ ৩ মি/সে²।', statements:'বলের মান ৬ N | বলের একক নিউটন | বল স্কেলার রাশি', imageUrl:'https://raw.githubusercontent.com/আপনার-নাম/রেপো/main/images/q2.png'}], QCOLS), 'text/csv;charset=utf-8'); return;
+    case 'umore': S.ulimit += 50; render(); return;
+    case 'rprev': S.rprev = S.rprev === v ? null : v; render(); return;
+    case 'ropen': await run(updateDoc(doc(db, 'reports', v), {status:'খোলা'}), 'আবার খোলা হয়েছে'); return;
+    case 'ecancel': S.eedit = null; S.eseg = 'list'; render(); return;
+    case 'editex': S.eedit = v; S.eseg = 'form'; render(); window.scrollTo(0, 0); return;
+    case 'dupex': { const e = byId(E, v), x = {...e}; delete x.id; if (await run(addDoc(collection(db, 'exams'), {...x, name:e.name + ' (কপি)', status:'খসড়া', live:false, resultPublished:false, createdAt:serverTimestamp()}), 'পরীক্ষার কপি হয়েছে (খসড়া)')) log('পরীক্ষার কপি: ' + e.name); return; }
+    case 'xclear': { if (!ask('xclear')) return; const e = byId(E, S.exq); if (await run(updateDoc(doc(db, 'exams', e.id), {items:[]}), 'সব প্রশ্ন মুছে গেছে')) log(e.name + ': সব প্রশ্ন সরানো হয়েছে'); return; }
     case 'uopen': S.us = S.us === v ? null : v; render(); return;
     case 'blk': { const u = byId(U, v); if (await run(updateDoc(doc(db, 'users', v), {blocked: !u.blocked}), u.blocked ? 'আনব্লক হয়েছে' : 'ব্লক হয়েছে')) log(userName(u) + (u.blocked ? ' আনব্লক' : ' ব্লক') + ' করা হয়েছে'); return; }
     case 'xp': { const i = v.lastIndexOf(':'), id = v.slice(0, i), d = +v.slice(i + 1), u = byId(U, id); if (await run(updateDoc(doc(db, 'users', id), {xp: increment(d)}), 'XP আপডেট হয়েছে')) log(userName(u) + '-এর XP ' + (d > 0 ? 'বাড়ানো' : 'কমানো') + ' হয়েছে'); return; }
@@ -685,9 +1030,9 @@ document.addEventListener('click', async ev => {
     case 'fixr': S.eq = v; S.qseg = 'form'; S.tab = 'q'; render(); window.scrollTo(0, 0); return;
     case 'rsolve': await run(updateDoc(doc(db, 'reports', v), {status:'সমাধান হয়েছে'}), 'সমাধান হিসেবে চিহ্নিত'); return;
     case 'rdrop': await run(deleteDoc(doc(db, 'reports', v)), 'রিপোর্ট বাতিল হয়েছে'); return;
-    case 'sendn': { const nt = $('nt'); if (!nt.value.trim()) return toast('বার্তা লিখুন'); if (await run(addDoc(collection(db, 'notices'), {text:nt.value.trim(), audience:$('na').value, kind:$('nk').value, at:serverTimestamp()}), 'নোটিশ সেভ হয়েছে')) { log('নোটিশ পাঠানো হয়েছে'); nt.value = ''; } return; }
+    case 'sendn': { const nt = $('nt'); if (!nt.value.trim()) return toast('বার্তা লিখুন'); if (await run(addDoc(collection(db, 'notices'), {title:$('ntt').value.trim(), text:nt.value.trim(), audience:$('na').value, kind:$('nk').value, link:$('nl').value.trim(), expiry:$('nx').value || '', active:true, at:serverTimestamp()}), 'নোটিশ সেভ হয়েছে')) { log('নোটিশ পাঠানো হয়েছে'); nt.value = ''; $('ntt').value = ''; $('nl').value = ''; render(); } return; }
     case 'deln': if (!ask('n' + v)) return; await run(deleteDoc(doc(db, 'notices', v)), 'নোটিশ মুছে গেছে'); return;
-    case 'savec': if (await run(setDoc(doc(db, 'config', 'app'), {ver:$('cv').value.trim(), support:$('cs').value.trim()}, {merge:true}), 'সেভ হয়েছে')) log('অ্যাপের তথ্য আপডেট হয়েছে'); return;
+    case 'savec': if (await run(setDoc(doc(db, 'config', 'app'), {ver:$('cv').value.trim(), minVer:$('cmv').value.trim(), maintMsg:$('cmm').value.trim(), storeUrl:$('csu').value.trim(), community:$('ccm').value.trim(), support:$('cs').value.trim()}, {merge:true}), 'সেভ হয়েছে')) log('অ্যাপের তথ্য আপডেট হয়েছে'); return;
     case 'copyrules': { const t = $('rulebox'); try { await navigator.clipboard.writeText(t.value); toast('কপি হয়েছে'); } catch(e) { t.select(); toast('লেখাটি বাছা হয়েছে, কপি করে নিন'); } return; }
   }
 });
@@ -702,9 +1047,16 @@ document.addEventListener('change', async ev => {
   }
   if (a === 'ctl') { if (await run(setDoc(doc(db, 'config', 'app'), {[v]: t.checked}, {merge:true}), 'সেটিং সেভ হয়েছে')) log('অ্যাপ কন্ট্রোল বদলেছে: ' + v); else render(); return; }
   if (a === 'sec') { await run(setDoc(doc(db, 'config', 'security'), {['i' + v]: t.checked}, {merge:true})); return; }
-  if (a === 'impfile' || a === 'ximpfile') { const f = t.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { $('itext').value = r.result; }; r.readAsText(f); return; }
-  if (t.id === 'qsub') { S.qsub = t.value; render(); }
+  if (a === 'impfile' || a === 'ximpfile') { const f = t.files[0]; if (f) readImpFile(f, a === 'impfile' ? 'imp' : 'ximp'); return; }
+  if (a === 'qsel') { if (t.checked) S.sel[v] = true; else delete S.sel[v]; render(); return; }
+  if (a === 'ntog') { await run(updateDoc(doc(db, 'notices', v), {active:t.checked}), t.checked ? 'নোটিশ চালু' : 'নোটিশ বন্ধ'); return; }
+  if (a === 'feat') { if (await run(setDoc(doc(db, 'config', 'app'), {feat:{[v]:t.checked}}, {merge:true}), 'সেটিং সেভ হয়েছে')) log('ফিচার বদলেছে: ' + v + (t.checked ? ' চালু' : ' বন্ধ')); else render(); return; }
+  if (t.id === 'qsub') { S.qsub = t.value; S.qch = 'সব'; S.qlimit = 50; render(); }
   else if (t.id === 'qbank') { S.qbank = t.value; render(); }
+  else if (t.id === 'qch') { S.qch = t.value; S.qlimit = 50; render(); }
+  else if (t.id === 'qflag') { S.qflag = t.value; S.qlimit = 50; render(); }
+  else if (t.id === 'qsort') { S.qsort = t.value; render(); }
+  else if (t.id === 'usort') { S.usort = t.value; render(); }
   else if (t.id === 'qst') { S.qst = t.value; render(); }
   else if (t.id === 'ufil') { S.ufil = t.value; render(); }
   else if (t.id === 'ssub') { S.sSub = t.value; render(); }
@@ -737,8 +1089,9 @@ document.addEventListener('submit', async ev => {
   }
   if (f.id === 'fe2') {
     const neg = $('eng').value === 'নেই' ? 0 : ($('eng').value === '০.৫' ? 0.5 : 0.25), type = $('et').value;
-    const data = {name:$('en').value.trim(), type, subject:$('esub').value, inst:$('einst').value, duration:+$('em').value || 20, count:+$('eq').value || 20, negative:neg, passMark:+$('epm').value || 0,
-      startAt:$('ew').value || '', showAnswer:$('eshow').checked, live:false, status:'খসড়া', items:[], createdAt:serverTimestamp()};
+    const base = {name:$('en').value.trim(), subject:$('esub').value, inst:$('einst').value, duration:+$('edur').value || 20, count:+$('eq').value || 20, negative:neg, passMark:+$('epm').value || 0, startAt:$('ew').value || '', showAnswer:$('eshow').checked};
+    if (S.eedit) { if (await run(updateDoc(doc(db, 'exams', S.eedit), base), 'পরীক্ষা বদলানো হয়েছে')) { log('পরীক্ষা এডিট: ' + base.name); S.eedit = null; S.eseg = 'list'; render(); } return; }
+    const data = {...base, type, live:false, status:'খসড়া', items:[], createdAt:serverTimestamp()};
     try {
       const ref = await addDoc(collection(db, 'exams'), data);
       log('নতুন পরীক্ষা তৈরি: ' + data.name); toast('পরীক্ষা তৈরি হয়েছে। এবার প্রশ্ন যোগ করুন');
@@ -750,7 +1103,9 @@ document.addEventListener('submit', async ev => {
     const e = byId(E, S.exq), a = f.querySelector('input[name=xa]:checked'), o = [0,1,2,3].map(i => $('xo' + i).value.trim());
     if (!a) { $('xmsg').textContent = 'সঠিক উত্তর বেছে নিন।'; return; }
     if (o.some(x => !x)) { $('xmsg').textContent = 'চারটি অপশনই লিখুন।'; return; }
-    const items = (e.items || []).concat([{question:$('xq').value.trim(), options:o, answer:+a.value, explanation:$('xe').value.trim()}]);
+    const it = {question:$('xq').value.trim(), options:o, answer:+a.value, explanation:$('xe').value.trim()}, xs = $('xst').value.trim(), xsm = $('xsm').value.split('\n').map(x => x.trim()).filter(Boolean), xi = fixImg($('xim').value), xsi = fixImg($('xsi').value), xoi = [0,1,2,3].map(i => fixImg($('xoi' + i).value));
+    if (xs) it.stimulus = xs; if (xsi) it.stimulusImageUrl = xsi; if (xsm.length) it.statements = xsm; if (xi) it.imageUrl = xi; if (xoi.some(Boolean)) it.optionImageUrls = xoi;
+    const items = (e.items || []).concat([it]);
     if (await run(updateDoc(doc(db, 'exams', e.id), {items}), 'প্রশ্ন যোগ হয়েছে (' + bn(items.length) + '/' + bn(e.count) + ')')) { log(e.name + ': নতুন প্রশ্ন যোগ হয়েছে'); S.iseg = 'add'; render(); }
   }
 });
@@ -762,4 +1117,4 @@ applyLook();
 
 </script>
 </body>
-   </html>
+</html>
