@@ -158,6 +158,22 @@ input.sel{width:22px;height:22px;min-height:0;flex:none;margin-top:3px;accent-co
 .po b{flex:none;width:22px}
 details summary{min-height:36px;display:flex;align-items:center}
 @media (min-width:900px){.tools.two-row{grid-template-columns:2fr 1fr 1fr 1fr}.tools.two-row input{grid-column:auto}}
+#mbar{position:fixed;left:0;right:0;bottom:0;z-index:60;background:var(--surface);border-top:2px solid var(--accent);box-shadow:0 -6px 20px rgba(0,0,0,.18);
+  padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:6px}
+#mbar[hidden]{display:none}
+#mprev{border:1px dashed var(--line);border-radius:10px;padding:6px 10px;max-height:84px;overflow:auto;font-size:.95em;line-height:1.7;background:var(--bg);white-space:pre-wrap;word-break:break-word}
+#mprev .ph{color:var(--muted)}
+#mprev .katex{font-size:1.08em}
+#mprev .katex-error{color:var(--bad)}
+#mtabs,#mchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#mtabs::-webkit-scrollbar,#mchips::-webkit-scrollbar{display:none}
+#mtabs button,#mchips button{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;min-height:38px;font-size:.92em}
+#mtabs button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#mchips button{border-radius:10px;background:var(--accent-soft);min-width:44px}
+#mchips button.nx{background:var(--accent);color:var(--accent-ink);font-weight:600}
+#mchips button:active{transform:scale(.96)}
+#mhide{margin-left:auto;background:none!important;border:0!important;color:var(--muted)!important}
+body.mopen{padding-bottom:230px}
 </style>
 </head>
 <body>
@@ -268,7 +284,7 @@ match /audit/{id} {
 
 /* ---------- state ---------- */
 const S = {tab:'home',qseg:'list',eseg:'list',iseg:'list',qf:'',qsub:'সব',qst:'সব',qbank:'সব',qlimit:50,eq:null,exq:null,cf:null,us:null,uq:'',ufil:'সব',sSub:'ICT',xasub:null,xainst:null,rx:null,imp:null,ximp:null,qch:'সব',qflag:'সব',qsort:'নতুন',sel:{},qprev:null,impAll:false,impReport:null,fileInfo:null,ulimit:50,usort:'নতুন',rf:'খোলা',rprev:null,eedit:null,look:{theme:'soft',size:'17'}};
-let Q = [], E = [], U = [], R = [], N = [], AUD = [], unsubs = [];
+let Q = [], E = [], U = [], R = [], N = [], AUD = [], SUB = [], unsubs = [];
 let CFG = {app:{...DEFAULT_APP}, struct:DEFAULT_STRUCT, missions:DEFAULT_MISSIONS, sec:{}};
 const perm = {};
 let ME = null;
@@ -404,6 +420,7 @@ function listen(){
   onCol('exams', d => { E = d.map(en).sort((a,b) => (b.createdAt && b.createdAt.seconds || 0) - (a.createdAt && a.createdAt.seconds || 0)); });
   onCol('users', d => { U = d; });
   onCol('reports', d => { R = d; });
+  onCol('submissions', d => { SUB = d; });
   onCol('notices', d => { N = d; });
   onCol('audit', d => { AUD = d.sort((a,b) => (b.at && b.at.seconds || 0) - (a.at && a.at.seconds || 0)).slice(0, 40); });
   onDoc('app', d => { CFG.app = {...DEFAULT_APP, ...(d || {}), feat:{...((d && d.feat) || {})}}; });
@@ -433,6 +450,7 @@ const IC = {
 const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 const MAIN = [['home','ড্যাশবোর্ড','home'],['q','প্রশ্ন','q'],['exam','পরীক্ষা','exam'],['user','ইউজার','user']];
 const MORE = [
+ ['res','পরীক্ষার ফলাফল','exam','কে দিল, কত নম্বর, কত সময়ে'],
  ['rank','মেধা তালিকা','rank','XP অনুযায়ী র‍্যাঙ্ক, লুকানো'],
  ['mission','মিশন ও XP','bolt','দৈনিক মিশন ও পুরস্কার ঠিক করা'],
  ['struct','বিষয় ও অধ্যায়','book','বিষয়, অধ্যায় যোগ বা মোছা'],
@@ -539,6 +557,36 @@ function vRank(){
   return `<div class="sec"><div><h1>মেধা তালিকা</h1><p class="sub">XP অনুযায়ী, অ্যাপের Leaderboard যেভাবে দেখায়</p></div></div>
   ${l.length ? `<div class="podium">${ord.map((u, i) => u ? `<div class="card ${cls[i]}"><div class="s">${['🥈 ২য়','🥇 ১ম','🥉 ৩য়'][i]}</div><div class="t">${esc(userName(u))}</div><div class="n">${bn(u.xp || 0)}</div><div class="s">XP</div></div>` : '<div></div>').join('')}</div>
   <div class="card">${l.slice(0, 50).map((u, i) => `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><span class="t">${bn(i + 1)}. ${esc(userName(u))}</span><span class="s" style="white-space:nowrap">${bn(u.xp || 0)} XP</span></div><div class="bar"><b style="width:${Math.round((u.xp || 0) / m * 100)}%"></b></div></div>`).join('')}</div>` : '<div class="card"><div class="empty">এখনো কোনো ইউজার বা XP নেই</div></div>'}`;
+}
+/* ---------- পরীক্ষার ফলাফল (অ্যাপ থেকে জমা পড়া submissions) ---------- */
+const mmss = n => { n = Math.max(0, Math.round(+n || 0)); return bn(Math.floor(n / 60)) + ' মি ' + bn(n % 60) + ' সে'; };
+const numFmt = n => { n = +n || 0; return bn((Math.round(n * 100) / 100).toString()); };
+const subTime = t => { try { const d = t && t.toDate ? t.toDate() : new Date(t); return isNaN(d) ? '' : d.toLocaleString('bn-BD', {day:'numeric', month:'short', hour:'numeric', minute:'2-digit'}); } catch(e) { return ''; } };
+function resList(){
+  let l = SUB.slice();
+  if (S.rexam) l = l.filter(s => s.examId === S.rexam);
+  const q = (S.rq || '').trim().toLowerCase();
+  if (q) l = l.filter(s => { const u = byId(U, s.uid) || {}; return [s.userName, u.name, s.college, u.college, s.examName, u.phone, u.email].join(' ').toLowerCase().indexOf(q) > -1; });
+  return l.sort((a, b) => (b.score || 0) - (a.score || 0) || (a.timeTakenSec || 0) - (b.timeTakenSec || 0));
+}
+function resRow(s){
+  const u = byId(U, s.uid) || {};
+  return {name:s.userName || u.name || '', phone:u.phone || '', email:u.email || '', college:s.college || u.college || '', studentClass:s.studentClass || u.studentClass || '', exam:s.examName || '', score:s.score, maxScore:s.maxScore || s.total, percent:s.percent, correct:s.correct, wrong:s.wrong, skipped:s.skipped, timeTakenSec:s.timeTakenSec, submittedAt:s.submittedAt && s.submittedAt.toDate ? s.submittedAt.toDate().toISOString() : ''};
+}
+function vRes(){
+  const exs = {}; SUB.forEach(s => { if (s.examId) { exs[s.examId] = exs[s.examId] || {n:s.examName || s.examId, c:0}; exs[s.examId].c++; } });
+  const l = resList(), n = l.length;
+  const avgPct = n ? l.reduce((a, s) => a + (+s.percent || 0), 0) / n : 0, avgT = n ? l.reduce((a, s) => a + (+s.timeTakenSec || 0), 0) / n : 0, top = n ? l[0] : null;
+  const lim = S.rlimit || 100;
+  return `<div class="sec"><div><h1>পরীক্ষার ফলাফল</h1><p class="sub">অ্যাপে লাইভ পরীক্ষা জমা দিলে এখানে আসে। নম্বর বেশি ও সময় কম হলে র‍্যাঙ্ক ওপরে।</p></div>${n ? `<button class="btn ghost sm" data-a="expres">CSV নামান</button>` : ''}</div>
+  <div class="card"><label for="rexam">পরীক্ষা</label><select id="rexam"><option value=""${S.rexam ? '' : ' selected'}>সব পরীক্ষা (${bn(SUB.length)})</option>${Object.keys(exs).map(k => `<option value="${esc(k)}"${S.rexam === k ? ' selected' : ''}>${esc(exs[k].n)} (${bn(exs[k].c)} জন)</option>`).join('')}</select>
+  <label for="rqs">খুঁজুন</label><input id="rqs" value="${esc(S.rq || '')}" placeholder="নাম, কলেজ, ফোন বা ইমেইল"></div>
+  ${n ? `<div class="grid" style="margin-top:12px">${stat('পরীক্ষার্থী', bn(n), 'জন জমা দিয়েছে')}${stat('গড় নম্বর', bn(Math.round(avgPct)) + '%', 'সব জমার গড় শতাংশ')}${stat('সর্বোচ্চ', top ? numFmt(top.score) : '০', top ? esc(top.userName || '') : '')}${stat('গড় সময়', mmss(avgT), 'জমা দিতে লেগেছে')}</div>
+  <div class="card" style="margin-top:12px">${l.slice(0, lim).map((s, i) => { const u = byId(U, s.uid) || {}; return `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><span class="t">${bn(i + 1)}. ${esc(s.userName || u.name || 'নাম নেই')}</span><div class="s">${esc([s.college || u.college, s.studentClass || u.studentClass].filter(Boolean).join(' · '))}${S.rexam ? '' : ' · ' + esc(s.examName || '')}</div></div><div style="text-align:right;white-space:nowrap"><span class="pill good">${numFmt(s.score)}/${numFmt(s.maxScore || s.total)}</span> <span class="pill gray">${bn(Math.round(+s.percent || 0))}%</span></div></div>
+   <div class="s" style="margin-top:6px">সঠিক ${bn(s.correct || 0)} · ভুল ${bn(s.wrong || 0)} · বাদ ${bn(s.skipped || 0)} · সময় ${mmss(s.timeTakenSec)} · জমা ${esc(subTime(s.submittedAt))}</div>
+   <div class="s">${esc([u.phone, u.email].filter(Boolean).join(' · ') || (s.userName === 'Guest' ? 'অতিথি ইউজার' : ''))}</div></div>`; }).join('')}
+  ${n > lim ? `<div style="text-align:center;margin-top:10px"><button class="btn ghost sm" data-a="resmore">আরও দেখান (${bn(n - lim)}টি বাকি)</button></div>` : ''}</div>`
+  : `<div class="card" style="margin-top:12px"><div class="empty">${SUB.length ? 'এই খোঁজে কোনো ফলাফল নেই।' : 'এখনো কেউ লাইভ পরীক্ষা জমা দেয়নি।'}</div>${SUB.length ? '' : '<p class="msg">অ্যাপে লাইভ পরীক্ষা জমা দিলে এখানে আসবে। না এলে Firestore রুলে <b>submissions</b> ব্লক Publish করা হয়েছে কিনা দেখুন।</p>'}</div>`}`;
 }
 function vMission(){
   return `<div class="sec"><div><h1>মিশন ও XP</h1><p class="sub">অ্যাপের "আজকের মিশন"</p></div></div><div class="card">${CFG.missions.map((m, i) => `<div class="row"><div><div class="t">${esc(m.t)}</div><div style="margin-top:6px;display:flex;align-items:center;gap:8px"><input type="number" id="mxp${i}" value="${m.xp}" min="0" style="width:96px" aria-label="XP"><span class="s">XP</span></div></div><div style="display:flex;gap:8px;align-items:center">${sw(`id="mon${i}"`, m.on, 'মিশন চালু')}${delBtn('m' + i, 'delm', i)}</div></div>`).join('') || '<div class="empty">কোনো মিশন নেই</div>'}<div style="margin-top:12px"><button class="btn" data-a="savem">পরিবর্তন সেভ করুন</button></div></div>
@@ -889,7 +937,7 @@ function vBackup(){
   <div class="card" style="margin-top:12px"><h2>ছবির লিংক কীভাবে দেবেন</h2><div class="msg">১) GitHub-এ আপনার রিপোজিটরিতে "images" নামে ফোল্ডার খুলে ছবি আপলোড করুন। ২) ছবি খুলে "Raw" বা "Download" চেপে যে লিংক পাবেন সেটা দিন। github.com/.../blob/... লিংক দিলেও চলবে, ইমপোর্টে নিজে raw লিংকে বদলে যাবে। ৩) প্রশ্নের তালিকায় "প্রিভিউ" চেপে ছবি আসছে কিনা দেখে নিন।</div></div>`;
 }
 
-const V = {home:vHome,q:vQ,exam:vExam,user:vUser,more:vMore,rank:vRank,mission:vMission,struct:vStruct,report:vReport,notice:vNotice,admins:vAdmins,audit:vAudit,ctl:vCtl,look:vLook,backup:vBackup};
+const V = {home:vHome,q:vQ,exam:vExam,user:vUser,more:vMore,rank:vRank,res:vRes,mission:vMission,struct:vStruct,report:vReport,notice:vNotice,admins:vAdmins,audit:vAudit,ctl:vCtl,look:vLook,backup:vBackup};
 
 function navs(){
   const cur = MOREKEYS.indexOf(S.tab) > -1 ? 'more' : S.tab;
@@ -1005,6 +1053,8 @@ document.addEventListener('click', async ev => {
     case 'bkq': dl('questions.json', JSON.stringify(plain(Q), null, 1), 'application/json'); return;
     case 'bke': dl('exams.json', JSON.stringify(plain(E), null, 1), 'application/json'); return;
     case 'bkall': dl('exam-master-backup-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(plain({questions:Q, exams:E, users:U, notices:N, reports:R, config:{app:CFG.app, struct:CFG.struct, missions:CFG.missions}}), null, 1), 'application/json'); toast('ব্যাকআপ নামানো হয়েছে'); return;
+    case 'expres': { const l = resList(); dl('exam-results.csv', toCSV(l.map((s, i) => ({rank:i + 1, ...resRow(s)})), ['rank','name','phone','email','college','studentClass','exam','score','maxScore','percent','correct','wrong','skipped','timeTakenSec','submittedAt']), 'text/csv;charset=utf-8'); toast(bn(l.length) + 'টি ফলাফল নামানো হয়েছে'); return; }
+    case 'resmore': S.rlimit = (S.rlimit || 100) + 100; render(); return;
     case 'expu': dl('users.csv', toCSV(U.map(u => ({...u, createdAt:u.createdAt && u.createdAt.toDate ? u.createdAt.toDate().toISOString() : u.createdAt})), ['id','name','email','phone','college','institution','studentClass','target','district','createdAt','isEmailVerified','accountStatus','deviceModel','xp','blocked']), 'text/csv;charset=utf-8'); return;
     case 'tpl': dl('exam-master-question-template.csv', toCSV([
       {question:'SI পদ্ধতিতে বলের একক কোনটি?', a:'জুল', b:'নিউটন', c:'ওয়াট', d:'প্যাসকেল', answer:'খ', explanation:'বলের SI একক নিউটন (N)।', subject:'পদার্থবিজ্ঞান ১ম পত্র', chapter:'৪র্থ: নিউটনিয়ান বলবিদ্যা', board:'ঢাকা', year:'2024', difficulty:'সহজ'},
@@ -1063,10 +1113,12 @@ document.addEventListener('change', async ev => {
   else if (t.id === 'rxs') { S.rx = t.value; render(); }
   else if (t.id === 'xasub') { S.xasub = t.value; render(); }
   else if (t.id === 'xainst') { S.xainst = t.value; render(); }
+  else if (t.id === 'rexam') { S.rexam = t.value; S.rlimit = 100; render(); }
 });
 document.addEventListener('input', ev => {
   const t = ev.target;
   if (t.id === 'qs') { S.qf = t.value; S.qlimit = 50; render(); const n = $('qs'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }
+  else if (t.id === 'rqs') { S.rq = t.value; S.rlimit = 100; render(); const n = $('rqs'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }
   else if (t.id === 'us') { S.uq = t.value; render(); const n = $('us'); if (n) { n.focus(); n.setSelectionRange(n.value.length, n.value.length); } }
 });
 document.addEventListener('keydown', ev => { if (ev.key === 'Enter' && (ev.target.id === 'pw' || ev.target.id === 'em')) login(); });
@@ -1115,6 +1167,117 @@ $('logo').innerHTML = icon('exam').replace('<svg', '<svg width="20" height="20"'
 const h = (location.hash || '').slice(1); if (V[h]) S.tab = h;
 applyLook();
 
+</script>
+<script>
+/* সূত্র বাটন বার + লাইভ প্রিভিউ (KaTeX, cdnjs) — প্রশ্ন ফর্মের লেখার ঘরে ফোকাস করলে নিচে ওঠে */
+(function(){
+  var FIELDS = {fstim:'উদ্দীপক', fq1:'প্রশ্ন', fst2:'বহুপদী বিবৃতি', o0:'অপশন ক', o1:'অপশন খ', o2:'অপশন গ', o3:'অপশন ঘ', fe:'ব্যাখ্যা'};
+  /* § = কার্সর বসবে; প্রতিটি জিনিস ডলারের ভেতরে নিজে থেকে বসে (ভেতরে থাকলে ডলার ছাড়া) */
+  var TABS = [
+   ['সাধারণ', [
+    ['ভগ্নাংশ','\\frac{§}{}'],['ঘাত x²','§^{}'],['নিচে xₙ','§_{}'],['√','\\sqrt{§}'],['ⁿ√','\\sqrt[§]{}'],
+    ['×','\\times '],['÷','\\div '],['±','\\pm '],['≠','\\neq '],['≤','\\leq '],['≥','\\geq '],['≈','\\approx '],['∞','\\infty '],
+    ['∴','\\therefore '],['°','^\\circ'],['|x|','|§|'],['log','\\log_{§}'],['ln','\\ln '],['e ঘাত','e^{§}'],['nCr','\\binom{§}{}'],['∑','\\sum_{§}^{}'],['n!','§!']]],
+   ['ত্রিকোণ/ক্যালকুলাস', [
+    ['sin','\\sin '],['cos','\\cos '],['tan','\\tan '],['cot','\\cot '],['sec','\\sec '],['cosec','\\csc '],['sin⁻¹','\\sin^{-1}'],['⁻¹','^{-1}'],
+    ['θ','\\theta '],['α','\\alpha '],['β','\\beta '],['γ','\\gamma '],['φ','\\phi '],['π','\\pi '],['ω','\\omega '],['λ','\\lambda '],['μ','\\mu '],['Δ','\\Delta '],
+    ['dy/dx','\\frac{d§}{d}'],['∫ সীমাসহ','\\int_{§}^{} \\,dx'],['∫','\\int § \\,dx'],['lim','\\lim_{x\\to §}'],['∂','\\frac{\\partial §}{\\partial }'],['f′','\'']]],
+   ['ম্যাট্রিক্স/ভেক্টর/সেট', [
+    ['২×২','\\begin{pmatrix} § & \\\\ & \\end{pmatrix}'],['৩×৩','\\begin{pmatrix} § & & \\\\ & & \\\\ & & \\end{pmatrix}'],['নির্ণায়ক','\\begin{vmatrix} § & \\\\ & \\end{vmatrix}'],
+    ['ভেক্টর','\\vec{§}'],['একক ভেক্টর','\\hat{§}'],['ডট ·','\\cdot '],['∠','\\angle '],['△','\\triangle '],['⊥','\\perp '],['∥','\\parallel '],['রেখা','\\overline{§}'],
+    ['∈','\\in '],['∉','\\notin '],['⊂','\\subset '],['∪','\\cup '],['∩','\\cap '],['∅','\\emptyset '],['ℝ','\\mathbb{R}'],['ℕ','\\mathbb{N}'],['ℤ','\\mathbb{Z}'],['i²=-1','i^{2}=-1'],['z̄','\\bar{§}']]],
+   ['পদার্থ', [
+    ['একক/বাংলা লেখা','\\text{§}'],['১০ এর ঘাত','\\times 10^{§}'],['m/s²','\\text{m/s}^{2}'],['kg m⁻³','\\text{kg m}^{-3}'],['Ω','\\Omega '],['ρ','\\rho '],['σ','\\sigma '],['ε₀','\\varepsilon_{0}'],['μ₀','\\mu_{0}'],['ħ','\\hbar '],['Φ','\\Phi '],
+    ['ভেক্টর F','\\vec{F}'],['পরিবর্তন Δx','\\Delta x'],['½mv²','\\frac{1}{2}mv^{2}'],['∮','\\oint ']]],
+   ['রসায়ন', [
+    ['রাসায়নিক সূত্র','\\ce{§}'],['বিক্রিয়া →','\\ce{§ -> }'],['উভমুখী ⇌','\\ce{§ <=> }'],['তাপে','\\ce{§ ->[\\Delta] }'],['ক্যাটায়ন','\\ce{§^2+}'],['অ্যানায়ন','\\ce{§^2-}'],
+    ['আইসোটোপ','\\ce{^{}_{}§}'],['কেলাস জল','\\ce{§.5H2O}'],['দ্বিবন্ধন','\\ce{§=}'],['ত্রিবন্ধন','\\ce{§#}'],['pH','\\mathrm{pH}'],['K꜀','K_{c}'],['ΔH','\\Delta H'],['mol L⁻¹','\\text{mol L}^{-1}']]],
+   ['জীব/ICT', [
+    ['সালোকসংশ্লেষণ','\\ce{6CO2 + 6H2O ->[\\text{আলো}] C6H12O6 + 6O2}'],['F₁','F_{1}'],['F₂','F_{2}'],['৩:১','3:1'],['৯:৩:৩:১','9:3:3:1'],['μm','\\mu\\text{m}'],
+    ['(…)₂','(§)_{2}'],['(…)₈','(§)_{8}'],['(…)₁₀','(§)_{10}'],['(…)₁₆','(§)_{16}'],['NOT ¯','\\overline{§}'],['AND ·','\\cdot '],['OR +','+'],['XOR ⊕','\\oplus '],['2ⁿ','2^{§}']]]
+  ];
+  var bar, prev, tabsEl, chipsEl, cur = null, tab = 0, loaded = 0, hideT;
+  function build(){
+    if (bar) return;
+    bar = document.createElement('div'); bar.id = 'mbar'; bar.hidden = true;
+    bar.innerHTML = '<div id="mprev" aria-live="polite"></div><div id="mtabs"></div><div id="mchips"></div>';
+    document.body.appendChild(bar);
+    prev = bar.querySelector('#mprev'); tabsEl = bar.querySelector('#mtabs'); chipsEl = bar.querySelector('#mchips');
+    bar.addEventListener('pointerdown', function(e){ e.preventDefault(); clearTimeout(hideT); });  /* ফোকাস হারাবে না */
+    drawTabs(); drawChips();
+  }
+  function drawTabs(){
+    tabsEl.textContent = '';
+    TABS.forEach(function(t, i){
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = t[0]; b.setAttribute('aria-pressed', i === tab);
+      b.addEventListener('click', function(){ tab = i; drawTabs(); drawChips(); }); tabsEl.appendChild(b);
+    });
+    var h = document.createElement('button'); h.type = 'button'; h.id = 'mhide'; h.textContent = 'বন্ধ ✕';
+    h.addEventListener('click', function(){ if (cur) cur.blur(); hide(); }); tabsEl.appendChild(h);
+  }
+  function drawChips(){
+    chipsEl.textContent = '';
+    var nx = document.createElement('button'); nx.type = 'button'; nx.className = 'nx'; nx.textContent = 'পরের ঘর →'; nx.addEventListener('click', next); chipsEl.appendChild(nx);
+    TABS[tab][1].forEach(function(c){
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = c[0]; b.addEventListener('click', function(){ insert(c[1]); }); chipsEl.appendChild(b);
+    });
+  }
+  function insideMath(txt, pos){
+    var n = 0; for (var i = 0; i < pos; i++){ if (txt[i] === '$' && txt[i-1] !== '\\') n++; } return n % 2 === 1;
+  }
+  function insert(tpl){
+    if (!cur) return;
+    var v = cur.value, s = cur.selectionStart, e = cur.selectionEnd, sel = v.slice(s, e), inside = insideMath(v, s);
+    var body = tpl, pos = body.indexOf('§');
+    var withSel = body.replace('§', sel); var caret = pos < 0 ? withSel.length : pos + sel.length;
+    var out = inside ? withSel : '$' + withSel + '$', off = inside ? 0 : 1;
+    cur.value = v.slice(0, s) + out + v.slice(e);
+    var p = s + off + (pos < 0 ? withSel.length : (sel ? pos + sel.length : pos));
+    cur.focus(); cur.setSelectionRange(p, p); cur.dispatchEvent(new Event('input', {bubbles:true})); preview();
+  }
+  function next(){
+    if (!cur) return; var v = cur.value, p = cur.selectionEnd, j = v.indexOf('}', p);
+    var k = v.indexOf('&', p), m = v.indexOf('$', p), cand = [];
+    if (j > -1) cand.push([j, 1]); if (k > -1) cand.push([k, 1]);
+    cand.sort(function(a, b){ return a[0] - b[0]; });
+    var np;
+    if (cand.length && (m < 0 || cand[0][0] < m)){
+      np = cand[0][0] + 1; if (v[np] === '{') { np++; if (v[np] === ' ') np++; } else if (v[np] === '$') np++;
+    } else if (m > -1){ np = m + 1; } else { np = v.length; }
+    cur.focus(); cur.setSelectionRange(np, np); preview();
+  }
+  function loadKatex(cb){
+    if (window.katex && window.renderMathInElement) return cb(true);
+    if (loaded === 2) return cb(false);
+    if (loaded === 1) return setTimeout(function(){ loadKatex(cb); }, 300);
+    loaded = 1; var B = 'https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/';
+    var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = B + 'katex.min.css'; document.head.appendChild(l);
+    function sc(src, ok, bad){ var s = document.createElement('script'); s.src = B + src; s.onload = ok; s.onerror = bad; document.head.appendChild(s); }
+    sc('katex.min.js', function(){ sc('contrib/mhchem.min.js', function(){ sc('contrib/auto-render.min.js', function(){ loaded = 0; cb(true); }, fail); }, fail); }, fail);
+    function fail(){ loaded = 2; cb(false); }
+  }
+  function preview(){
+    if (!cur) return; var txt = cur.value;
+    if (!txt.trim()){ prev.innerHTML = '<span class="ph">' + (FIELDS[cur.id] || '') + ': লিখলে এখানে বইয়ের মতো দেখা যাবে</span>'; return; }
+    loadKatex(function(ok){
+      prev.textContent = txt;
+      if (!ok){ prev.insertAdjacentHTML('afterbegin', '<div class="ph">প্রিভিউ লোড হয়নি (ইন্টারনেট দেখুন)। কোড ঠিকই বসছে।</div>'); return; }
+      try { window.renderMathInElement(prev, {delimiters:[{left:'$$', right:'$$', display:true},{left:'$', right:'$', display:false}], throwOnError:false, strict:false}); } catch(e){}
+    });
+  }
+  function show(){ build(); bar.hidden = false; document.body.classList.add('mopen'); }
+  function hide(){ if (bar) bar.hidden = true; document.body.classList.remove('mopen'); cur = null; }
+  document.addEventListener('focusin', function(e){
+    var t = e.target;
+    if (t && FIELDS[t.id] && t.closest && t.closest('#fq')){ clearTimeout(hideT); cur = t; show(); preview();
+      setTimeout(function(){ try { t.scrollIntoView({block:'center', behavior:'smooth'}); } catch(_){} }, 250); }
+  });
+  document.addEventListener('focusout', function(e){
+    if (e.target && FIELDS[e.target.id]){ clearTimeout(hideT); hideT = setTimeout(function(){ var a = document.activeElement; if (!a || !FIELDS[a.id]) hide(); }, 250); }
+  });
+  document.addEventListener('input', function(e){ if (cur && e.target === cur) preview(); });
+  window.__mathBar = {insert: insert, next: next};
+})();
 </script>
 </body>
 </html>
