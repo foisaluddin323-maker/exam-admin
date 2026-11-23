@@ -219,7 +219,7 @@ body.mopen{padding-bottom:230px}
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,onSnapshot,writeBatch,serverTimestamp,increment} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getFirestore,collection,doc,addDoc,setDoc,updateDoc,deleteDoc,onSnapshot,writeBatch,serverTimestamp,increment,deleteField} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ====== Firebase config ====== */
 const firebaseConfig = {
@@ -501,7 +501,8 @@ function eForm(e){
   <div class="two"><div><label for="eq">প্রশ্ন সংখ্যা</label><input id="eq" type="number" value="${esc(v('count',25))}" min="1"></div><div><label for="edur">সময় (মিনিট)</label><input id="edur" type="number" value="${esc(v('duration',25))}" min="1"></div></div>
   <div class="two"><div><label for="eng">নেগেটিভ মার্কিং</label><select id="eng">${opts(['নেই','০.২৫','০.৫'], neg)}</select></div><div><label for="epm">পাস মার্ক (%)</label><input id="epm" type="number" value="${esc(v('passMark',40))}" min="0" max="100"></div></div>
   <label for="einst">প্রতিষ্ঠান (শুধু Mega পরীক্ষার জন্য)</label><select id="einst">${opts(['সব প্রতিষ্ঠান'].concat(INST), v('inst','সব প্রতিষ্ঠান'))}</select>
-  <label for="ew">শুরুর সময়</label><input id="ew" type="datetime-local" value="${esc(v('startAt',''))}">
+  <div class="two"><div><label for="ew">শুরুর সময়</label><input id="ew" type="datetime-local" value="${esc(v('startAt',''))}"></div><div><label for="ew2">শেষের সময় (Live/Weekly)</label><input id="ew2" type="datetime-local" value="${esc(v('endAt',''))}"></div></div>
+  <div class="msg">শুরু ও শেষের সময়ের মধ্যে যখন খুশি ছাত্র ঢুকে পরীক্ষা দিতে পারবে, ঢোকার পর "সময় (মিনিট)" পাবে। শেষের সময় ফাঁকা রাখলে শুরু + মিনিটই শেষ ধরা হবে। যেমন শুরু সকাল ৮টা, শেষ রাত ৮টা, সময় ৬০ মিনিট।</div>
   <div class="row" style="margin-top:6px"><div><div class="t">পরীক্ষার পর উত্তর দেখানো</div><div class="s">শেষ হলে ব্যাখ্যাসহ উত্তর দেখা যাবে</div></div><label class="sw" aria-label="উত্তর দেখানো"><input type="checkbox" id="eshow"${e && e.showAnswer === false ? '' : ' checked'}><i></i></label></div>
   <div class="msg">Academic পরীক্ষার প্রশ্ন আসবে প্রশ্নব্যাংক থেকে, আর Mega পরীক্ষার প্রশ্ন আসবে আলাদা Mega প্রশ্নব্যাংক থেকে (অটো বা হাতে বাছা)। Live ও Weekly পরীক্ষায় নিজের প্রশ্ন লিখে যোগ করবেন। শুরুতে পরীক্ষা খসড়া থাকবে।</div>
   <div class="btns" style="margin-top:12px"><button class="btn" type="submit">${e ? 'পরিবর্তন সেভ করুন' : 'তৈরি করে প্রশ্ন যোগ করুন'}</button>${e ? '<button class="btn ghost" type="button" data-a="ecancel">বাতিল</button>' : ''}</div></form>`;
@@ -547,7 +548,7 @@ function vExam(){
     <div class="row"><div><div class="t">ফলাফল</div><div class="s">${e.resultPublished ? 'প্রকাশিত' : 'এখনো প্রকাশ হয়নি'}</div></div><button class="btn sm ${e.resultPublished ? 'ghost' : ''}" data-a="pubres" data-v="${e.id}">${e.resultPublished ? 'লুকান' : 'প্রকাশ করুন'}</button></div>
     <div class="msg">কে কত পেল তার তালিকা এখানে দেখাতে হলে অ্যাপকে প্রতিটি পরীক্ষার ফলাফল Firebase-এ সেভ করতে হবে। সেটা অ্যাপে যোগ হলে আমি এই পেজে দেখানোর ব্যবস্থা করে দেব।</div></div>`;
   }
-  return head + (E.length ? `<div class="grid">${E.map(e => `<div class="card"><div class="row" style="border:0;padding:0;align-items:flex-start"><div><div class="t">${esc(e.name)}</div><div class="s"><span class="pill${e.type === 'Live' ? ' bad' : e.type === 'Weekly' ? ' warn' : ''}">${e.type}</span> ${stBadge(e.status)}</div><div class="s">${qcount(e)} · ${bn(e.duration)} মিনিট · নেগেটিভ ${e.negative ? bn(e.negative) : 'নেই'}</div><div class="s">${esc(e.subject || '')}${e.startAt ? ' · ' + esc(String(e.startAt).replace('T', ' ')) : ''}</div></div>${e.status !== 'শেষ' ? sw(`data-a="toge" data-v="${e.id}"`, e.status === 'চালু', 'চালু বা বন্ধ') : ''}</div>
+  return head + (E.length ? `<div class="grid">${E.map(e => `<div class="card"><div class="row" style="border:0;padding:0;align-items:flex-start"><div><div class="t">${esc(e.name)}</div><div class="s"><span class="pill${e.type === 'Live' ? ' bad' : e.type === 'Weekly' ? ' warn' : ''}">${e.type}</span> ${stBadge(e.status)}</div><div class="s">${qcount(e)} · ${bn(e.duration)} মিনিট · নেগেটিভ ${e.negative ? bn(e.negative) : 'নেই'}</div><div class="s">${esc(e.subject || '')}${e.startAt ? ' · ' + esc(String(e.startAt).replace('T', ' ')) : ''}${e.endAt ? ' → ' + esc(String(e.endAt).replace('T', ' ')) : ''}</div></div>${e.status !== 'শেষ' ? sw(`data-a="toge" data-v="${e.id}"`, e.status === 'চালু', 'চালু বা বন্ধ') : ''}</div>
   <div class="btns" style="margin-top:10px"><button class="btn sm" data-a="exitems" data-v="${e.id}">প্রশ্ন দেখুন/যোগ করুন</button><button class="btn sm ghost" data-a="exres" data-v="${e.id}">ফলাফল</button><button class="btn sm ghost" data-a="editex" data-v="${e.id}">এডিট</button><button class="btn sm ghost" data-a="dupex" data-v="${e.id}">কপি</button>${delBtn('e' + e.id, 'dele', e.id)}</div></div>`).join('')}</div>` : '<div class="card"><div class="empty">এখনো কোনো পরীক্ষা নেই। "নতুন পরীক্ষা" ট্যাব থেকে বানান।</div></div>');
 }
 
@@ -1156,6 +1157,11 @@ document.addEventListener('submit', async ev => {
   if (f.id === 'fe2') {
     const neg = $('eng').value === 'নেই' ? 0 : ($('eng').value === '০.৫' ? 0.5 : 0.25), type = $('et').value;
     const base = {name:$('en').value.trim(), subject:$('esub').value, inst:$('einst').value, duration:+$('edur').value || 20, count:+$('eq').value || 20, negative:neg, passMark:+$('epm').value || 0, startAt:$('ew').value || '', showAnswer:$('eshow').checked};
+    const ew2 = $('ew2').value || '', stM = $('ew').value ? new Date($('ew').value).getTime() : 0, enM = ew2 ? new Date(ew2).getTime() : 0;
+    if (ew2 && !stM) { toast('শেষের সময় দিতে হলে শুরুর সময়ও দিন'); return; }
+    if (ew2 && enM <= stM) { toast('শেষের সময় শুরুর পরে হতে হবে'); return; }
+    if (ew2 && (enM - stM) < base.duration * 60000) { toast('শুরু থেকে শেষের ব্যবধান পরীক্ষার সময়ের (মিনিট) চেয়ে কম'); return; }
+    if (ew2) base.endAt = ew2; else if (S.eedit) base.endAt = deleteField();
     if (S.eedit) { if (await run(updateDoc(doc(db, 'exams', S.eedit), base), 'পরীক্ষা বদলানো হয়েছে')) { log('পরীক্ষা এডিট: ' + base.name); S.eedit = null; S.eseg = 'list'; render(); } return; }
     const data = {...base, type, live:false, status:'খসড়া', items:[], createdAt:serverTimestamp()};
     try {
