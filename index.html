@@ -950,7 +950,21 @@ function render(){
   const denied = Object.keys(perm);
   const banner = denied.length ? `<div class="demo" style="background:var(--bad-soft);color:var(--bad)">কিছু অংশ (${denied.map(esc).join(', ')}) পড়া যাচ্ছে না। Firestore রুল ঠিক করুন: আরও → অ্যাডমিন ও সিকিউরিটি।</div>` : '';
   $('main').innerHTML = banner + V[S.tab]();
+  mathPass();
   try { history.replaceState(null, '', '#' + S.tab); } catch(x) {}
+}
+let _mp = 0;
+function mathPass(){
+  const m = $('main'); if (!m || !/\$|\\ce\{/.test(m.textContent) || !window.__loadKatex) return;
+  const id = ++_mp;
+  window.__loadKatex(ok => {
+    if (id !== _mp || !ok) return;
+    try { window.renderMathInElement(m, {delimiters:[{left:'$$', right:'$$', display:true},{left:'$', right:'$', display:false}], throwOnError:false, strict:false, ignoredClasses:['example-json']}); } catch(e){}
+    const bad = m.querySelectorAll('.katex-error'); if (!bad.length) return;
+    bad.forEach(x => { const r = x.closest('.row') || x.closest('.panel'); if (r) r.style.outline = '2px solid var(--bad)'; });
+    const d = document.createElement('div'); d.className = 'demo'; d.style.cssText = 'background:var(--bad-soft);color:var(--bad)';
+    d.textContent = '⚠ ' + bn(bad.length) + ' জায়গায় গণিতের কোড ভুল (লাল বক্স)। ওই প্রশ্ন এডিট করে ঠিক করুন।'; m.prepend(d);
+  });
 }
 function go(t){
   if (t === 'logout') { signOut(auth); return; }
@@ -1277,6 +1291,7 @@ applyLook();
   });
   document.addEventListener('input', function(e){ if (cur && e.target === cur) preview(); });
   window.__mathBar = {insert: insert, next: next};
+  window.__loadKatex = loadKatex;
 })();
 </script>
 </body>
