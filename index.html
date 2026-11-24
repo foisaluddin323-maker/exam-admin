@@ -284,7 +284,7 @@ match /audit/{id} {
 
 /* ---------- state ---------- */
 const S = {tab:'home',qseg:'list',eseg:'list',iseg:'list',qf:'',qsub:'সব',qst:'সব',qbank:'সব',qlimit:50,eq:null,exq:null,cf:null,us:null,uq:'',ufil:'সব',sSub:'ICT',xasub:null,xainst:null,rx:null,imp:null,ximp:null,qch:'সব',qflag:'সব',qsort:'নতুন',sel:{},qprev:null,impAll:false,impReport:null,fileInfo:null,ulimit:50,usort:'নতুন',rf:'খোলা',rprev:null,eedit:null,look:{theme:'soft',size:'17'}};
-let Q = [], E = [], U = [], R = [], N = [], AUD = [], SUB = [], unsubs = [];
+let Q = [], E = [], U = [], R = [], N = [], AUD = [], SUB = [], LBS = [], unsubs = [];
 let CFG = {app:{...DEFAULT_APP}, struct:DEFAULT_STRUCT, missions:DEFAULT_MISSIONS, sec:{}};
 const perm = {};
 let ME = null;
@@ -421,6 +421,7 @@ function listen(){
   onCol('users', d => { U = d; });
   onCol('reports', d => { R = d; });
   onCol('submissions', d => { SUB = d; });
+  onCol('leaderboardStats', d => { LBS = d; });
   onCol('notices', d => { N = d; });
   onCol('audit', d => { AUD = d.sort((a,b) => (b.at && b.at.seconds || 0) - (a.at && a.at.seconds || 0)).slice(0, 40); });
   onDoc('app', d => { CFG.app = {...DEFAULT_APP, ...(d || {}), feat:{...((d && d.feat) || {})}}; });
@@ -552,12 +553,32 @@ function vExam(){
   <div class="btns" style="margin-top:10px"><button class="btn sm" data-a="exitems" data-v="${e.id}">প্রশ্ন দেখুন/যোগ করুন</button><button class="btn sm ghost" data-a="exres" data-v="${e.id}">ফলাফল</button><button class="btn sm ghost" data-a="editex" data-v="${e.id}">এডিট</button><button class="btn sm ghost" data-a="dupex" data-v="${e.id}">কপি</button>${delBtn('e' + e.id, 'dele', e.id)}</div></div>`).join('')}</div>` : '<div class="card"><div class="empty">এখনো কোনো পরীক্ষা নেই। "নতুন পরীক্ষা" ট্যাব থেকে বানান।</div></div>');
 }
 
+function dhakaKeys(){
+  const d = new Date(Date.now() + 6 * 3600 * 1000), p2 = n => String(n).padStart(2, '0');
+  const ymd = x => x.getUTCFullYear() + '-' + p2(x.getUTCMonth() + 1) + '-' + p2(x.getUTCDate());
+  const back = (d.getUTCDay() + 1) % 7, w = new Date(d.getTime() - back * 86400000);
+  return {day: ymd(d), week: ymd(w), month: d.getUTCFullYear() + '-' + p2(d.getUTCMonth() + 1)};
+}
+function lbRows(){
+  const k = dhakaKeys(), kind = S.rkind === 'p' ? 'p' : 'a', per = S.rper || 'All';
+  return LBS.filter(u => !u.hidden).map(u => {
+    let x = 0;
+    if (per === 'All') x = u[kind + 'All'] || 0;
+    else if (per === 'Day') x = u.dayKey === k.day ? (u[kind + 'Day'] || 0) : 0;
+    else if (per === 'Week') x = u.weekKey === k.week ? (u[kind + 'Week'] || 0) : 0;
+    else x = u.monthKey === k.month ? (u[kind + 'Month'] || 0) : 0;
+    return Object.assign({}, u, {x: x});
+  }).filter(u => u.x > 0).sort((a, b) => b.x - a.x);
+}
 function vRank(){
-  const l = U.filter(u => !u.hidden).sort((a, b) => (b.xp || 0) - (a.xp || 0)), m = l[0] && l[0].xp ? l[0].xp : 1;
-  const top = l.slice(0, 3), ord = [top[1], top[0], top[2]], cls = ['', 'p1', ''], rk = [2, 1, 3];
-  return `<div class="sec"><div><h1>মেধা তালিকা</h1><p class="sub">XP অনুযায়ী, অ্যাপের Leaderboard যেভাবে দেখায়</p></div></div>
-  ${l.length ? `<div class="podium">${ord.map((u, i) => u ? `<div class="card ${cls[i]}"><div class="s">${['🥈 ২য়','🥇 ১ম','🥉 ৩য়'][i]}</div><div class="t">${esc(userName(u))}</div><div class="n">${bn(u.xp || 0)}</div><div class="s">XP</div></div>` : '<div></div>').join('')}</div>
-  <div class="card">${l.slice(0, 50).map((u, i) => `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><span class="t">${bn(i + 1)}. ${esc(userName(u))}</span><span class="s" style="white-space:nowrap">${bn(u.xp || 0)} XP</span></div><div class="bar"><b style="width:${Math.round((u.xp || 0) / m * 100)}%"></b></div></div>`).join('')}</div>` : '<div class="card"><div class="empty">এখনো কোনো ইউজার বা XP নেই</div></div>'}`;
+  const l = lbRows(), m = l[0] ? l[0].x : 1, nameOf = u => u.name || userName(byId(U, u.id || u.uid) || {}) || 'নামহীন';
+  const top = l.slice(0, 3), ord = [top[1], top[0], top[2]], cls = ['', 'p1', ''];
+  const seg = (a, v, t, cur) => `<button aria-pressed="${cur === v}" data-a="${a}" data-v="${v}">${t}</button>`;
+  return `<div class="sec"><div><h1>মেধা তালিকা</h1><p class="sub">অ্যাপের লিডারবোর্ড যেভাবে দেখায় (XP অনুযায়ী)। যারা নাম লুকিয়েছে তারা এখানে আসে না।</p></div></div>
+  <div class="seg">${seg('rkind', 'a', 'সামগ্রিক', S.rkind || 'a')}${seg('rkind', 'p', 'অনুশীলন', S.rkind || 'a')}</div>
+  <div class="seg" style="margin-top:6px">${seg('rper', 'Day', 'আজকের', S.rper || 'All')}${seg('rper', 'Week', 'সাপ্তাহিক', S.rper || 'All')}${seg('rper', 'Month', 'মাসিক', S.rper || 'All')}${seg('rper', 'All', 'সর্বকালের', S.rper || 'All')}</div>
+  ${l.length ? `<div class="podium">${ord.map((u, i) => u ? `<div class="card ${cls[i]}"><div class="s">${['🥈 ২য়','🥇 ১ম','🥉 ৩য়'][i]}</div><div class="t">${esc(nameOf(u))}</div><div class="n">${bn(u.x)}</div><div class="s">XP</div></div>` : '<div></div>').join('')}</div>
+  <div class="card">${l.slice(0, 50).map((u, i) => `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between;gap:8px"><span class="t">${bn(i + 1)}. ${esc(nameOf(u))}</span><span class="s" style="white-space:nowrap">${bn(u.x)} XP</span></div><div class="s">${esc([u.college, u.district].filter(Boolean).join(' · '))}</div><div class="bar"><b style="width:${Math.round(u.x / m * 100)}%"></b></div></div>`).join('')}</div>` : '<div class="card"><div class="empty">এখনো কোনো XP নেই (অ্যাপে ছাত্ররা অনুশীলন বা লাইভ পরীক্ষা দিলে এখানে আসবে)</div></div>'}`;
 }
 /* ---------- পরীক্ষার ফলাফল (অ্যাপ থেকে জমা পড়া submissions) ---------- */
 const mmss = n => { n = Math.max(0, Math.round(+n || 0)); return bn(Math.floor(n / 60)) + ' মি ' + bn(n % 60) + ' সে'; };
@@ -1069,6 +1090,8 @@ document.addEventListener('click', async ev => {
     case 'bke': dl('exams.json', JSON.stringify(plain(E), null, 1), 'application/json'); return;
     case 'bkall': dl('exam-master-backup-' + new Date().toISOString().slice(0, 10) + '.json', JSON.stringify(plain({questions:Q, exams:E, users:U, notices:N, reports:R, config:{app:CFG.app, struct:CFG.struct, missions:CFG.missions}}), null, 1), 'application/json'); toast('ব্যাকআপ নামানো হয়েছে'); return;
     case 'expres': { const l = resList(); dl('exam-results.csv', toCSV(l.map((s, i) => ({rank:i + 1, ...resRow(s)})), ['rank','name','phone','email','college','studentClass','exam','score','maxScore','percent','correct','wrong','skipped','timeTakenSec','submittedAt']), 'text/csv;charset=utf-8'); toast(bn(l.length) + 'টি ফলাফল নামানো হয়েছে'); return; }
+    case 'rkind': S.rkind = v; render(); return;
+    case 'rper': S.rper = v; render(); return;
     case 'resmore': S.rlimit = (S.rlimit || 100) + 100; render(); return;
     case 'expu': dl('users.csv', toCSV(U.map(u => ({...u, createdAt:u.createdAt && u.createdAt.toDate ? u.createdAt.toDate().toISOString() : u.createdAt})), ['id','name','email','phone','college','institution','studentClass','target','district','createdAt','isEmailVerified','accountStatus','deviceModel','xp','blocked']), 'text/csv;charset=utf-8'); return;
     case 'tpl': dl('exam-master-question-template.csv', toCSV([
