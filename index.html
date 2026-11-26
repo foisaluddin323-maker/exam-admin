@@ -261,12 +261,14 @@ const DEFAULT_APP = {maint:false,force:false,reg:true,board:true,ver:'',minVer:'
 const SEC_ITEMS = ['Firestore রুল: শুধু অ্যাডমিন লিখতে পারবে','Firebase Auth-এ শুধু Email/Password চালু','রুলে অ্যাডমিন UID বসানো','App Check চালু করা','নিয়মিত ব্যাকআপ এক্সপোর্ট'];
 const BOARDS = ['সকল বোর্ড','ঢাকা','চট্টগ্রাম','রাজশাহী','কুমিল্লা','যশোর','বরিশাল','সিলেট','দিনাজপুর','ময়মনসিংহ','মাদ্রাসা','কারিগরি'];
 const ABBR = {'ঢাকা':'ঢা. বো.','রাজশাহী':'রা. বো.','কুমিল্লা':'কু. বো.','যশোর':'য. বো.','চট্টগ্রাম':'চ. বো.','বরিশাল':'ব. বো.','সিলেট':'সি. বো.','দিনাজপুর':'দি. বো.','ময়মনসিংহ':'ম. বো.','মাদ্রাসা':'মা. বো.','কারিগরি':'কা. বো.','সকল বোর্ড':'সকল বো.'};
-const UNI_ABBR = {'ঢাকা বিশ্ববিদ্যালয়':'ঢা. বি.','রাজশাহী বিশ্ববিদ্যালয়':'রা. বি.','চট্টগ্রাম বিশ্ববিদ্যালয়':'চ. বি.','জাহাঙ্গীরনগর বিশ্ববিদ্যালয়':'জা. বি.','জগন্নাথ বিশ্ববিদ্যালয়':'জগ. বি.','খুলনা বিশ্ববিদ্যালয়':'খু. বি.','ইসলামী বিশ্ববিদ্যালয়':'ই. বি.','শাহজালাল বিজ্ঞান ও প্রযুক্তি বিশ্ববিদ্যালয়':'শা. বি. প্র. বি.','কুমিল্লা বিশ্ববিদ্যালয়':'কু. বি.','বেগম রোকেয়া বিশ্ববিদ্যালয়':'বে. রো. বি.','বরিশাল বিশ্ববিদ্যালয়':'ব. বি.','জাতীয় বিশ্ববিদ্যালয়':'জাতীয় বি.','বাংলাদেশ ইউনিভার্সিটি অব প্রফেশনালস':'BUP','বাংলাদেশ প্রকৌশল বিশ্ববিদ্যালয়':'BUET','চট্টগ্রাম প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয়':'CUET','রাজশাহী প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয়':'RUET','খুলনা প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয়':'KUET','ঢাকা প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয়':'DUET','বাংলাদেশ টেক্সটাইল বিশ্ববিদ্যালয়':'BUTEX','মেরিন একাডেমি':'MA','সরকারি মেডিকেল কলেজ':'মেডিকেল','ডেন্টাল':'ডেন্টাল','কৃষি গুচ্ছ':'কৃষি গুচ্ছ','GST গুচ্ছ':'GST','CKRUET':'CKRUET','AFMC':'AFMC'};
+const UNI_ABBR = {'ঢাকা বিশ্ববিদ্যালয়':'ঢা. বি.','রাজশাহী বিশ্ববিদ্যালয়':'রা. বি.','চট্টগ্রাম বিশ্ববিদ্যালয়':'চ. বি.','জাহাঙ্গীরনগর বিশ্ববিদ্যালয়':'জা. বি.','জগন্নাথ বিশ্ববিদ্যালয়':'জগ. বি.','খুলনা বিশ্ববিদ্যালয়':'খু. বি.','ইসলামী বিশ্ববিদ্যালয়':'ই. বি.','শাহজালাল বিজ্ঞান ও প্রযুক্তি বিশ্ববিদ্যালয়':'শা. বি. প্র. বি.','কুমিল্লা বিশ্ববিদ্যালয়':'কু. বি.','বেগম রোকেয়া বিশ্ববিদ্যালয়':'বে. রো. বি.','বরিশাল বিশ্ববিদ্যালয়':'ব. বি.','জাতীয় বিশ্ববিদ্যালয়':'জাতীয় বি.','বাংলাদেশ ইউনিভার্সিটি অব প্রফেশনালস':'BUP','বাংলাদেশ প্রকৌশল বিশ্ববিদ্যালয়':'BUET','চট্টগ্রাম প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয়':'CUET','রাজশাহী প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয়':'RUET','খুলনা প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয়':'KUET','ঢাকা প্রকৌশল ও প্রযুক্তি বিশ্ববিদ্যালয়':'DUET','বাংলাদেশ টেক্সটাইল বিশ্ববিদ্যালয়':'BUTEX','বাংলাদেশ উন্মুক্ত বিশ্ববিদ্যালয়':'উ. বি.','মেরিন একাডেমি':'MA','সরকারি মেডিকেল কলেজ':'মেডিকেল','ডেন্টাল':'ডেন্টাল','কৃষি গুচ্ছ':'কৃষি গুচ্ছ','GST গুচ্ছ':'GST','CKRUET':'CKRUET','AFMC':'AFMC'};
 const INST = Object.keys(UNI_ABBR);
 const UNI_LEG = {'DU':'ঢাকা বিশ্ববিদ্যালয়','BUET':'বাংলাদেশ প্রকৌশল বিশ্ববিদ্যালয়','মেডিকেল':'সরকারি মেডিকেল কলেজ','JU':'জাহাঙ্গীরনগর বিশ্ববিদ্যালয়','RU':'রাজশাহী বিশ্ববিদ্যালয়','CU':'চট্টগ্রাম বিশ্ববিদ্যালয়','GST':'GST গুচ্ছ','কৃষি':'কৃষি গুচ্ছ'};
 const uni = x => UNI_LEG[String(x || '').trim()] || String(x || '').trim();
-const isV = q => q.bank === 'বিশ্ববিদ্যালয়' || q.bank === 'ভার্সিটি প্র্যাকটিস' || q.bank === 'মেগা';
-const BANKS = ['HSC বোর্ড','স্মার্ট প্র্যাকটিস','বিশ্ববিদ্যালয়','ভার্সিটি প্র্যাকটিস','মেগা'];
+const isV = q => q.bank === 'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন' || q.bank === 'বিশ্ববিদ্যালয়ের প্র্যাকটিস প্রশ্ন' || q.bank === 'মেগা';
+const BANKS = ['HSC Board Question','HSC Non-Board Question','বিগত বিশ্ববিদ্যালয়ের প্রশ্ন','বিশ্ববিদ্যালয়ের প্র্যাকটিস প্রশ্ন','মেগা'];
+const LEG_BANK = {'HSC বোর্ড':'HSC Board Question','স্মার্ট প্র্যাকটিস':'HSC Non-Board Question','বিশ্ববিদ্যালয়':'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন','ভার্সিটি প্র্যাকটিস':'বিশ্ববিদ্যালয়ের প্র্যাকটিস প্রশ্ন'};
+const normBank = b => { b = String(b == null ? '' : b).trim(); return LEG_BANK[b] || b; };
 const QSTATUS = ['প্রকাশিত','খসড়া','রিভিউ দরকার'];
 const EXAMPLE_JSON = '[\n  {"question":"SI পদ্ধতিতে বলের একক কোনটি?","options":["জুল","নিউটন","ওয়াট","প্যাসকেল"],"answer":"খ","explanation":"বলের SI একক নিউটন (N)।"},\n  {"stimulus":"একটি বস্তুর ভর ২ কেজি, ত্বরণ ৩ মি/সে²।","stimulusImageUrl":"","statements":["বলের মান ৬ N","বলের একক নিউটন","বল স্কেলার রাশি"],"question":"নিচের কোনটি সঠিক?","options":["i ও ii","i ও iii","ii ও iii","i, ii ও iii"],"answer":"ক","imageUrl":"","optionImageUrls":["","","",""],"explanation":"বল ভেক্টর রাশি।"}\n]';
 
@@ -309,6 +311,9 @@ function toast(t){ const e = $('toast'); e.textContent = t; e.hidden = false; cl
 function errMsg(e){ return e && e.code === 'permission-denied' ? 'অনুমতি নেই। Firestore রুলে এই অংশ যোগ করতে হবে (আরও → অ্যাডমিন ও সিকিউরিটি)।' : 'সমস্যা: ' + ((e && (e.code || e.message)) || 'অজানা'); }
 async function run(p, okMsg){ try { await p; if (okMsg) toast(okMsg); return true; } catch(e) { toast(errMsg(e)); return false; } }
 function log(m){ addDoc(collection(db,'audit'), {msg:m, by:(ME&&ME.email)||'', at:serverTimestamp()}).catch(() => {}); }
+const BANK_LBL = {};
+const bl = b => BANK_LBL[b] || b;
+function bopts(list, cur){ return list.map(s => `<option value="${esc(s)}"${s === cur ? ' selected' : ''}>${esc(s === 'সব' ? 'সব' : bl(s))}</option>`).join(''); }
 function opts(list, cur){ return list.map(s => `<option${s === cur ? ' selected' : ''}>${esc(s)}</option>`).join(''); }
 function seg(name, list, cur){ return `<div class="seg" role="group">${list.map(x => `<button type="button" data-a="seg" data-n="${name}" data-v="${x[0]}" aria-pressed="${cur === x[0]}">${x[1]}</button>`).join('')}</div>`; }
 function ask(k){ if (S.cf === k) { S.cf = null; return true; } S.cf = k; render(); return false; }
@@ -317,12 +322,12 @@ function sw(attrs, on, label){ return `<label class="sw" aria-label="${esc(label
 function stBadge(s){ return `<span class="pill ${s === 'প্রকাশিত' || s === 'চালু' ? 'good' : s === 'খসড়া' ? 'gray' : s === 'শেষ' ? '' : 'warn'}">${s}</span>`; }
 function fmtDate(t){ try { const d = t && t.toDate ? t.toDate() : new Date(t); if (isNaN(d)) return ''; return d.toLocaleDateString('bn-BD', {day:'numeric', month:'long'}); } catch(e) { return ''; } }
 function subjects(){ const s = Object.keys(CFG.struct); Q.forEach(q => { if (q.subject && s.indexOf(q.subject) < 0) s.push(q.subject); }); return s; }
-function qn(q){ return {...q, bank:q.bank || 'HSC বোর্ড', status:q.status || 'প্রকাশিত', type:q.type || 'MCQ', options:Array.isArray(q.options) ? q.options : ['','','',''], answer:typeof q.answer === 'number' ? q.answer : 0}; }
+function qn(q){ return {...q, _rawBank:q.bank || '', bank:normBank(q.bank) || 'HSC Board Question', status:q.status || 'প্রকাশিত', type:q.type || 'MCQ', options:Array.isArray(q.options) ? q.options : ['','','',''], answer:typeof q.answer === 'number' ? q.answer : 0}; }
 function en(e){ return {...e, type:e.type || 'Academic', status:e.status || (e.live ? 'চালু' : 'খসড়া'), count:+e.count || 0, duration:+e.duration || 0, negative:+e.negative || 0}; }
 
 /* ---------- সোর্স: একই প্রশ্ন, একাধিক বোর্ড-সাল ---------- */
 function srcOf(q){
-  if (q.bank && q.bank !== 'HSC বোর্ড' && q.bank !== 'বিশ্ববিদ্যালয়') return [];
+  if (q.bank && q.bank !== 'HSC Board Question' && q.bank !== 'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন') return [];
   const out = [], V = isV(q), add = (b, y) => { b = V ? uni(b) : String(b || '').trim(); y = bd(y).trim(); if (b && !out.some(x => x[0] === b && x[1] === y)) out.push([b, y]); };
   add(q.board, V ? q.session : q.year);
   (Array.isArray(q.sources) ? q.sources : []).forEach(x => { const a = String(x).split('|'); add(a[0], a[1]); });
@@ -343,7 +348,7 @@ function parseSrcLines(t, V){
   return Array.from(new Set(out));
 }
 function ownMode(e){ return e.type === 'Live' || e.type === 'Weekly'; }
-function inGroup(e, q){ if (e.type === 'Mega') return q.bank === 'বিশ্ববিদ্যালয়' || q.bank === 'ভার্সিটি প্র্যাকটিস' || q.bank === 'মেগা'; if (e.type === 'Academic' || e.type === 'Master') return q.bank === 'HSC বোর্ড' || q.bank === 'স্মার্ট প্র্যাকটিস'; return true; }
+function inGroup(e, q){ if (e.type === 'Mega') return q.bank === 'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন' || q.bank === 'বিশ্ববিদ্যালয়ের প্র্যাকটিস প্রশ্ন' || q.bank === 'মেগা'; if (e.type === 'Academic' || e.type === 'Master') return q.bank === 'HSC Board Question' || q.bank === 'HSC Non-Board Question'; return true; }
 function qcount(e){ return Array.isArray(e.items) ? `প্রশ্ন ${bn(e.items.length)}/${bn(e.count)} যোগ হয়েছে` : `${bn(e.count)}টি প্রশ্ন`; }
 
 /* ---------- নতুন সাহায্যকারী: ছবি, ডুপ্লিকেট, মান যাচাই, ডাউনলোড ---------- */
@@ -388,7 +393,7 @@ const ROMAN = ['i','ii','iii','iv','v','vi','vii','viii'];
 function itemOf(q, src){
   const o = {question:q.question, options:q.options.slice(), answer:q.answer, explanation:q.explanation || ''};
   if (src) o.src = src;
-  if (q.bank === 'HSC বোর্ড' || q.bank === 'বিশ্ববিদ্যালয়') {
+  if (q.bank === 'HSC Board Question' || q.bank === 'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন') {
     if (Array.isArray(q.sources) && q.sources.length) o.sources = q.sources.slice();
     if (q.board) o.board = q.board;
     if (q.year) o.year = String(q.year);
@@ -509,7 +514,7 @@ const stat = (l, n, d) => `<div class="card stat"><div class="l">${l}</div><div 
 function qForm(){
   const q = S.eq ? Q.filter(x => x.id === S.eq)[0] : null, v = (k, d) => q && q[k] !== undefined ? q[k] : d, subs = subjects();
   return `<form class="card" id="fq"><h2>${q ? 'প্রশ্ন এডিট করুন' : 'নতুন প্রশ্ন'}</h2>
-  <div class="two"><div><label for="fbk">কোথায় যাবে</label><select id="fbk">${opts(BANKS, v('bank','HSC বোর্ড'))}</select></div><div><label for="fst">অবস্থা</label><select id="fst">${opts(QSTATUS, v('status','প্রকাশিত'))}</select></div></div>
+  <div class="two"><div><label for="fbk">কোথায় যাবে</label><select id="fbk">${bopts(BANKS, normBank(v('bank','HSC Board Question')))}</select></div><div><label for="fst">অবস্থা</label><select id="fst">${opts(QSTATUS, v('status','প্রকাশিত'))}</select></div></div>
   <div class="two"><div><label for="fs">বিষয়</label><select id="fs">${opts(subs, v('subject', subs[0]))}</select></div><div><label for="fb">বোর্ড / প্রতিষ্ঠান</label><select id="fb">${opts(BOARDS.concat(INST), uni(v('board','সকল বোর্ড')))}</select></div></div>
   <div class="two"><div><label for="fy">সাল</label><input id="fy" type="number" value="${esc(v('year', 2026))}"></div><div><label for="fd">কঠিনতা</label><select id="fd">${opts(['সহজ','মাঝারি','কঠিন'], v('difficulty','সহজ'))}</select></div></div>
   <label for="fsrc">আরও সোর্স (ঐচ্ছিক, একই প্রশ্ন আরও যেখানে এসেছে। প্রতি লাইনে একটি, যেমন: যশোর 2024 বা ঢা. বি. 2023-24)</label><textarea id="fsrc" style="min-height:52px" placeholder="যশোর 2024&#10;রাজশাহী 2025">${esc((Array.isArray(v('sources',[])) ? v('sources',[]) : []).map(x => String(x).replace('|', ' ')).join('\n'))}</textarea>
@@ -740,7 +745,7 @@ function buildRow(raw, def, mode){
     question:qt, options:o, answer:a, explanation:String(g(H.exp) || '').trim(), imageUrl:img(g(H.img), 'প্রশ্নের ছবি'),
     stimulus:String(g(H.stim) || '').trim(), stimulusImageUrl:img(g(H.stimg), 'উদ্দীপকের ছবি'), statements:st, optionImageUrls:oi.some(Boolean) ? oi : [],
     university:String(g(H.uni) || '').trim(), session:String(g(H.sess) || def.session || '').trim(), unit:String(g(H.unit) || '').trim(), difficulty:DIFF[String(g(H.diff)).trim().toLowerCase()] || 'মাঝারি'};
-  if (BANKS.indexOf(bankRaw) > -1) q.bank = bankRaw;
+  if (BANKS.indexOf(normBank(bankRaw)) > -1) q.bank = normBank(bankRaw);
   if (QSTATUS.indexOf(stRaw) > -1) q.rstatus = stRaw;
   return {ok:q, warns};
 }
@@ -818,7 +823,7 @@ function parseAny(text, def, frows, skipDup){
     const q = res.ok, k = dupKeyOf(q);
     res.warns.forEach(w => warns.push({n:i + 1, msg:w}));
     q._n = i + 1;
-    const qb = q.bank || (def && def.bank) || '', qs0 = primaryOf(q, qb), MB = ['HSC বোর্ড', 'বিশ্ববিদ্যালয়'];
+    const qb = q.bank || (def && def.bank) || '', qs0 = primaryOf(q, qb), MB = ['HSC Board Question', 'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন'];
     if (skipDup && ex[k]) {
       const old = byId(Q, ex[k][0]);
       if (old && old.bank === qb && MB.indexOf(qb) > -1 && qs0 && !srcOf(old).some(x => x[0] + '|' + x[1] === qs0) && !merge.some(m => m.id === old.id && m.s === qs0)) { merge.push({id:old.id, s:qs0, n:i + 1, q}); return; }
@@ -841,7 +846,7 @@ function collectImp(prefix){
 function impBox(prefix, target){
   const p = S[prefix], f = S[prefix + 'Form'] || {}, fi = S.fileInfo && S.fileInfo.p === prefix ? S.fileInfo : null;
   return `<div class="card"><h2>একসাথে অনেক প্রশ্ন (বাল্ক ইমপোর্ট)</h2><p class="sub">Excel (.xlsx), CSV, JSON বা সাধারণ লেখা, যেটা সুবিধা। আগে যাচাই হবে, তারপর আপনি দেখে নিয়ে যোগ করবেন। উত্তর না থাকলে বা বোঝা না গেলে ওই প্রশ্ন নেওয়া হবে না, আন্দাজে উত্তর বসানো হয় না।</p>
-  ${target === 'q' ? `<div class="two"><div><label for="ibk">কোন ব্যাংকে যাবে</label><select id="ibk">${opts(BANKS, f.bank || 'HSC বোর্ড')}</select></div><div><label for="ist">অবস্থা</label><select id="ist">${opts(QSTATUS, f.status || 'খসড়া')}</select></div></div>
+  ${target === 'q' ? `<div class="two"><div><label for="ibk">কোন ব্যাংকে যাবে</label><select id="ibk">${bopts(BANKS, f.bank || 'HSC Board Question')}</select></div><div><label for="ist">অবস্থা</label><select id="ist">${opts(QSTATUS, f.status || 'খসড়া')}</select></div></div>
   <p class="sub" style="margin-top:12px">নিচের ঘর ফাঁকা থাকলে প্রতিটি প্রশ্নে এই মান বসবে (প্রশ্নে নিজের মান থাকলে সেটাই থাকবে):</p>
   <div class="two"><div><label for="isub">বিষয়</label><select id="isub">${opts([''].concat(subjects()), f.subject || '')}</select></div><div><label for="ibd">বোর্ড / প্রতিষ্ঠান</label><select id="ibd">${opts([''].concat(BOARDS.concat(INST)), f.board || '')}</select></div></div>
   <div class="two"><div><label for="iyr">সাল</label><input id="iyr" type="number" placeholder="যেমন ২০২৪" value="${esc(f.year || '')}"></div><div><label for="ich">অধ্যায়</label><input id="ich" placeholder="যেমন ৩য় অধ্যায়" value="${esc(f.chapter || '')}"></div></div>
@@ -924,7 +929,7 @@ function vHome(){
   return `<div class="sec"><div><h1>ড্যাশবোর্ড</h1><p class="sub">অ্যাপের অবস্থা এক নজরে</p></div></div>
   <div class="grid stats">${stat('মোট ইউজার', bn(U.length), 'এই সপ্তাহে নতুন ' + bn(newU))}${stat('প্রশ্ন', bn(Q.length), 'প্রকাশিত ' + bn(pub) + ' · খসড়া ' + bn(dr))}${stat('চালু পরীক্ষা', bn(live), bn(E.length) + 'টির মধ্যে')}${stat('ভুল রিপোর্ট', bn(openR), 'খোলা')}</div>
   <div class="card" style="margin-top:12px"><h2>করণীয়</h2>${todo || '<div class="empty">এখন কোনো করণীয় নেই</div>'}</div>
-  <div class="cols2" style="margin-top:12px"><div class="card"><h2>ব্যাংক অনুযায়ী প্রশ্ন</h2>${sub.map(b => `<div class="row"><div class="t">${b[0]}</div><div class="s" style="text-align:right">মোট ${bn(b[1])} · প্রকাশিত ${bn(b[2])} · খসড়া ${bn(b[3])}</div></div>`).join('')}</div>
+  <div class="cols2" style="margin-top:12px"><div class="card"><h2>ব্যাংক অনুযায়ী প্রশ্ন</h2>${sub.map(b => `<div class="row"><div class="t">${esc(bl(b[0]))}</div><div class="s" style="text-align:right">মোট ${bn(b[1])} · প্রকাশিত ${bn(b[2])} · খসড়া ${bn(b[3])}</div></div>`).join('')}</div>
   <div class="card"><h2>অ্যাপের অবস্থা</h2><div class="row"><div class="t">মেইনটেন্যান্স মোড</div>${sw2(A.maint, 'চালু', 'বন্ধ')}</div><div class="row"><div class="t">নতুন রেজিস্ট্রেশন</div>${sw2(!A.reg, 'বন্ধ', 'চালু')}</div><div class="row"><div class="t">সর্বশেষ ভার্সন</div><div class="s">${esc(A.ver || '—')}</div></div><div class="row"><div class="t">ন্যূনতম ভার্সন</div><div class="s">${esc(A.minVer || '—')}</div></div><div style="margin-top:10px"><button class="btn sm ghost" data-a="go" data-v="ctl">অ্যাপ কন্ট্রোল</button></div></div></div>
   <div class="cols2" style="margin-top:12px"><div class="card"><h2>বিষয় অনুযায়ী প্রশ্ন</h2>${top.length ? top.map(x => `<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(x[0])}</span><span class="s">${bn(x[1])}টি</span></div><div class="bar"><b style="width:${Math.round(x[1] / mx * 100)}%"></b></div></div>`).join('') : '<div class="empty">এখনো কোনো প্রশ্ন নেই</div>'}</div>
   <div class="card"><h2>দ্রুত কাজ</h2><div class="btns" style="margin-top:10px"><button class="btn" data-a="newq">নতুন প্রশ্ন</button><button class="btn ghost" data-a="bulkq">বাল্ক ইমপোর্ট</button><button class="btn ghost" data-a="newe">নতুন পরীক্ষা</button><button class="btn ghost" data-a="go" data-v="notice">নোটিশ পাঠান</button><button class="btn ghost" data-a="go" data-v="backup">ব্যাকআপ</button></div>
@@ -942,10 +947,10 @@ function qList(){
 /* ---------- ফোল্ডার ভিউ (৪ ট্যাব) ---------- */
 const n2e = x => String(x == null ? '' : x).replace(/[০-৯]/g, d => '০১২৩৪৫৬৭৮৯'.indexOf(d)).trim();
 const FTABS = [
-  {id:'board', name:'বোর্ড প্রশ্ন', ic:'🏛️', bank:'HSC বোর্ড', lv:['board','year','subject','chapter']},
-  {id:'non', name:'নন-বোর্ড প্রশ্ন', ic:'📘', bank:'স্মার্ট প্র্যাকটিস', lv:['subject','chapter']},
-  {id:'vprev', name:'ভার্সিটি পূর্ববর্তী', ic:'🎓', bank:'বিশ্ববিদ্যালয়', lv:['uni','sess','unit','subject']},
-  {id:'vprac', name:'ভার্সিটি প্র্যাকটিস', ic:'✏️', bank:'ভার্সিটি প্র্যাকটিস', lv:['subject','chapter']}
+  {id:'board', name:'HSC Board Question', ic:'🏛️', bank:'HSC Board Question', lv:['board','year','subject','chapter']},
+  {id:'non', name:'HSC Non-Board Question', ic:'📘', bank:'HSC Non-Board Question', lv:['subject','chapter']},
+  {id:'vprev', name:'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন', ic:'🎓', bank:'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন', lv:['uni','sess','unit','subject']},
+  {id:'vprac', name:'বিশ্ববিদ্যালয়ের প্র্যাকটিস প্রশ্ন', ic:'✏️', bank:'বিশ্ববিদ্যালয়ের প্র্যাকটিস প্রশ্ন', lv:['subject','chapter']}
 ];
 const FLBL = {board:'বোর্ড', year:'সাল', subject:'বিষয়', chapter:'অধ্যায়', uni:'বিশ্ববিদ্যালয়', sess:'সেশন', unit:'ইউনিট'};
 function fOpts(lv, path, T){
@@ -978,7 +983,9 @@ function vFolder(){
   const opts0 = fOpts(lv, path, T), base = fFilter(T, path);
   const rows = opts0.map(o => { const qs = base.filter(q => fMatch(q, lv, o, (T.lv[0] === 'board' || T.lv[0] === 'uni') ? path[0] : '')), n = qs.length, p = qs.filter(q => q.status === 'প্রকাশিত').length;
     return `<div class="row" style="align-items:center"><div style="flex:1;min-width:0"><div class="t">${esc(bn(o))}</div><div class="s">প্রকাশিত ${bn(p)} ${fBadge(n, p)}</div></div><div style="font-weight:700;font-size:1.15em;color:${n ? 'var(--accent)' : 'var(--bad)'}">${bn(n)}</div><button class="btn sm ${n ? '' : 'ghost'}" data-a="fgo" data-v="${esc(o)}">${path.length + 1 === T.lv.length ? 'প্রশ্ন দেখুন' : 'খুলুন'}</button></div>`; }).join('');
-  return tabs + `<div class="msg" style="margin-top:12px">ধাপ: ${T.lv.map(x => FLBL[x]).join(' → ')} → প্রশ্ন। সব ${FLBL[lv]} সবসময় দেখানো হয়, যেটায় প্রশ্ন নেই সেটা লাল।</div>` + crumbs +
+  const oldN = Q.filter(q => q._rawBank && q._rawBank !== q.bank).length;
+  const mig = oldN ? `<div class="warn" style="margin-top:12px">${bn(oldN)}টি প্রশ্নে এখনো পুরনো ব্যাংকের নাম আছে। নতুন নামে বদলে নিন (অ্যাপের নতুন সংস্করণ চালু থাকলে তবেই)। <button class="btn sm" data-a="migbank">নতুন নামে বদলান</button></div>` : '';
+  return tabs + mig + `<div class="msg" style="margin-top:12px">ধাপ: ${T.lv.map(x => FLBL[x]).join(' → ')} → প্রশ্ন। সব ${FLBL[lv]} সবসময় দেখানো হয়, যেটায় প্রশ্ন নেই সেটা লাল।</div>` + crumbs +
     `<div class="card"><h2 style="margin-top:0">${FLBL[lv]} বাছুন (${bn(base.length)}টি প্রশ্ন এই ফোল্ডারে)</h2>${rows || '<div class="empty">এখানে কিছু নেই</div>'}</div>` +
     `<div class="btns" style="margin-top:10px"><button class="btn ghost" data-a="newq">নতুন প্রশ্ন যোগ করুন</button><button class="btn ghost" data-a="seg" data-n="qseg" data-v="list">সব প্রশ্নের তালিকা (মেগা সহ)</button></div>`;
 }
@@ -994,11 +1001,11 @@ function vQ(){
   const chs = S.qsub !== 'সব' && CFG.struct[S.qsub] ? CFG.struct[S.qsub] : Array.from(new Set(Q.filter(q => S.qsub === 'সব' || q.subject === S.qsub).map(q => q.chapter).filter(Boolean))).sort();
   const chOpts = ['সব'].concat(chs); if (S.qch !== 'সব' && chOpts.indexOf(S.qch) < 0) chOpts.push(S.qch);
   const badge = q => [q.imageUrl ? 'ছবি' : '', q.stimulus || q.stimulusImageUrl ? 'উদ্দীপক' : '', (q.statements || []).length ? 'বহুপদী' : '', (q.optionImageUrls || []).some(Boolean) ? 'অপশনে ছবি' : ''].filter(Boolean).map(x => `<span class="pill">${x}</span>`).join(' ');
-  return head + backF + `<div class="tools two-row"><input id="qs" placeholder="প্রশ্ন, অপশন বা ব্যাখ্যা খুঁজুন" value="${esc(S.qf)}" aria-label="খুঁজুন"><select id="qsub" aria-label="বিষয়">${opts(['সব'].concat(subjects()), S.qsub)}</select><select id="qbank" aria-label="ব্যাংক">${opts(['সব'].concat(BANKS), S.qbank)}</select><select id="qst" aria-label="অবস্থা">${opts(['সব'].concat(QSTATUS), S.qst)}</select></div>
+  return head + backF + `<div class="tools two-row"><input id="qs" placeholder="প্রশ্ন, অপশন বা ব্যাখ্যা খুঁজুন" value="${esc(S.qf)}" aria-label="খুঁজুন"><select id="qsub" aria-label="বিষয়">${opts(['সব'].concat(subjects()), S.qsub)}</select><select id="qbank" aria-label="ব্যাংক">${bopts(['সব'].concat(BANKS), S.qbank)}</select><select id="qst" aria-label="অবস্থা">${opts(['সব'].concat(QSTATUS), S.qst)}</select></div>
   <div class="tools"><select id="qch" aria-label="অধ্যায়">${opts(chOpts, S.qch)}</select><select id="qflag" aria-label="ধরন">${opts(QFLAGS, S.qflag)}</select><select id="qboard" aria-label="বোর্ড">${opts(['সব'].concat(Array.from(new Set(Q.map(q => q.board).filter(Boolean))).sort()), S.qboard)}</select><select id="qyear" aria-label="সাল">${opts(['সব'].concat(Array.from(new Set(Q.map(q => String(q.year || '')).filter(Boolean))).sort().reverse()), S.qyear)}</select><select id="qsort" aria-label="সাজান">${opts(['নতুন','পুরোনো','বিষয়'], S.qsort)}</select></div>
   <div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><div class="s"><b>${bn(l.length)}টি প্রশ্ন পাওয়া গেছে</b>${nsel ? ' · বাছা ' + bn(nsel) + 'টি' : ''}</div><div class="btns"><button class="btn sm ghost" data-a="qselall">ফিল্টার করা সব বাছুন</button>${nsel ? '<button class="btn sm ghost" data-a="qselnone">বাছাই বাতিল</button>' : ''}<button class="btn sm ghost" data-a="expq">CSV নামান</button></div></div>
   ${nsel ? `<div class="btns" style="margin-top:10px"><button class="btn sm good" data-a="qbulk" data-v="প্রকাশিত">প্রকাশ করুন</button><button class="btn sm ghost" data-a="qbulk" data-v="খসড়া">খসড়া করুন</button><button class="btn sm ghost" data-a="qbulk" data-v="রিভিউ দরকার">রিভিউ দরকার</button><select id="qmv" aria-label="ব্যাংক বদলান" style="flex:0 1 150px;min-height:36px;padding:4px 8px">${opts(BANKS, BANKS[0])}</select><button class="btn sm ghost" data-a="qmove">ব্যাংক বদলান</button>${delBtn('qbulkdel', 'qbulkdel', 'x', 'বাছাগুলো মুছুন')}</div>` : ''}</div>
-  <div class="card">${l.length ? l.slice(0, S.qlimit).map(q => { const iss = qIssues(q); return `<div class="row" style="align-items:flex-start"><input type="checkbox" class="sel" data-a="qsel" data-v="${q.id}" aria-label="বাছুন"${S.sel[q.id] ? ' checked' : ''}><div style="flex:1;min-width:0"><div class="t">${esc(q.question)}</div><div class="s">${stBadge(q.status)} <span class="pill gray">${esc(q.bank)}</span> ${badge(q)} ${esc(q.subject || '')}${q.chapter ? ' · ' + esc(q.chapter) : ''} · ${srcOf(q).length ? srcChips(q) : esc(q.board || '') + ' ' + esc(q.year || '')}${q.session ? ' · ' + esc(q.session) : ''}${q.unit ? ' · ' + esc(q.unit) : ''}</div><div class="s">সঠিক: ${L[q.answer] || '?'}) ${esc(q.options[q.answer])}</div>${iss.length ? `<div class="s" style="color:var(--warn)">⚠ ${iss.map(esc).join(' · ')}</div>` : ''}${S.qprev === q.id ? qPrev(q) : ''}</div><div class="btns" style="flex-direction:column;align-items:stretch"><button class="btn sm ghost" data-a="editq" data-v="${q.id}">এডিট</button><button class="btn sm ghost" data-a="qprev" data-v="${q.id}">${S.qprev === q.id ? 'বন্ধ' : 'প্রিভিউ'}</button><button class="btn sm ghost" data-a="qtog" data-v="${q.id}">${q.status === 'প্রকাশিত' ? 'খসড়া করুন' : 'প্রকাশ করুন'}</button><button class="btn sm ghost" data-a="qdup" data-v="${q.id}">কপি</button>${delBtn('q' + q.id, 'delq', q.id)}</div></div>`; }).join('') + (l.length > S.qlimit ? `<div style="text-align:center;margin-top:10px"><button class="btn ghost" data-a="qmore">আরও দেখুন (${bn(l.length - S.qlimit)}টি বাকি)</button></div>` : '') : '<div class="empty">কোনো প্রশ্ন নেই। "নতুন প্রশ্ন" বা "বাল্ক ইমপোর্ট" থেকে যোগ করুন।</div>'}</div>`;
+  <div class="card">${l.length ? l.slice(0, S.qlimit).map(q => { const iss = qIssues(q); return `<div class="row" style="align-items:flex-start"><input type="checkbox" class="sel" data-a="qsel" data-v="${q.id}" aria-label="বাছুন"${S.sel[q.id] ? ' checked' : ''}><div style="flex:1;min-width:0"><div class="t">${esc(q.question)}</div><div class="s">${stBadge(q.status)} <span class="pill gray">${esc(bl(q.bank))}</span> ${badge(q)} ${esc(q.subject || '')}${q.chapter ? ' · ' + esc(q.chapter) : ''} · ${srcOf(q).length ? srcChips(q) : esc(q.board || '') + ' ' + esc(q.year || '')}${q.session ? ' · ' + esc(q.session) : ''}${q.unit ? ' · ' + esc(q.unit) : ''}</div><div class="s">সঠিক: ${L[q.answer] || '?'}) ${esc(q.options[q.answer])}</div>${iss.length ? `<div class="s" style="color:var(--warn)">⚠ ${iss.map(esc).join(' · ')}</div>` : ''}${S.qprev === q.id ? qPrev(q) : ''}</div><div class="btns" style="flex-direction:column;align-items:stretch"><button class="btn sm ghost" data-a="editq" data-v="${q.id}">এডিট</button><button class="btn sm ghost" data-a="qprev" data-v="${q.id}">${S.qprev === q.id ? 'বন্ধ' : 'প্রিভিউ'}</button><button class="btn sm ghost" data-a="qtog" data-v="${q.id}">${q.status === 'প্রকাশিত' ? 'খসড়া করুন' : 'প্রকাশ করুন'}</button><button class="btn sm ghost" data-a="qdup" data-v="${q.id}">কপি</button>${delBtn('q' + q.id, 'delq', q.id)}</div></div>`; }).join('') + (l.length > S.qlimit ? `<div style="text-align:center;margin-top:10px"><button class="btn ghost" data-a="qmore">আরও দেখুন (${bn(l.length - S.qlimit)}টি বাকি)</button></div>` : '') : '<div class="empty">কোনো প্রশ্ন নেই। "নতুন প্রশ্ন" বা "বাল্ক ইমপোর্ট" থেকে যোগ করুন।</div>'}</div>`;
 }
 function vCov(){
   const T = S.cvt || 30, subs = subjects().filter(sb => Q.some(q => q.subject === sb) || (CFG.struct[sb] || []).length);
@@ -1015,7 +1022,7 @@ function vCov(){
 }
 function impReportCard(){
   const r = S.impReport;
-  return `<div class="card" style="margin-bottom:12px;border-color:var(--good)"><h2>ইমপোর্ট শেষ</h2><div class="s">${bn(r.added)}টি প্রশ্ন যোগ হয়েছে (${esc(r.bank)} · ${esc(r.status)})${r.bad ? ` · বাদ ${bn(r.bad)}টি` : ''}${r.merged ? ` · পুরনো প্রশ্নে সোর্স যোগ ${bn(r.merged)}টি` : ''}${r.dup ? ` · ডুপ্লিকেট ${bn(r.dup)}টি` : ''}</div>
+  return `<div class="card" style="margin-bottom:12px;border-color:var(--good)"><h2>ইমপোর্ট শেষ</h2><div class="s">${bn(r.added)}টি প্রশ্ন যোগ হয়েছে (${esc(bl(r.bank))} · ${esc(r.status)})${r.bad ? ` · বাদ ${bn(r.bad)}টি` : ''}${r.merged ? ` · পুরনো প্রশ্নে সোর্স যোগ ${bn(r.merged)}টি` : ''}${r.dup ? ` · ডুপ্লিকেট ${bn(r.dup)}টি` : ''}</div>
   <div class="btns" style="margin-top:10px"><button class="btn sm" data-a="qfilter" data-v="${esc(r.status)}">তালিকায় দেখুন</button>${delBtn('undoimp', 'undoimp', 'x', 'এই ইমপোর্ট বাতিল করুন')}<button class="btn sm ghost" data-a="impokrep">ঠিক আছে</button></div></div>`;
 }
 
@@ -1151,9 +1158,9 @@ document.addEventListener('click', async ev => {
     case 'impbad': { const p = S.imp; if (p && p.bad.length) dl('bad-rows.json', JSON.stringify(p.bad.map(b => ({row:b.n, reason:b.why, data:b.raw})), null, 1), 'application/json'); return; }
     case 'impgo': {
       const p = S.imp; if (!p || !p.ok || (!p.ok.length && !(p.merge && p.merge.length))) return;
-      const bk = S.impOpts.bank || 'HSC বোর্ড', stt = S.impOpts.status || 'খসড়া', bid = 'b' + Date.now().toString(36);
+      const bk = S.impOpts.bank || 'HSC Board Question', stt = S.impOpts.status || 'খসড়া', bid = 'b' + Date.now().toString(36);
       try {
-        await batchDo(p.ok.map((q, i) => i), (bt, i) => { const x = {...p.ok[i]}; delete x._n; const rs = x.rstatus; delete x.rstatus; x.bank = x.bank || bk; x.status = rs || stt; x.type = 'MCQ'; x.importBatch = bid; x.createdAt = serverTimestamp(); if ((x.bank === 'বিশ্ববিদ্যালয়' || x.bank === 'মেগা') && !x.university) x.university = x.board || ''; if (!x.university) delete x.university; bt.set(doc(collection(db, 'questions')), x); });
+        await batchDo(p.ok.map((q, i) => i), (bt, i) => { const x = {...p.ok[i]}; delete x._n; const rs = x.rstatus; delete x.rstatus; x.bank = x.bank || bk; x.status = rs || stt; x.type = 'MCQ'; x.importBatch = bid; x.createdAt = serverTimestamp(); if ((x.bank === 'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন' || x.bank === 'মেগা') && !x.university) x.university = x.board || ''; if (!x.university) delete x.university; bt.set(doc(collection(db, 'questions')), x); });
         const mg = {}; (p.merge || []).filter(m => m.id).forEach(m => { (mg[m.id] = mg[m.id] || []).push(m.s); });
         const mids = Object.keys(mg);
         if (mids.length) await batchDo(mids, (bt, id) => { const old = byId(Q, id), cur = (Array.isArray(old.sources) ? old.sources : []).slice(); mg[id].forEach(x => { if (cur.indexOf(x) < 0) cur.push(x); }); bt.update(doc(db, 'questions', id), {sources:cur, updatedAt:serverTimestamp()}); });
@@ -1202,6 +1209,7 @@ document.addEventListener('click', async ev => {
     case 'expres': { const l = resList(); dl('exam-results.csv', toCSV(l.map((s, i) => ({rank:i + 1, ...resRow(s)})), ['rank','name','phone','email','college','studentClass','exam','score','maxScore','percent','correct','wrong','skipped','timeTakenSec','submittedAt']), 'text/csv;charset=utf-8'); toast(bn(l.length) + 'টি ফলাফল নামানো হয়েছে'); return; }
     case 'rkind': S.rkind = v; render(); return;
     case 'rper': S.rper = v; render(); return;
+    case 'migbank': { const ids = Q.filter(q => q._rawBank && q._rawBank !== q.bank).map(q => q.id); if (!ids.length) return; await batchDo(ids, (bt, id) => { const q = byId(Q, id); bt.update(doc(db, 'questions', id), {bank:q.bank, updatedAt:serverTimestamp()}); }); toast(bn(ids.length) + 'টি প্রশ্নের ব্যাংকের নাম বদলেছে'); return; }
     case 'ftab': S.ftab = +v; S.fpath = []; render(); return;
     case 'fcrumb': S.fpath = S.fpath.slice(0, +v + 1); render(); return;
     case 'fgo': { const T = FTABS[S.ftab]; S.fpath = S.fpath.slice(0, T.lv.length - 1 > S.fpath.length ? S.fpath.length : S.fpath.length); S.fpath.push(v);
@@ -1293,7 +1301,7 @@ document.addEventListener('submit', async ev => {
       optionImageUrls:[0,1,2,3].map(i => $('oi' + i).value.trim()), updatedAt:serverTimestamp()};
     if (!d.optionImageUrls.some(Boolean)) d.optionImageUrls = [];
     d.sources = parseSrcLines($('fsrc').value, isV(d)).filter(x => x !== primaryOf(d, d.bank));
-    if (d.bank === 'বিশ্ববিদ্যালয়' || d.bank === 'মেগা') d.university = d.board;
+    if (d.bank === 'বিগত বিশ্ববিদ্যালয়ের প্রশ্ন' || d.bank === 'মেগা') d.university = d.board;
     const ok = S.eq ? await run(updateDoc(doc(db, 'questions', S.eq), d), 'পরিবর্তন সেভ হয়েছে') : await run(addDoc(collection(db, 'questions'), {...d, createdAt:serverTimestamp()}), 'প্রশ্ন সেভ হয়েছে');
     if (ok) { log(S.eq ? 'একটি প্রশ্ন এডিট করা হয়েছে' : 'নতুন প্রশ্ন যোগ হয়েছে (' + d.bank + ')'); S.eq = null; S.qseg = 'list'; render(); }
     return;
