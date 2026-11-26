@@ -98,6 +98,8 @@ label{display:block;font-size:.88em;color:var(--muted);margin:12px 0 4px}
 .msg{font-size:.88em;margin-top:8px;color:var(--muted)}
 .empty{color:var(--muted);text-align:center;padding:26px 8px}
 .menu{display:grid;grid-template-columns:1fr;gap:10px}
+.grp{font-weight:600;font-size:.82em;letter-spacing:.06em;color:var(--muted);margin:18px 4px 8px}
+.homebtns{display:grid;gap:10px;margin-top:12px}.homebtns .btn{width:100%;padding:14px;text-align:left}
 .menu button{display:flex;gap:14px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px}
 .menu .ic{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
 .menu .ic svg{width:24px;height:24px}
@@ -290,7 +292,7 @@ match /audit/{id} {
 }`;
 
 /* ---------- state ---------- */
-const S = {tab:'home',qseg:'folder',ftab:0,fpath:[],fback:false,qsess:'সব',qunit:'সব',eseg:'list',iseg:'list',qf:'',qsub:'সব',qst:'সব',qbank:'সব',qboard:'সব',qyear:'সব',cvt:30,qlimit:50,eq:null,exq:null,cf:null,us:null,uq:'',ufil:'সব',sSub:'ICT',xasub:null,xainst:null,rx:null,imp:null,ximp:null,qch:'সব',qflag:'সব',qsort:'নতুন',sel:{},qprev:null,impAll:false,impReport:null,fileInfo:null,ulimit:50,usort:'নতুন',rf:'খোলা',rprev:null,eedit:null,look:{theme:'soft',size:'17'}};
+const S = {tab:'home',useg:'users',qseg:'folder',ftab:0,fpath:[],fback:false,qsess:'সব',qunit:'সব',eseg:'list',iseg:'list',qf:'',qsub:'সব',qst:'সব',qbank:'সব',qboard:'সব',qyear:'সব',cvt:30,qlimit:50,eq:null,exq:null,cf:null,us:null,uq:'',ufil:'সব',sSub:'ICT',xasub:null,xainst:null,rx:null,imp:null,ximp:null,qch:'সব',qflag:'সব',qsort:'নতুন',sel:{},qprev:null,impAll:false,impReport:null,fileInfo:null,ulimit:50,usort:'নতুন',rf:'খোলা',rprev:null,eedit:null,look:{theme:'soft',size:'17'}};
 let Q = [], E = [], U = [], R = [], N = [], AUD = [], SUB = [], LBS = [], unsubs = [];
 let CFG = {app:{...DEFAULT_APP}, struct:DEFAULT_STRUCT, missions:DEFAULT_MISSIONS, sec:{}};
 const perm = {};
@@ -308,7 +310,7 @@ try { const sv = JSON.parse(localStorage.getItem('em-look') || 'null'); if (sv &
 /* ---------- ছোট সাহায্যকারী ---------- */
 let TT;
 function toast(t){ const e = $('toast'); e.textContent = t; e.hidden = false; clearTimeout(TT); TT = setTimeout(() => e.hidden = true, 2800); }
-function errMsg(e){ return e && e.code === 'permission-denied' ? 'অনুমতি নেই। Firestore রুলে এই অংশ যোগ করতে হবে (আরও → অ্যাডমিন ও সিকিউরিটি)।' : 'সমস্যা: ' + ((e && (e.code || e.message)) || 'অজানা'); }
+function errMsg(e){ return e && e.code === 'permission-denied' ? 'অনুমতি নেই। Firestore রুলে এই অংশ যোগ করতে হবে (সেটিংস → অ্যাডমিন ও সিকিউরিটি)।' : 'সমস্যা: ' + ((e && (e.code || e.message)) || 'অজানা'); }
 async function run(p, okMsg){ try { await p; if (okMsg) toast(okMsg); return true; } catch(e) { toast(errMsg(e)); return false; } }
 function log(m){ addDoc(collection(db,'audit'), {msg:m, by:(ME&&ME.email)||'', at:serverTimestamp()}).catch(() => {}); }
 const BANK_LBL = {};
@@ -491,13 +493,10 @@ const IC = {
  out:'<path d="M9 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h4M16 8l4 4-4 4M20 12H9"/>',
  dl:'<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>'};
 const icon = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
-const MAIN = [['home','ড্যাশবোর্ড','home'],['q','প্রশ্ন','q'],['exam','পরীক্ষা','exam'],['user','ইউজার','user']];
+const MAIN = [['home','হোম','home'],['q','প্রশ্ন','q'],['exam','পরীক্ষা','exam'],['user','ইউজার','user'],['set','সেটিংস','set']];
 const MORE = [
- ['res','পরীক্ষার ফলাফল','exam','কে দিল, কত নম্বর, কত সময়ে'],
- ['rank','মেধা তালিকা','rank','XP অনুযায়ী র‍্যাঙ্ক, লুকানো'],
  ['mission','মিশন ও XP','bolt','দৈনিক মিশন ও পুরস্কার ঠিক করা'],
  ['struct','বিষয় ও অধ্যায়','book','বিষয়, অধ্যায় যোগ বা মোছা'],
- ['report','ভুল রিপোর্ট','flag','ইউজারদের জানানো প্রশ্নের ভুল'],
  ['notice','নোটিশ','bell','সবাইকে বার্তা'],
  ['admins','অ্যাডমিন ও সিকিউরিটি','shield','Firestore রুল ও নিরাপত্তা তালিকা'],
  ['backup','ব্যাকআপ ও টেমপ্লেট','dl','ডেটা নামান, Excel টেমপ্লেট'],
@@ -506,6 +505,8 @@ const MORE = [
  ['look','চেহারা ও লেখা','brush','থিম এবং লেখার সাইজ'],
  ['logout','লগআউট','out','এই ডিভাইস থেকে বের হন']];
 const MOREKEYS = MORE.map(m => m[0]);
+const SETG = [['কনটেন্ট',['struct','mission','notice']],['অ্যাপ ও নিরাপত্তা',['ctl','admins','backup']],['অন্যান্য',['audit','look','logout']]];
+const USEG = [['users','ইউজার'],['res','ফলাফল'],['rank','মেধা তালিকা'],['report','ভুল রিপোর্ট']];
 
 /* ---------- পেজ ---------- */
 const stat = (l, n, d) => `<div class="card stat"><div class="l">${l}</div><div class="n">${n}</div><div class="d">${d}</div></div>`;
@@ -541,14 +542,14 @@ function chMatch(qc, c){
 function eForm(e){
   const v = (k, d) => e && e[k] !== undefined ? e[k] : d, neg = e ? (e.negative === 0 ? 'নেই' : e.negative === 0.5 ? '০.৫' : '০.২৫') : '০.২৫';
   return `<form class="card" id="fe2"><h2>${e ? 'পরীক্ষা এডিট করুন' : 'নতুন পরীক্ষা'}</h2><label for="en">পরীক্ষার নাম</label><input id="en" required value="${esc(v('name',''))}">
-  <div class="two"><div><label for="et">ধরন${e ? ' (বদলানো যায় না)' : ''}</label><select id="et"${e ? ' disabled' : ''}>${opts(['Academic','Master','Mega','Live'].concat(e && e.type === 'Weekly' ? ['Weekly'] : []), v('type','Academic'))}</select></div><div><label for="esub">বিষয়</label><select id="esub">${opts(['সব বিষয়'].concat(subjects()), v('subject','সব বিষয়'))}</select></div></div>
+  <div class="two"><div><label for="et">ধরন${e ? ' (বদলানো যায় না)' : ''}</label><select id="et"${e ? ' disabled' : ''}>${opts(['Master','Mega','Live'].concat(e && (e.type === 'Weekly' || e.type === 'Academic') ? [e.type] : []), v('type','Master'))}</select></div><div><label for="esub">বিষয়</label><select id="esub">${opts(['সব বিষয়'].concat(subjects()), v('subject','সব বিষয়'))}</select></div></div>
   <div class="two"><div><label for="eq">প্রশ্ন সংখ্যা</label><input id="eq" type="number" value="${esc(v('count',25))}" min="1"></div><div><label for="edur">সময় (মিনিট)</label><input id="edur" type="number" value="${esc(v('duration',25))}" min="1"></div></div>
   <div class="two"><div><label for="eng">নেগেটিভ মার্কিং</label><select id="eng">${opts(['নেই','০.২৫','০.৫'], neg)}</select></div><div><label for="epm">পাস মার্ক (%)</label><input id="epm" type="number" value="${esc(v('passMark',40))}" min="0" max="100"></div></div>
   <label for="einst">প্রতিষ্ঠান (শুধু Mega পরীক্ষার জন্য)</label><select id="einst">${opts(['সব প্রতিষ্ঠান'].concat(INST), v('inst','সব প্রতিষ্ঠান') === 'সব প্রতিষ্ঠান' ? 'সব প্রতিষ্ঠান' : uni(v('inst','সব প্রতিষ্ঠান')))}</select>
   <div class="two"><div><label for="ew">শুরুর সময়</label><input id="ew" type="datetime-local" value="${esc(v('startAt',''))}"></div><div><label for="ew2">শেষের সময় (Live/Weekly)</label><input id="ew2" type="datetime-local" value="${esc(v('endAt',''))}"></div></div>
   <div class="msg">শুরু ও শেষের সময়ের মধ্যে যখন খুশি ছাত্র ঢুকে পরীক্ষা দিতে পারবে, ঢোকার পর "সময় (মিনিট)" পাবে। শেষের সময় ফাঁকা রাখলে শুরু + মিনিটই শেষ ধরা হবে। যেমন শুরু সকাল ৮টা, শেষ রাত ৮টা, সময় ৬০ মিনিট।</div>
   <div class="row" style="margin-top:6px"><div><div class="t">পরীক্ষার পর উত্তর দেখানো</div><div class="s">শেষ হলে ব্যাখ্যাসহ উত্তর দেখা যাবে</div></div><label class="sw" aria-label="উত্তর দেখানো"><input type="checkbox" id="eshow"${e && e.showAnswer === false ? '' : ' checked'}><i></i></label></div>
-  <div class="msg">Academic ও Master (HSC মডেল টেস্ট) পরীক্ষার প্রশ্ন আসবে বোর্ড ও নন-বোর্ড ব্যাংক থেকে, Mega পরীক্ষার প্রশ্ন আসবে ভার্সিটি পূর্ববর্তী ও ভার্সিটি প্র্যাকটিস ব্যাংক থেকে (অটো বা হাতে বাছা)। Live পরীক্ষায় নিজের প্রশ্ন লিখে বা যেকোনো ব্যাংক থেকে বেছে যোগ করবেন। শুরুতে পরীক্ষা খসড়া থাকবে।</div>
+  <div class="msg">Master (HSC মডেল টেস্ট) পরীক্ষার প্রশ্ন আসবে বোর্ড ও নন-বোর্ড ব্যাংক থেকে, Mega পরীক্ষার প্রশ্ন আসবে ভার্সিটি পূর্ববর্তী ও ভার্সিটি প্র্যাকটিস ব্যাংক থেকে (অটো বা হাতে বাছা)। Live পরীক্ষায় নিজের প্রশ্ন লিখে বা যেকোনো ব্যাংক থেকে বেছে যোগ করবেন। শুরুতে পরীক্ষা খসড়া থাকবে।</div>
   <div class="btns" style="margin-top:12px"><button class="btn" type="submit">${e ? 'পরিবর্তন সেভ করুন' : 'তৈরি করে প্রশ্ন যোগ করুন'}</button>${e ? '<button class="btn ghost" type="button" data-a="ecancel">বাতিল</button>' : ''}</div></form>`;
 }
 function vItems(){
@@ -681,7 +682,8 @@ function vLook(){
   <div class="card" style="margin-top:12px"><h2>লেখার সাইজ</h2>${seg('fsz', [['15','ছোট'],['17','মাঝারি'],['19','বড়'],['21','অনেক বড়']], S.look.size)}<p>এটি একটি নমুনা লেখা। প্রশ্ন, উত্তর ও ব্যাখ্যা এই সাইজে দেখাবে।</p></div>`;
 }
 function vMore(){
-  return `<div class="sec"><div><h1>আরও</h1><p class="sub">বাকি সব পেজ এখানে</p></div></div><div class="menu">${MORE.map(m => `<button data-a="go" data-v="${m[0]}"><span class="ic">${icon(m[2])}</span><span><b>${m[1]}</b><span class="d">${m[3]}</span></span></button>`).join('')}</div>`;
+  const by = {}; MORE.forEach(m => by[m[0]] = m);
+  return `<div class="sec"><div><h1>সেটিংস</h1><p class="sub">বাকি সব পেজ এখানে</p></div></div>` + SETG.map(g => `<div class="grp">${g[0]}</div><div class="menu">${g[1].map(k => by[k]).filter(Boolean).map(m => `<button data-a="go" data-v="${m[0]}"><span class="ic">${icon(m[2])}</span><span><b>${m[1]}</b><span class="d">${m[3]}</span></span></button>`).join('')}</div>`).join('');
 }
 const normH = h => String(h ?? '').trim().toLowerCase().replace(/[\s_\-.()\/]/g, '');
 const H = {
@@ -926,14 +928,11 @@ function vHome(){
   if (edr) todo += al('', bn(edr) + 'টি পরীক্ষা খসড়া অবস্থায়', '<button class="btn sm" data-a="go" data-v="exam">দেখুন</button>');
   const sub = BANKS.map(b => { const l = Q.filter(q => q.bank === b); return [b, l.length, l.filter(q => q.status === 'প্রকাশিত').length, l.filter(q => q.status === 'খসড়া').length]; });
   const sw2 = (on, y, n) => `<span class="pill ${on ? 'bad' : 'good'}">${on ? y : n}</span>`;
-  return `<div class="sec"><div><h1>ড্যাশবোর্ড</h1><p class="sub">অ্যাপের অবস্থা এক নজরে</p></div></div>
+  return `<div class="sec"><div><h1>হোম</h1><p class="sub">অ্যাপের অবস্থা এক নজরে</p></div></div>
   <div class="grid stats">${stat('মোট ইউজার', bn(U.length), 'এই সপ্তাহে নতুন ' + bn(newU))}${stat('প্রশ্ন', bn(Q.length), 'প্রকাশিত ' + bn(pub) + ' · খসড়া ' + bn(dr))}${stat('চালু পরীক্ষা', bn(live), bn(E.length) + 'টির মধ্যে')}${stat('ভুল রিপোর্ট', bn(openR), 'খোলা')}</div>
+  <div class="homebtns"><button class="btn" data-a="newq">＋ নতুন প্রশ্ন যোগ করুন</button><button class="btn ghost" data-a="newe">＋ নতুন পরীক্ষা বানান</button><button class="btn ghost" data-a="bulkq">⇪ Excel/CSV থেকে প্রশ্ন ইমপোর্ট</button></div>
   <div class="card" style="margin-top:12px"><h2>করণীয়</h2>${todo || '<div class="empty">এখন কোনো করণীয় নেই</div>'}</div>
-  <div class="cols2" style="margin-top:12px"><div class="card"><h2>ব্যাংক অনুযায়ী প্রশ্ন</h2>${sub.map(b => `<div class="row"><div class="t">${esc(bl(b[0]))}</div><div class="s" style="text-align:right">মোট ${bn(b[1])} · প্রকাশিত ${bn(b[2])} · খসড়া ${bn(b[3])}</div></div>`).join('')}</div>
-  <div class="card"><h2>অ্যাপের অবস্থা</h2><div class="row"><div class="t">মেইনটেন্যান্স মোড</div>${sw2(A.maint, 'চালু', 'বন্ধ')}</div><div class="row"><div class="t">নতুন রেজিস্ট্রেশন</div>${sw2(!A.reg, 'বন্ধ', 'চালু')}</div><div class="row"><div class="t">সর্বশেষ ভার্সন</div><div class="s">${esc(A.ver || '—')}</div></div><div class="row"><div class="t">ন্যূনতম ভার্সন</div><div class="s">${esc(A.minVer || '—')}</div></div><div style="margin-top:10px"><button class="btn sm ghost" data-a="go" data-v="ctl">অ্যাপ কন্ট্রোল</button></div></div></div>
-  <div class="cols2" style="margin-top:12px"><div class="card"><h2>বিষয় অনুযায়ী প্রশ্ন</h2>${top.length ? top.map(x => `<div style="margin-top:10px"><div style="display:flex;justify-content:space-between;gap:8px"><span>${esc(x[0])}</span><span class="s">${bn(x[1])}টি</span></div><div class="bar"><b style="width:${Math.round(x[1] / mx * 100)}%"></b></div></div>`).join('') : '<div class="empty">এখনো কোনো প্রশ্ন নেই</div>'}</div>
-  <div class="card"><h2>দ্রুত কাজ</h2><div class="btns" style="margin-top:10px"><button class="btn" data-a="newq">নতুন প্রশ্ন</button><button class="btn ghost" data-a="bulkq">বাল্ক ইমপোর্ট</button><button class="btn ghost" data-a="newe">নতুন পরীক্ষা</button><button class="btn ghost" data-a="go" data-v="notice">নোটিশ পাঠান</button><button class="btn ghost" data-a="go" data-v="backup">ব্যাকআপ</button></div>
-  <h3 style="margin-top:16px">সাম্প্রতিক কাজ</h3>${AUD.length ? AUD.slice(0, 5).map(r => `<div class="row"><div class="t">${esc(r.msg)}</div><div class="s" style="white-space:nowrap">${fmtDate(r.at)}</div></div>`).join('') : '<div class="empty">এখনো কোনো কাজের ইতিহাস নেই</div>'}</div></div>`;
+  <div style="margin-top:12px"><div class="card"><h2>ব্যাংক অনুযায়ী প্রশ্ন</h2>${sub.map(b => `<div class="row"><div class="t">${esc(bl(b[0]))}</div><div class="s" style="text-align:right">মোট ${bn(b[1])} · প্রকাশিত ${bn(b[2])} · খসড়া ${bn(b[3])}</div></div>`).join('')}</div></div>`;
 }
 function qList(){
   const t = (S.qf || '').toLowerCase();
@@ -991,7 +990,7 @@ function vFolder(){
 }
 function fReset(){ S.qsub = S.qch = S.qboard = S.qyear = S.qbank = S.qsess = S.qunit = 'সব'; S.qflag = 'সব'; S.qst = 'সব'; S.qf = ''; S.sel = {}; }
 function vQ(){
-  const head = `<div class="sec"><div><h1>প্রশ্ন ম্যানেজার</h1><p class="sub">মোট ${bn(Q.length)}টি প্রশ্ন</p></div></div>` + seg('qseg', [['folder','ফোল্ডার'],['list','সব প্রশ্ন'],['form', S.eq ? 'এডিট' : 'নতুন প্রশ্ন'],['bulk','বাল্ক ইমপোর্ট'],['cov','কভারেজ']], S.qseg);
+  const head = `<div class="sec"><div><h1>প্রশ্ন ম্যানেজার</h1><p class="sub">মোট ${bn(Q.length)}টি প্রশ্ন</p></div></div>` + seg('qseg', [['folder','ফোল্ডার'],['form', S.eq ? 'এডিট' : 'নতুন প্রশ্ন'],['bulk','ইমপোর্ট']], S.qseg === 'list' || S.qseg === 'cov' ? 'folder' : S.qseg) + (S.qseg === 'folder' || S.qseg === 'list' || S.qseg === 'cov' ? `<div class="btns" style="margin-bottom:12px"><button class="btn sm ${S.qseg === 'list' ? '' : 'ghost'}" data-a="seg" data-n="qseg" data-v="list">সব প্রশ্নের তালিকা</button><button class="btn sm ${S.qseg === 'cov' ? '' : 'ghost'}" data-a="seg" data-n="qseg" data-v="cov">কভারেজ</button></div>` : '');
   if (S.qseg === 'folder') return head + vFolder();
   if (S.qseg === 'form') return head + qForm();
   if (S.qseg === 'cov') return head + vCov();
@@ -1029,7 +1028,7 @@ function impReportCard(){
 function userName(u){ return u.name || u.displayName || 'নাম নেই'; }
 const UFIELDS = [['email','ইমেইল'],['phone','ফোন'],['college','কলেজ'],['institution','প্রতিষ্ঠান'],['studentClass','শ্রেণি'],['target','লক্ষ্য'],['district','জেলা'],['deviceModel','ডিভাইস'],['accountStatus','অ্যাকাউন্ট']];
 const isVer = u => !!(u.isEmailVerified || u.emailVerified);
-function vUser(){
+function vUserList(){
   const t = S.uq.toLowerCase(), now = Date.now() / 1000;
   const l = U.filter(u => (!t || JSON.stringify(u).toLowerCase().includes(t)) && (S.ufil === 'সব' || (S.ufil === 'ব্লক' ? u.blocked : S.ufil === 'সক্রিয়' ? !u.blocked : S.ufil === 'ভেরিফাই হয়নি' ? !isVer(u) : tsSec(u.createdAt) > now - 7 * 86400)));
   if (S.usort === 'XP') l.sort((a, b) => (b.xp || 0) - (a.xp || 0)); else if (S.usort === 'নাম') l.sort((a, b) => userName(a).localeCompare(userName(b))); else l.sort((a, b) => tsSec(b.createdAt) - tsSec(a.createdAt));
@@ -1073,18 +1072,22 @@ function vBackup(){
   <div class="card" style="margin-top:12px"><h2>ছবির লিংক কীভাবে দেবেন</h2><div class="msg">১) GitHub-এ আপনার রিপোজিটরিতে "images" নামে ফোল্ডার খুলে ছবি আপলোড করুন। ২) ছবি খুলে "Raw" বা "Download" চেপে যে লিংক পাবেন সেটা দিন। github.com/.../blob/... লিংক দিলেও চলবে, ইমপোর্টে নিজে raw লিংকে বদলে যাবে। ৩) প্রশ্নের তালিকায় "প্রিভিউ" চেপে ছবি আসছে কিনা দেখে নিন।</div></div>`;
 }
 
-const V = {home:vHome,q:vQ,exam:vExam,user:vUser,more:vMore,rank:vRank,res:vRes,mission:vMission,struct:vStruct,report:vReport,notice:vNotice,admins:vAdmins,audit:vAudit,ctl:vCtl,look:vLook,backup:vBackup};
+function vUser(){
+  const f = {users:vUserList, res:vRes, rank:vRank, report:vReport}[S.useg] || vUserList;
+  return seg('useg', USEG, S.useg) + f();
+}
+const V = {home:vHome,q:vQ,exam:vExam,user:vUser,more:vMore,set:vMore,rank:vRank,res:vRes,mission:vMission,struct:vStruct,report:vReport,notice:vNotice,admins:vAdmins,audit:vAudit,ctl:vCtl,look:vLook,backup:vBackup};
 
 function navs(){
-  const cur = MOREKEYS.indexOf(S.tab) > -1 ? 'more' : S.tab;
-  $('mob').innerHTML = MAIN.concat([['more','আরও','more']]).map(t => `<button data-a="go" data-v="${t[0]}" aria-current="${cur === t[0]}">${icon(t[2])}<span>${t[1]}</span></button>`).join('');
+  const cur = MOREKEYS.indexOf(S.tab) > -1 ? 'set' : S.tab;
+  $('mob').innerHTML = MAIN.map(t => `<button data-a="go" data-v="${t[0]}" aria-current="${cur === t[0]}">${icon(t[2])}<span>${t[1]}</span></button>`).join('');
   $('side').innerHTML = MAIN.map(t => [t[0], t[1], t[2]]).concat(MORE.map(m => [m[0], m[1], m[2]])).map(t => `<button data-a="go" data-v="${t[0]}" aria-current="${S.tab === t[0]}">${icon(t[2])}<span>${t[1]}</span></button>`).join('');
 }
 function render(){
   if (!ME) return;
   navs();
   const denied = Object.keys(perm);
-  const banner = denied.length ? `<div class="demo" style="background:var(--bad-soft);color:var(--bad)">কিছু অংশ (${denied.map(esc).join(', ')}) পড়া যাচ্ছে না। Firestore রুল ঠিক করুন: আরও → অ্যাডমিন ও সিকিউরিটি।</div>` : '';
+  const banner = denied.length ? `<div class="demo" style="background:var(--bad-soft);color:var(--bad)">কিছু অংশ (${denied.map(esc).join(', ')}) পড়া যাচ্ছে না। Firestore রুল ঠিক করুন: সেটিংস → অ্যাডমিন ও সিকিউরিটি।</div>` : '';
   $('main').innerHTML = banner + V[S.tab]();
   mathPass();
   try { history.replaceState(null, '', '#' + S.tab); } catch(x) {}
@@ -1104,6 +1107,9 @@ function mathPass(){
 }
 function go(t){
   if (t === 'logout') { signOut(auth); return; }
+  if (t === 'more') t = 'set';
+  if (t === 'res' || t === 'rank' || t === 'report') { S.useg = t; t = 'user'; }
+  else if (t === 'user') S.useg = 'users';
   S.tab = t; S.cf = null; render(); window.scrollTo(0, 0);
 }
 
@@ -1336,7 +1342,7 @@ document.addEventListener('submit', async ev => {
 $('lookbtn').innerHTML = icon('brush'); $('lookbtn').onclick = () => go('look');
 $('outbtn').innerHTML = icon('out'); $('outbtn').onclick = () => signOut(auth);
 $('logo').innerHTML = icon('exam').replace('<svg', '<svg width="20" height="20"');
-const h = (location.hash || '').slice(1); if (V[h]) S.tab = h;
+const h = (location.hash || '').slice(1); if (V[h]) { if (h === 'res' || h === 'rank' || h === 'report') { S.useg = h; S.tab = 'user'; } else S.tab = h === 'more' ? 'set' : h; }
 applyLook();
 
 </script>
